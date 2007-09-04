@@ -16,6 +16,9 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 public:
   MainWindow();
 
+protected:
+  bool eventFilter(QObject *obj, QEvent *event);
+
 private slots:
   void on_sliderSize_sliderMoved(int value);
   void on_pushButtonRandomLetter_clicked();

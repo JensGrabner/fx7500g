@@ -1,4 +1,5 @@
 #include <QStyleOptionGraphicsItem>
+#include <QKeyEvent>
 
 #include "screen.h"
 #include "text_printer.h"
@@ -11,6 +12,7 @@ Screen::Screen(QGraphicsItem *parent) : QGraphicsItem(parent),
 {
   qsrand(time(0));
   setFlag(QGraphicsItem::ItemIsMovable, true);
+  setFlag(QGraphicsItem::ItemIsFocusable, true);
 
   _normalScreen = QImage(widthInPlots, heightInPlots, QImage::Format_Mono);
   _graphicScreen = QImage(widthInPlots, heightInPlots, QImage::Format_Mono);
