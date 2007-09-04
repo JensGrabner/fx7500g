@@ -20,7 +20,7 @@ public:
 
   LCDChar charAtOffset(int offset) const; // Returns LCD_Space if offset is incorrect
   int stringIndexAtOffset(int offset) const; // Returns -1 if offset is incorrect
-  int offsetByStringIndex(int strIndex) const; // Returns -1 if strIndex is incorrect
+  int offsetByStringIndex(int strIndex) const; // Returns count() if strIndex is too high
 private:
   bool _isRightJustified;
 };
@@ -50,6 +50,8 @@ public:
   bool write(LCDChar c); // Returns false if writing is forbidden
   bool write(LCDOperator o);
 
+  void applyKey(int key);
+
   bool moveLeft(); // Returns false if movement is forbidden
   bool moveRight();
   bool moveUp();
@@ -69,6 +71,7 @@ private:
   QList<ShellLine> _lines;
 
   int getPromptLineIndex() const; // Return the line index of the prompt beginning
+  void moveCursor(int newOffset);
 
 private slots:
   void doBlinkCursor();

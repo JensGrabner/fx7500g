@@ -43,7 +43,7 @@ int ShellLine::stringIndexAtOffset(int offset) const
 int ShellLine::offsetByStringIndex(int strIndex) const
 {
   if (strIndex >= count())
-    return -1;
+    return length();
 
   int offset = 0;
   for (int i = 1; i <= strIndex; ++i)
@@ -69,8 +69,6 @@ Shell::Shell() :
   _blinkTimer.setInterval(500); // Cursor blinks every second
   connect(&_blinkTimer, SIGNAL(timeout()), this, SLOT(doBlinkCursor()));
   _blinkTimer.start();
-
-  _promptLine << LCDString("Salut") << LCDString("Les") << LCDString("Amis");
 }
 
 void Shell::setCursorMode(CursorMode mode)
@@ -175,14 +173,17 @@ bool Shell::write(LCDChar c)
   if (_cursorOffset >= _promptLine.length())
   {
     _promptLine << LCDString(c);
-    _cursorOffset++;
+    moveCursor(_cursorOffset + 1);
   } else
   {
     // Get LCDString under the cursor
     int index = _promptLine.stringIndexAtOffset(_cursorOffset);
     if (index >= 0)
       _promptLine[index] = LCDString(c);
+    moveCursor(_cursorOffset + 1);
   }
+
+  restartBlink();
 
   emit promptLineChanged();
 
@@ -194,14 +195,22 @@ bool Shell::write(LCDOperator o)
   if (_cursorOffset >= _promptLine.length())
   {
     _promptLine << LCDString(o);
-    _cursorOffset++;
+    moveCursor(_promptLine.length());
   } else
   {
     // Get LCDString under the cursor
     int index = _promptLine.stringIndexAtOffset(_cursorOffset);
     if (index >= 0)
       _promptLine[index] = LCDString(o);
+
+    // Cursor move to the right
+    if (index >= _promptLine.count())
+      moveCursor(_promptLine.length());
+    else
+      moveCursor(_promptLine.offsetByStringIndex(index + 1));
   }
+
+  restartBlink();
 
   emit promptLineChanged();
 
@@ -210,22 +219,56 @@ bool Shell::write(LCDOperator o)
 
 bool Shell::moveLeft()
 {
-  int index = _promptLine.stringIndexAtOffset(_cursorOffset);
+  int index;
+  if (_promptLine.length() && _cursorOffset >= _promptLine.length())
+    index = _promptLine.count();
+  else
+    index = _promptLine.stringIndexAtOffset(_cursorOffset);
+
   if (index > 0)
-    _cursorOffset = _promptLine.offsetByStringIndex(index - 1);
+    moveCursor(_promptLine.offsetByStringIndex(index - 1));
+
+  restartBlink();
 }
 
 bool Shell::moveRight()
 {
   int index = _promptLine.stringIndexAtOffset(_cursorOffset);
-  if (index < _promptLine.count() - 1)
-    _cursorOffset = _promptLine.offsetByStringIndex(index + 1);
+  if (index >= 0 && index <= _promptLine.count() - 1)
+    moveCursor(_promptLine.offsetByStringIndex(index + 1));
+
+  restartBlink();
 }
 
 bool Shell::moveUp()
 {
+  restartBlink();
 }
 
 bool Shell::moveDown()
 {
+  restartBlink();
+}
+
+void Shell::applyKey(int key)
+{
+  switch (key)
+  {
+  case Qt::Key_Left: moveLeft(); break;
+  case Qt::Key_Right: moveRight(); break;
+  case Qt::Key_Up: moveUp(); break;
+  case Qt::Key_Down: moveDown(); break;
+  }
+}
+
+void Shell::moveCursor(int newOffset)
+{
+  // Restore old offset char
+  int line = _cursorOffset / 16;
+  int col = _cursorOffset - line * 16;
+  line += getPromptLineIndex();
+  emit cursorBlinked(col, line, _promptLine.charAtOffset(_cursorOffset));
+
+  // Move cursor
+  _cursorOffset = newOffset;
 }
