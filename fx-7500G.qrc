@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/" >
+        <file>images/casio-charset.png</file>
+    </qresource>
+</RCC>
