@@ -5,8 +5,8 @@ Calculator::Calculator() :
   _angleMode(Deg),
   _screen(0)
 {
-  connect(&_shell, SIGNAL(cursorBlinked(int, int, LCDChar)),
-          this, SLOT(shellCursorBlinked(int, int, LCDChar)));
+  connect(&_shell, SIGNAL(changeChar(int, int, LCDChar)),
+          this, SLOT(shellChangeChar(int, int, LCDChar)));
   connect(&_shell, SIGNAL(promptLineChanged()),
           this, SLOT(shellPromptLineChanged()));
 }
@@ -22,7 +22,7 @@ void Calculator::test()
     _screen->drawScreen(_shell.currentScreen());
 }
 
-void Calculator::shellCursorBlinked(int col, int line, LCDChar c)
+void Calculator::shellChangeChar(int col, int line, LCDChar c)
 {
   if (_screen && _displayMode != DisplayMode_Resume &&
       _displayMode != DisplayMode_Graphical)

@@ -34,7 +34,7 @@ private:
   Screen *_screen;
 
 private slots:
-  void shellCursorBlinked(int col, int line, LCDChar c);
+  void shellChangeChar(int col, int line, LCDChar c);
   void shellPromptLineChanged();
 };
 
