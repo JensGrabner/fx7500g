@@ -3,6 +3,8 @@ TARGET =
 DEPENDPATH += .
 INCLUDEPATH += .
 
+CONFIG += release
+
 # Input
 HEADERS += main_window.h \
   screen.h \

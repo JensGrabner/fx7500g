@@ -14,8 +14,8 @@ Screen::Screen(QGraphicsItem *parent) : QGraphicsItem(parent),
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemIsFocusable, true);
 
-  _normalScreen = QImage(widthInPlots, heightInPlots, QImage::Format_Mono);
-  _graphicScreen = QImage(widthInPlots, heightInPlots, QImage::Format_Mono);
+  _normalScreen = QImage(widthInPlots, heightInPlots, QImage::Format_RGB32); //, QImage::Format_Mono);
+  _graphicScreen = QImage(widthInPlots, heightInPlots, QImage::Format_RGB32); //, QImage::Format_Mono);
 
   QPainter painter(&_normalScreen);
   painter.fillRect(0, 0, widthInPlots, heightInPlots, QColor(0, 0, 0));
