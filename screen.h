@@ -22,11 +22,7 @@ public:
 
   void drawChar(LCDChar c, int column, int line);
 
-  void randomLetter(); // TEMPORARY FUNCTION
-
   void clearNormalScreen();
-
-  void drawResumeScreen(); // TEMPORARY FUNCTION => must be deported elsewhere
 
   void drawScreen(const QList<LCDString> &screen);
 
