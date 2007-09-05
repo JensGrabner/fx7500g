@@ -31,7 +31,6 @@ Screen::Screen(QGraphicsItem *parent) : QGraphicsItem(parent),
       indexLCD++;
     }*/
 
-  drawResumeScreen();
   drawNormalScreenInPixmap();
 }
 
@@ -183,35 +182,9 @@ QRect Screen::imageRectToPixmapRect(const QRect &rect) const
   return r;
 }
 
-void Screen::randomLetter()
-{
-  int indexLCD = qrand() % (int) LCDChar_End;
-  int line = qrand() % 8;
-  int column = qrand() % 16;
-
-  TextPrinter::instance().printChar(_normalScreen, (LCDChar) indexLCD, column, line);
-
-  copyImageInPixmap(getCharRect(column, line));
-  update(imageRectToPixmapRect(getCharRect(column, line)));
-}
-
 void Screen::clearNormalScreen()
 {
   _normalScreen.fill(0);
-  drawNormalScreenInPixmap();
-  update();
-}
-
-void Screen::drawResumeScreen()
-{
-  clearNormalScreen();
-
-  TextPrinter::instance().printString(_normalScreen, LCDString("**** MODE ****"), 1, 0);
-  TextPrinter::instance().printString(_normalScreen, LCDString("sys mode : RUN"), 0, 2);
-  TextPrinter::instance().printString(_normalScreen, LCDString("cal mode : COMP"), 0, 3);
-  TextPrinter::instance().printString(_normalScreen, LCDString("angle : Deg"), 3, 4);
-  TextPrinter::instance().printString(_normalScreen, LCDString("display : Norm"), 1, 5);
-  TextPrinter::instance().printString(_normalScreen, LCDString("Step    0"), 3, 7);
   drawNormalScreenInPixmap();
   update();
 }

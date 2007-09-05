@@ -280,6 +280,7 @@ void Shell::applyKey(int key)
   case Qt::Key_Right: moveRight(); break;
   case Qt::Key_Up: moveUp(); break;
   case Qt::Key_Down: moveDown(); break;
+  case Qt::Key_Delete: deleteString(); break;
   }
 }
 
@@ -293,4 +294,15 @@ void Shell::moveCursor(int newOffset)
 
   // Move cursor
   _cursorOffset = newOffset;
+}
+
+void Shell::deleteString()
+{
+  if (_cursorOffset < _promptLine.length())
+  {
+    _promptLine.removeAt(_promptLine.stringIndexAtOffset(_cursorOffset));
+    emit promptLineChanged();
+  }
+
+  restartBlink();
 }

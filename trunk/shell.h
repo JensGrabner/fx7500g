@@ -56,6 +56,7 @@ public:
   void moveRight();
   void moveUp();
   void moveDown();
+  void deleteString(); // Delete the string under cursor .. WANTED A BETTER NAME
 
 signals:
   void changeChar(int col, int line, LCDChar c);

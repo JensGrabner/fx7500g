@@ -15,7 +15,8 @@ MainWindow::MainWindow() : QMainWindow(0)
 
   graphicsView->installEventFilter(this);
 
-  on_pushButtonRandomLetter_clicked();
+  _calculator.init();
+  //on_pushButtonRandomLetter_clicked();
 }
 
 void MainWindow::on_sliderSize_sliderMoved(int value)
@@ -25,10 +26,8 @@ void MainWindow::on_sliderSize_sliderMoved(int value)
 
 void MainWindow::on_pushButtonRandomLetter_clicked()
 {
-  //_screen->randomLetter();
-//  _screen->drawResumeScreen();
+  _calculator.setScreenMode(Calculator::ScreenMode_Normal);
   _calculator.test();
-  _calculator.setDisplayMode(Calculator::DisplayMode_Shell);
   _calculator.shell().write(LCDOp_Log);
   _calculator.shell().write(LCDOp_Log);
   _calculator.shell().write(LCDOp_Log);
