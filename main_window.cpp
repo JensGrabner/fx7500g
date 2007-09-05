@@ -34,6 +34,10 @@ void MainWindow::on_pushButtonRandomLetter_clicked()
   _calculator.shell().write(LCDOp_Log);
   _calculator.shell().write(LCDChar_A);
   _calculator.shell().write(LCDOp_Ln);
+  _calculator.shell().write(LCDOp_YonMinusOne);
+  _calculator.shell().write(LCDOp_Cos_1);
+  _calculator.shell().write(LCDOp_Sin_1);
+  _calculator.shell().write(LCDOp_Tan_1);
   graphicsView->setFocus(Qt::OtherFocusReason);
 }
 

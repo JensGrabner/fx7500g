@@ -69,7 +69,7 @@ enum LCDChar {
   LCDChar_z,
   LCDChar_SquareRoot,  // Square root
   LCDChar_Square,      // ²
-  LCDChar_MinusOne,    // -1
+  LCDChar_MinusOneUp,  // -1
   LCDChar_Exclamation, // !
   LCDChar_Degree,      // °
   LCDChar_Ten,         // "10"
@@ -124,6 +124,7 @@ enum LCDChar {
   LCDChar_InsertCapsLockCursor,
   LCDChar_ShiftCursor,
   LCDChar_CapsLockCursor,
+  LCDChar_MinusOne,  // -1
   LCDChar_Space,
   LCDChar_End = LCDChar_Space
 };
@@ -141,6 +142,9 @@ enum LCDOperator
   LCDOp_Sinh,
   LCDOp_Cosh,
   LCDOp_Tanh,
+  LCDOp_Sin_1, // Sin exponent -1
+  LCDOp_Cos_1, // Cos exponent -1
+  LCDOp_Tan_1, // Cos exponent -1
   LCDOp_Xy,
   LCDOp_xSquareRoot,
   LCDOp_Neg,
