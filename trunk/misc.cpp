@@ -82,6 +82,9 @@ LCDString::LCDString(LCDOperator op)
   case LCDOp_Sinh: assignString("sinh "); break;
   case LCDOp_Cosh: assignString("cosh "); break;
   case LCDOp_Tanh: assignString("tanh "); break;
+  case LCDOp_Sin_1: assignString("sin"); (*this) << LCDChar_MinusOneUp << LCDChar_Space; break;
+  case LCDOp_Cos_1: assignString("cos"); (*this) << LCDChar_MinusOneUp << LCDChar_Space; break;
+  case LCDOp_Tan_1: assignString("tan"); (*this) << LCDChar_MinusOneUp << LCDChar_Space; break;
   case LCDOp_Xy: (*this) << LCDChar_x << LCDChar_ExpY; break;
   case LCDOp_xSquareRoot: (*this) << LCDChar_SquareRootX << LCDChar_SquareRoot; break;
   case LCDOp_Neg: assignString("Neg "); break;
