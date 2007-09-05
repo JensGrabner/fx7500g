@@ -41,7 +41,7 @@ void TextPrinter::printChar(QPaintDevice &paintDevice, LCDChar c, int col, int l
   if (image.isNull())
     return;
 
-  painter.drawImage(col * 6 + 1, line * 8, image);
+  painter.drawImage(col * 6 + 1, line * 8, image, 0, 0, -1, -1);
 }
 
 void TextPrinter::printString(QPaintDevice &paintDevice, const LCDString &str, int col, int line, bool wordwrap)
