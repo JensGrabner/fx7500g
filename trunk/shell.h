@@ -52,13 +52,13 @@ public:
 
   void applyKey(int key);
 
-  bool moveLeft(); // Returns false if movement is forbidden
-  bool moveRight();
-  bool moveUp();
-  bool moveDown();
+  void moveLeft(); // Returns false if movement is forbidden
+  void moveRight();
+  void moveUp();
+  void moveDown();
 
 signals:
-  void cursorBlinked(int col, int line, LCDChar c);
+  void changeChar(int col, int line, LCDChar c);
   void promptLineChanged();
 
 private:

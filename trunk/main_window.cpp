@@ -14,6 +14,8 @@ MainWindow::MainWindow() : QMainWindow(0)
   _screen->setPlotSize(5);
 
   graphicsView->installEventFilter(this);
+
+  on_pushButtonRandomLetter_clicked();
 }
 
 void MainWindow::on_sliderSize_sliderMoved(int value)
@@ -33,6 +35,7 @@ void MainWindow::on_pushButtonRandomLetter_clicked()
   _calculator.shell().write(LCDOp_Log);
   _calculator.shell().write(LCDChar_A);
   _calculator.shell().write(LCDOp_Ln);
+  graphicsView->setFocus(Qt::OtherFocusReason);
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)

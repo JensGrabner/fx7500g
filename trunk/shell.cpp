@@ -24,6 +24,8 @@ LCDChar ShellLine::charAtOffset(int offset) const
 
 int ShellLine::stringIndexAtOffset(int offset) const
 {
+  Q_ASSERT_X(offset >= 0, "ShellLine::stringIndexAtOffset()", "<offset> is negative!");
+
   if (offset >= length())
     return -1;
 
@@ -98,14 +100,14 @@ void Shell::doBlinkCursor()
     case CapsLockCursor: cursor = LCDChar_CapsLockCursor; break;
     default:;
     }
-    emit cursorBlinked(col, line, cursor);
+    emit changeChar(col, line, cursor);
   }
   else
   {
     if (_cursorOffset < _promptLine.length())
-      emit cursorBlinked(col, line, _promptLine.charAtOffset(_cursorOffset));
+      emit changeChar(col, line, _promptLine.charAtOffset(_cursorOffset));
     else
-      emit cursorBlinked(col, line, LCDChar_Space);
+      emit changeChar(col, line, LCDChar_Space);
   }
   _displayCursorTurn = !_displayCursorTurn;
 }
@@ -217,7 +219,7 @@ bool Shell::write(LCDOperator o)
   return true;
 }
 
-bool Shell::moveLeft()
+void Shell::moveLeft()
 {
   int index;
   if (_promptLine.length() && _cursorOffset >= _promptLine.length())
@@ -231,7 +233,7 @@ bool Shell::moveLeft()
   restartBlink();
 }
 
-bool Shell::moveRight()
+void Shell::moveRight()
 {
   int index = _promptLine.stringIndexAtOffset(_cursorOffset);
   if (index >= 0 && index <= _promptLine.count() - 1)
@@ -240,13 +242,33 @@ bool Shell::moveRight()
   restartBlink();
 }
 
-bool Shell::moveUp()
+void Shell::moveUp()
 {
+  if (_cursorOffset < 16)
+    moveCursor(0);
+  else
+  {
+    int upIndex = _promptLine.stringIndexAtOffset(_cursorOffset - 16);
+    moveCursor(_promptLine.offsetByStringIndex(upIndex));
+  }
+
   restartBlink();
 }
 
-bool Shell::moveDown()
+void Shell::moveDown()
 {
+  if (_cursorOffset + 16 >= _promptLine.length())
+    moveCursor(_promptLine.length());
+  else
+  {
+    int downIndex = _promptLine.stringIndexAtOffset(_cursorOffset + 16);
+    int downOffset = _promptLine.offsetByStringIndex(downIndex);
+    if (downOffset == _cursorOffset + 16)
+      moveCursor(_cursorOffset + 16);
+    else
+      moveCursor(_promptLine.offsetByStringIndex(downIndex + 1));
+  }
+
   restartBlink();
 }
 
@@ -267,7 +289,7 @@ void Shell::moveCursor(int newOffset)
   int line = _cursorOffset / 16;
   int col = _cursorOffset - line * 16;
   line += getPromptLineIndex();
-  emit cursorBlinked(col, line, _promptLine.charAtOffset(_cursorOffset));
+  emit changeChar(col, line, _promptLine.charAtOffset(_cursorOffset));
 
   // Move cursor
   _cursorOffset = newOffset;
