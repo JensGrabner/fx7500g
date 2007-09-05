@@ -16,7 +16,6 @@ MainWindow::MainWindow() : QMainWindow(0)
   graphicsView->installEventFilter(this);
 
   _calculator.init();
-  //on_pushButtonRandomLetter_clicked();
 }
 
 void MainWindow::on_sliderSize_sliderMoved(int value)
@@ -24,20 +23,24 @@ void MainWindow::on_sliderSize_sliderMoved(int value)
   _screen->setPlotSize(value);
 }
 
-void MainWindow::on_pushButtonRandomLetter_clicked()
+void MainWindow::on_pushButtonRUN_clicked()
 {
   _calculator.setScreenMode(Calculator::ScreenMode_Normal);
-  _calculator.test();
-  _calculator.shell().write(LCDOp_Log);
-  _calculator.shell().write(LCDOp_Log);
-  _calculator.shell().write(LCDOp_Log);
-  _calculator.shell().write(LCDOp_Log);
-  _calculator.shell().write(LCDChar_A);
-  _calculator.shell().write(LCDOp_Ln);
-  _calculator.shell().write(LCDOp_YonMinusOne);
-  _calculator.shell().write(LCDOp_Cos_1);
-  _calculator.shell().write(LCDOp_Sin_1);
-  _calculator.shell().write(LCDOp_Tan_1);
+  _calculator.setSysMode(Calculator::SysMode_RUN);
+  graphicsView->setFocus(Qt::OtherFocusReason);
+}
+
+void MainWindow::on_pushButtonWRT_clicked()
+{
+  _calculator.setScreenMode(Calculator::ScreenMode_Normal);
+  _calculator.setSysMode(Calculator::SysMode_WRT);
+  graphicsView->setFocus(Qt::OtherFocusReason);
+}
+
+void MainWindow::on_pushButtonPCL_clicked()
+{
+  _calculator.setScreenMode(Calculator::ScreenMode_Normal);
+  _calculator.setSysMode(Calculator::SysMode_PCL);
   graphicsView->setFocus(Qt::OtherFocusReason);
 }
 

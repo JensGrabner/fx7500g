@@ -20,17 +20,6 @@ Screen::Screen(QGraphicsItem *parent) : QGraphicsItem(parent),
   QPainter painter(&_normalScreen);
   painter.fillRect(0, 0, widthInPlots, heightInPlots, QColor(0, 0, 0));
 
-/*  int indexLCD = 0;
-  for (int line = 0; line < 8; ++line)
-    for (int column = 0; column < 16; ++column)
-    {
-      if (indexLCD > LCDChar_End)
-        break;
-
-      TextPrinter::instance().printChar(_normalScreen, (LCDChar) indexLCD, column, line);
-      indexLCD++;
-    }*/
-
   drawNormalScreenInPixmap();
 }
 

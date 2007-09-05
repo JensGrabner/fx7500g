@@ -43,8 +43,6 @@ public:
 
   Shell &shell() { return _shell; }
 
-  void test();
-
 private:
   ScreenMode _screenMode;
   SysMode _sysMode;
@@ -54,8 +52,12 @@ private:
   DisplayMode _displayMode;
   Shell _shell;
   Screen *_screen;
+  int _steps; // TEMPORARY => replace by a more complete object
 
   QList<LCDString> getResumeScreen() const;
+  QList<LCDString> getWRTScreen() const;
+  QList<LCDString> getPCLScreen() const;
+
   QString sysModeString() const;
   QString calModeString() const;
   QString baseModeString() const;

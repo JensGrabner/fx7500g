@@ -21,7 +21,9 @@ protected:
 
 private slots:
   void on_sliderSize_sliderMoved(int value);
-  void on_pushButtonRandomLetter_clicked();
+  void on_pushButtonRUN_clicked();
+  void on_pushButtonWRT_clicked();
+  void on_pushButtonPCL_clicked();
 
 private:
   QGraphicsScene *_graphicsScene;
