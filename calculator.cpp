@@ -7,7 +7,8 @@ Calculator::Calculator() :
   _calMode(CalMode_COMP),
   _baseMode(BaseMode_Dec),
   _displayMode(DisplayMode_Norm),
-  _screen(0)
+  _screen(0),
+  _steps(4006)
 {
   connect(&_shell, SIGNAL(changeChar(int, int, LCDChar)),
           this, SLOT(shellChangeChar(int, int, LCDChar)));
@@ -18,15 +19,6 @@ Calculator::Calculator() :
 void Calculator::setAngleMode(AngleMode value)
 {
   _angleMode = value;
-}
-
-void Calculator::test()
-{
-  if (_screen)
-  {
-    _screen->drawScreen(_shell.currentScreen());
-    _shell.restartBlink();
-  }
 }
 
 void Calculator::shellChangeChar(int col, int line, LCDChar c)
@@ -90,6 +82,12 @@ void Calculator::setScreenMode(ScreenMode value)
     return;
 
   _screenMode = value;
+
+  if (_screenMode == ScreenMode_Normal)
+  {
+    _screen->drawScreen(_shell.currentScreen());
+    _shell.restartBlink();
+  }
 }
 
 void Calculator::setCalMode(CalMode value)
@@ -162,6 +160,21 @@ void Calculator::setSysMode(SysMode value)
     return;
 
   _sysMode = value;
+
+  switch (_sysMode)
+  {
+  case SysMode_RUN:
+    _screen->drawScreen(_shell.currentScreen());
+    break;
+  case SysMode_WRT:
+    _screen->drawScreen(getWRTScreen());
+    break;
+  case SysMode_PCL:
+    _screen->drawScreen(getPCLScreen());
+    break;
+  }
+
+  _shell.restartBlink();
 }
 
 QString Calculator::displayModeString() const
@@ -173,4 +186,56 @@ QString Calculator::displayModeString() const
   case DisplayMode_Sci: return "Sci";
   default: return "";
   }
+}
+
+QList<LCDString> Calculator::getWRTScreen() const
+{
+  QList<LCDString> screen;
+
+  screen << LCDString(QString("sys mode : %1").arg(sysModeString()));
+  if (_calMode == CalMode_BASE_N)
+  {
+    screen << LCDString("cal mode :BASE-N");
+    screen << LCDString(QString("            %1").arg(baseModeString()));
+    screen << LCDString("");
+  } else
+  {
+    screen << LCDString(QString("cal mode : %1").arg(calModeString()));
+    screen << LCDString(QString("   angle : %1").arg(angleModeString()));
+    screen << LCDString(QString(" display : %1").arg(displayModeString()));
+  }
+  screen << LCDString("");
+  QString strBytesFree = QString("%1 Bytes Free").arg(_steps);
+
+  screen << LCDString(QString(16 - strBytesFree.length(), ' ') + strBytesFree);
+  screen << LCDString("");
+  screen << LCDString(" Prog 0123456789");
+
+  return screen;
+}
+
+QList<LCDString> Calculator::getPCLScreen() const
+{
+  QList<LCDString> screen;
+
+  screen << LCDString(QString("sys mode : %1").arg(sysModeString()));
+  if (_calMode == CalMode_BASE_N)
+  {
+    screen << LCDString("cal mode :BASE-N");
+    screen << LCDString(QString("            %1").arg(baseModeString()));
+    screen << LCDString("");
+  } else
+  {
+    screen << LCDString(QString("cal mode : %1").arg(calModeString()));
+    screen << LCDString(QString("   angle : %1").arg(angleModeString()));
+    screen << LCDString(QString(" display : %1").arg(displayModeString()));
+  }
+  screen << LCDString("");
+  QString strBytesFree = QString("%1 Bytes Free").arg(_steps);
+
+  screen << LCDString(QString(16 - strBytesFree.length(), ' ') + strBytesFree);
+  screen << LCDString("");
+  screen << LCDString(" Prog 0123456789");
+
+  return screen;
 }
