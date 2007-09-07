@@ -134,3 +134,82 @@ void LCDString::assignString(const QString &str)
       (*this) << ch;
   }
 }
+
+CalculatorState::CalculatorState() :
+  _sysMode(SysMode_RUN),
+  _angleMode(Deg),
+  _calMode(CalMode_COMP),
+  _baseMode(BaseMode_Dec),
+  _displayMode(DisplayMode_Norm)
+{
+}
+
+QString CalculatorState::baseModeString() const
+{
+  switch (_baseMode)
+  {
+  case BaseMode_Dec: return "Dec";
+  case BaseMode_Hex: return "Hex";
+  case BaseMode_Bin: return "Bin";
+  case BaseMode_Oct: return "Oct";
+  default: return "";
+  }
+}
+
+QString CalculatorState::angleModeString() const
+{
+  switch (_angleMode)
+  {
+  case Deg: return "Deg";
+  case Rad: return "Rad";
+  case Grad: return "Gra";
+  default: return "";
+  }
+}
+
+QString CalculatorState::sysModeString() const
+{
+  switch (_sysMode)
+  {
+  case SysMode_RUN: return "RUN";
+  case SysMode_WRT: return "WRT";
+  case SysMode_PCL: return "PCL";
+  default: return "";
+  }
+}
+
+QString CalculatorState::displayModeString() const
+{
+  switch (_displayMode)
+  {
+  case DisplayMode_Norm: return "Norm";
+  case DisplayMode_Fix: return "Fix";
+  case DisplayMode_Sci: return "Sci";
+  default: return "";
+  }
+}
+
+QString CalculatorState::calModeString() const
+{
+  switch (_calMode)
+  {
+  case CalMode_COMP: return "COMP";
+  case CalMode_BASE_N: return "BASE-N";
+  case CalMode_SD1: return "SD 1";
+  case CalMode_LR1: return "LR 1";
+  case CalMode_SD2: return "SD 2";
+  case CalMode_LR2: return "LR 2";
+  default: return "";
+  }
+}
+
+void CalculatorState::setSysMode(SysMode value)
+{
+  if (_sysMode == value)
+    return;
+
+  SysMode oldMode = _sysMode;
+
+  _sysMode = value;
+  emit sysModeChanged(oldMode);
+}

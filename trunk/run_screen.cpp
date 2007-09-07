@@ -223,6 +223,8 @@ void RunScreen::deleteString()
 
 void RunScreen::feedScreen()
 {
+  clear();
+
   int line = 0;
   foreach (const ShellLine &shellLine, _lines)
   {

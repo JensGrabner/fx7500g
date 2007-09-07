@@ -2,46 +2,49 @@
 
 Calculator::Calculator() :
   _screenMode(ScreenMode_Resume),
-  _sysMode(SysMode_RUN),
-  _angleMode(Deg),
-  _calMode(CalMode_COMP),
-  _baseMode(BaseMode_Dec),
-  _displayMode(DisplayMode_Norm),
-  _screen(0),
+  _lcdDisplay(0),
   _steps(4006)
 {
+  // Init run screen
+  _runScreen.init(&_calcState);
   connect(&_runScreen, SIGNAL(changeChar(int, int, LCDChar)),
           this, SLOT(shellChangeChar(int, int, LCDChar)));
   connect(&_runScreen, SIGNAL(promptLineChanged()),
           this, SLOT(shellPromptLineChanged()));
+
+  // Init prog screen
+  _progScreen.init(&_calcState);
+  connect(&_progScreen, SIGNAL(changeChar(int, int, LCDChar)),
+          this, SLOT(progChangeChar(int, int, LCDChar)));
 }
 
 void Calculator::setAngleMode(AngleMode value)
 {
-  _angleMode = value;
+  _calcState.setAngleMode(value);
 }
 
 void Calculator::shellChangeChar(int col, int line, LCDChar c)
 {
-  if (_screen && _screenMode == ScreenMode_Normal &&
-      _sysMode == SysMode_RUN)
-    _screen->drawChar(c, col, line);
+  if (_lcdDisplay && _screenMode == ScreenMode_Normal &&
+      _calcState.sysMode() == SysMode_RUN)
+    _lcdDisplay->drawChar(c, col, line);
+}
+
+void Calculator::progChangeChar(int col, int line, LCDChar c)
+{
+  if (_lcdDisplay && _screenMode == ScreenMode_Normal &&
+      (_calcState.sysMode() == SysMode_WRT || _calcState.sysMode() == SysMode_PCL))
+    _lcdDisplay->drawChar(c, col, line);
 }
 
 void Calculator::setDisplayMode(DisplayMode value)
 {
-  if (value == _displayMode)
-    return;
-
-  _displayMode = value;
-
-  if (_screenMode == ScreenMode_Normal)
-    _runScreen.restartBlink();
+  _calcState.setDisplayMode(value);
 }
 
 void Calculator::shellPromptLineChanged()
 {
-  _screen->drawScreen(_runScreen.currentScreen());
+  _lcdDisplay->drawScreen(_runScreen.currentScreen());
 }
 
 QList<LCDString> Calculator::getResumeScreen() const
@@ -50,17 +53,17 @@ QList<LCDString> Calculator::getResumeScreen() const
 
   screen << LCDString(" **** MODE ****");
   screen << LCDString("");
-  screen << LCDString(QString("sys mode : %1").arg(sysModeString()));
-  if (_calMode == CalMode_BASE_N)
+  screen << LCDString(QString("sys mode : %1").arg(_calcState.sysModeString()));
+  if (_calcState.calMode() == CalMode_BASE_N)
   {
     screen << LCDString("cal mode :BASE-N");
-    screen << LCDString(QString("            %1").arg(baseModeString()));
+    screen << LCDString(QString("            %1").arg(_calcState.baseModeString()));
     screen << LCDString("");
   } else
   {
-    screen << LCDString(QString("cal mode : %1").arg(calModeString()));
-    screen << LCDString(QString("   angle : %1").arg(angleModeString()));
-    screen << LCDString(QString(" display : %1").arg(displayModeString()));
+    screen << LCDString(QString("cal mode : %1").arg(_calcState.calModeString()));
+    screen << LCDString(QString("   angle : %1").arg(_calcState.angleModeString()));
+    screen << LCDString(QString(" display : %1").arg(_calcState.displayModeString()));
   }
   screen << LCDString("");
   screen << LCDString("   Step    0");
@@ -70,10 +73,10 @@ QList<LCDString> Calculator::getResumeScreen() const
 
 void Calculator::init()
 {
-  Q_ASSERT_X(_screen, "Calculator::init()", "<_screen> is 0!");
+  Q_ASSERT_X(_lcdDisplay, "Calculator::init()", "<_lcdDisplay> is 0!");
 
   setScreenMode(ScreenMode_Resume);
-  _screen->drawScreen(getResumeScreen());
+  _lcdDisplay->drawScreen(getResumeScreen());
 }
 
 void Calculator::setScreenMode(ScreenMode value)
@@ -83,159 +86,67 @@ void Calculator::setScreenMode(ScreenMode value)
 
   _screenMode = value;
 
-  if (_screenMode == ScreenMode_Normal)
+  switch (_screenMode)
   {
-    _screen->drawScreen(_runScreen.currentScreen());
-    _runScreen.restartBlink();
+  case ScreenMode_Normal:
+    switch (_calcState.sysMode())
+    {
+    case SysMode_RUN:
+      _lcdDisplay->drawScreen(_runScreen.currentScreen());
+      _runScreen.restartBlink();
+      break;
+    case SysMode_WRT:
+    case SysMode_PCL:
+      _lcdDisplay->drawScreen(_progScreen.currentScreen());
+      _progScreen.restartBlink();
+      break;
+    default:;
+    }
+    break;
+  default:;
   }
 }
 
 void Calculator::setCalMode(CalMode value)
 {
-  if (value == _calMode)
-    return;
-
-  _calMode = value;
-}
-
-QString Calculator::calModeString() const
-{
-  switch (_calMode)
-  {
-  case CalMode_COMP: return "COMP";
-  case CalMode_BASE_N: return "BASE-N";
-  case CalMode_SD1: return "SD 1";
-  case CalMode_LR1: return "LR 1";
-  case CalMode_SD2: return "SD 2";
-  case CalMode_LR2: return "LR 2";
-  default: return "";
-  }
+  _calcState.setCalMode(value);
 }
 
 void Calculator::setBaseMode(BaseMode value)
 {
-  if (value == _baseMode)
-    return;
-
-  _baseMode = value;
-}
-
-QString Calculator::baseModeString() const
-{
-  switch (_baseMode)
-  {
-  case BaseMode_Dec: return "Dec";
-  case BaseMode_Hex: return "Hex";
-  case BaseMode_Bin: return "Bin";
-  case BaseMode_Oct: return "Oct";
-  default: return "";
-  }
-}
-
-QString Calculator::angleModeString() const
-{
-  switch (_angleMode)
-  {
-  case Deg: return "Deg";
-  case Rad: return "Rad";
-  case Grad: return "Gra";
-  default: return "";
-  }
-}
-
-QString Calculator::sysModeString() const
-{
-  switch (_sysMode)
-  {
-  case SysMode_RUN: return "RUN";
-  case SysMode_WRT: return "WRT";
-  case SysMode_PCL: return "PCL";
-  default: return "";
-  }
+  _calcState.setBaseMode(value);
 }
 
 void Calculator::setSysMode(SysMode value)
 {
-  if (value == _sysMode)
-    return;
+  _calcState.setSysMode(value);
 
-  _sysMode = value;
-
-  switch (_sysMode)
+  switch (_calcState.sysMode())
   {
   case SysMode_RUN:
-    _screen->drawScreen(_runScreen.currentScreen());
+    _lcdDisplay->drawScreen(_runScreen.currentScreen());
+    _runScreen.restartBlink();
     break;
   case SysMode_WRT:
-    _screen->drawScreen(getWRTScreen());
-    break;
   case SysMode_PCL:
-    _screen->drawScreen(getPCLScreen());
+    _lcdDisplay->drawScreen(_progScreen.currentScreen());
+    _progScreen.restartBlink();
     break;
-  }
-
-  _runScreen.restartBlink();
-}
-
-QString Calculator::displayModeString() const
-{
-  switch (_displayMode)
-  {
-  case DisplayMode_Norm: return "Norm";
-  case DisplayMode_Fix: return "Fix";
-  case DisplayMode_Sci: return "Sci";
-  default: return "";
+  default:;
   }
 }
 
-QList<LCDString> Calculator::getWRTScreen() const
+void Calculator::applyKey(int key)
 {
-  QList<LCDString> screen;
-
-  screen << LCDString(QString("sys mode : %1").arg(sysModeString()));
-  if (_calMode == CalMode_BASE_N)
+  switch (_calcState.sysMode())
   {
-    screen << LCDString("cal mode :BASE-N");
-    screen << LCDString(QString("            %1").arg(baseModeString()));
-    screen << LCDString("");
-  } else
-  {
-    screen << LCDString(QString("cal mode : %1").arg(calModeString()));
-    screen << LCDString(QString("   angle : %1").arg(angleModeString()));
-    screen << LCDString(QString(" display : %1").arg(displayModeString()));
+  case SysMode_RUN:
+    _runScreen.applyKey(key);
+    break;
+  case SysMode_WRT:
+  case SysMode_PCL:
+    _progScreen.applyKey(key);
+    break;
+  default:;
   }
-  screen << LCDString("");
-  QString strBytesFree = QString("%1 Bytes Free").arg(_steps);
-
-  screen << LCDString(QString(16 - strBytesFree.length(), ' ') + strBytesFree);
-  screen << LCDString("");
-  screen << LCDString(" Prog 0123456789");
-
-  return screen;
-}
-
-QList<LCDString> Calculator::getPCLScreen() const
-{
-  QList<LCDString> screen;
-
-  screen << LCDString(QString("sys mode : %1").arg(sysModeString()));
-  if (_calMode == CalMode_BASE_N)
-  {
-    screen << LCDString("cal mode :BASE-N");
-    screen << LCDString(QString("            %1").arg(baseModeString()));
-    screen << LCDString("");
-  } else
-  {
-    screen << LCDString(QString("cal mode : %1").arg(calModeString()));
-    screen << LCDString(QString("   angle : %1").arg(angleModeString()));
-    screen << LCDString(QString(" display : %1").arg(displayModeString()));
-  }
-  screen << LCDString("");
-  QString strBytesFree = QString("%1 Bytes Free").arg(_steps);
-
-  screen << LCDString(QString(16 - strBytesFree.length(), ' ') + strBytesFree);
-  screen << LCDString("");
-  screen << LCDString(" Prog 0123456789");
-
-  return screen;
 }
