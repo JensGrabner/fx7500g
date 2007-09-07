@@ -2,7 +2,7 @@
 #define CALCULATOR_H
 
 #include "screen.h"
-#include "shell.h"
+#include "run_screen.h"
 
 class Calculator : QObject
 {
@@ -41,7 +41,7 @@ public:
   Screen *screen() { return _screen; }
   void setScreen(Screen *screen) { _screen = screen; };
 
-  Shell &shell() { return _shell; }
+  RunScreen &runScreen() { return _runScreen; }
 
 private:
   ScreenMode _screenMode;
@@ -50,7 +50,7 @@ private:
   CalMode _calMode;
   BaseMode _baseMode;
   DisplayMode _displayMode;
-  Shell _shell;
+  RunScreen _runScreen;
   Screen *_screen;
   int _steps; // TEMPORARY => replace by a more complete object
 

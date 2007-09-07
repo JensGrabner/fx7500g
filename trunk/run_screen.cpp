@@ -1,4 +1,4 @@
-#include "shell.h"
+#include "run_screen.h"
 
 ShellLine::ShellLine(const LCDString &lcdStr, bool rightJustified) :
   _isRightJustified(rightJustified)
@@ -62,95 +62,17 @@ int ShellLine::length() const
   return length;
 }
 
-Shell::Shell() :
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+
+RunScreen::RunScreen() : TextScreen(),
   _cursorOffset(0),
-  _cursorMode(Cursor),
-  _prompt(true),
-  _displayCursorTurn(true)
+  _prompt(true)
 {
-  _blinkTimer.setInterval(500); // Cursor blinks every second
-  connect(&_blinkTimer, SIGNAL(timeout()), this, SLOT(doBlinkCursor()));
-  _blinkTimer.start();
 }
 
-void Shell::setCursorMode(CursorMode mode)
-{
-  if (mode == _cursorMode)
-    return;
-
-  _cursorMode = mode;
-  _blinkTimer.start();
-}
-
-void Shell::doBlinkCursor()
-{
-  int line = _cursorOffset / 16;
-  int col = _cursorOffset - line * 16;
-  line += getPromptLineIndex();
-
-  if (_displayCursorTurn)
-  {
-    LCDChar cursor = LCDChar_Cursor;
-    switch (_cursorMode)
-    {
-    case Cursor: cursor = LCDChar_Cursor; break;
-    case InsertCursor: cursor = LCDChar_InsertCursor; break;
-    case InsertCapsLockCursor: cursor = LCDChar_InsertCapsLockCursor; break;
-    case ShiftCursor: cursor = LCDChar_ShiftCursor; break;
-    case CapsLockCursor: cursor = LCDChar_CapsLockCursor; break;
-    default:;
-    }
-    emit changeChar(col, line, cursor);
-  }
-  else
-  {
-    if (_cursorOffset < _promptLine.length())
-      emit changeChar(col, line, _promptLine.charAtOffset(_cursorOffset));
-    else
-      emit changeChar(col, line, LCDChar_Space);
-  }
-  _displayCursorTurn = !_displayCursorTurn;
-}
-
-QList<LCDString> Shell::currentScreen() const
-{
-  QList<LCDString> screen;
-
-  foreach (const ShellLine &line, _lines)
-  {
-    LCDString lcdStr;
-    if (line.isRightJustified())
-    {
-      Q_ASSERT_X(line.length() < 17, "Shell::currentScreen()", "A shell response length must be less or equal to 16");
-
-      // Padding with space
-      for (int i = 0; i < 16 - line.length(); ++i)
-        lcdStr << LCDChar_Space;
-    }
-
-    // Append real value
-    foreach (const LCDString &subLcdStr, line)
-      foreach (LCDChar c, subLcdStr)
-        lcdStr << c;
-    screen << lcdStr;
-  }
-
-  // Prompt?
-  if (_prompt)
-  {
-    LCDString lcdStr;
-
-    foreach (const LCDString &subLcdStr, _promptLine)
-      foreach (LCDChar c, subLcdStr)
-        lcdStr << c;
-    if (lcdStr.count())
-      screen << lcdStr;
-  }
-
-  return screen;
-}
-
-int Shell::getPromptLineIndex() const
+int RunScreen::getPromptLineIndex() const
 {
   int lineIndex = 0;
   foreach (const ShellLine &line, _lines)
@@ -163,40 +85,34 @@ int Shell::getPromptLineIndex() const
   return lineIndex;
 }
 
-void Shell::restartBlink()
-{
-  _displayCursorTurn = true;
-  doBlinkCursor();
-  _blinkTimer.start();
-}
-
-bool Shell::write(LCDChar c)
+bool RunScreen::write(LCDChar c)
 {
   if (_cursorOffset >= _promptLine.length())
-  {
     _promptLine << LCDString(c);
-    moveCursor(_cursorOffset + 1);
-  } else
+  else
   {
     // Get LCDString under the cursor
     int index = _promptLine.stringIndexAtOffset(_cursorOffset);
     if (index >= 0)
       _promptLine[index] = LCDString(c);
-    moveCursor(_cursorOffset + 1);
   }
 
-  restartBlink();
+  feedScreen();
 
   emit promptLineChanged();
+
+  moveCursor(_cursorOffset + 1);
 
   return true;
 }
 
-bool Shell::write(LCDOperator o)
+bool RunScreen::write(LCDOperator o)
 {
+  int newOffset;
   if (_cursorOffset >= _promptLine.length())
   {
     _promptLine << LCDString(o);
+    newOffset = _promptLine.length();
     moveCursor(_promptLine.length());
   } else
   {
@@ -207,19 +123,21 @@ bool Shell::write(LCDOperator o)
 
     // Cursor move to the right
     if (index >= _promptLine.count())
-      moveCursor(_promptLine.length());
+      newOffset = _promptLine.length();
     else
-      moveCursor(_promptLine.offsetByStringIndex(index + 1));
+      newOffset = _promptLine.offsetByStringIndex(index + 1);
   }
 
-  restartBlink();
+  feedScreen();
 
   emit promptLineChanged();
+
+  moveCursor(newOffset);
 
   return true;
 }
 
-void Shell::moveLeft()
+void RunScreen::moveLeft()
 {
   int index;
   if (_promptLine.length() && _cursorOffset >= _promptLine.length())
@@ -229,20 +147,20 @@ void Shell::moveLeft()
 
   if (index > 0)
     moveCursor(_promptLine.offsetByStringIndex(index - 1));
-
-  restartBlink();
+  else
+    restartBlink();
 }
 
-void Shell::moveRight()
+void RunScreen::moveRight()
 {
   int index = _promptLine.stringIndexAtOffset(_cursorOffset);
   if (index >= 0 && index <= _promptLine.count() - 1)
     moveCursor(_promptLine.offsetByStringIndex(index + 1));
-
-  restartBlink();
+  else
+    restartBlink();
 }
 
-void Shell::moveUp()
+void RunScreen::moveUp()
 {
   if (_cursorOffset < 16)
     moveCursor(0);
@@ -251,11 +169,9 @@ void Shell::moveUp()
     int upIndex = _promptLine.stringIndexAtOffset(_cursorOffset - 16);
     moveCursor(_promptLine.offsetByStringIndex(upIndex));
   }
-
-  restartBlink();
 }
 
-void Shell::moveDown()
+void RunScreen::moveDown()
 {
   if (_cursorOffset + 16 >= _promptLine.length())
     moveCursor(_promptLine.length());
@@ -268,11 +184,9 @@ void Shell::moveDown()
     else
       moveCursor(_promptLine.offsetByStringIndex(downIndex + 1));
   }
-
-  restartBlink();
 }
 
-void Shell::applyKey(int key)
+void RunScreen::applyKey(int key)
 {
   switch (key)
   {
@@ -284,25 +198,76 @@ void Shell::applyKey(int key)
   }
 }
 
-void Shell::moveCursor(int newOffset)
+void RunScreen::moveCursor(int newOffset)
 {
   // Restore old offset char
-  int line = _cursorOffset / 16;
-  int col = _cursorOffset - line * 16;
+  int line = newOffset / 16;
+  int col = newOffset - line * 16;
   line += getPromptLineIndex();
-  emit changeChar(col, line, _promptLine.charAtOffset(_cursorOffset));
 
-  // Move cursor
+  TextScreen::moveCursor(col, line);
   _cursorOffset = newOffset;
 }
 
-void Shell::deleteString()
+void RunScreen::deleteString()
 {
   if (_cursorOffset < _promptLine.length())
   {
     _promptLine.removeAt(_promptLine.stringIndexAtOffset(_cursorOffset));
+    feedScreen();
     emit promptLineChanged();
   }
 
   restartBlink();
+}
+
+void RunScreen::feedScreen()
+{
+  int line = 0;
+  foreach (const ShellLine &shellLine, _lines)
+  {
+    LCDString lcdStr;
+    if (shellLine.isRightJustified())
+    {
+      Q_ASSERT_X(line.length() < 17, "Shell::currentScreen()", "A shell response length must be less or equal to 16");
+
+      // Padding with space
+      for (int i = 0; i < 16 - shellLine.length(); ++i)
+        lcdStr << LCDChar_Space;
+    }
+
+    // Append real value
+    foreach (const LCDString &subLcdStr, shellLine)
+      foreach (LCDChar c, subLcdStr)
+        lcdStr << c;
+
+    // Copy it into <_screen>
+    int col = 0;
+    foreach (LCDChar c, lcdStr)
+    {
+      if (col >= 16)
+      {
+        col = 0;
+        line++;
+      }
+      _screen[col++][line] = c;
+    }
+    line++;
+  }
+
+  // Prompt?
+  if (_prompt)
+  {
+    int col = 0;
+    foreach (const LCDString &subLcdStr, _promptLine)
+      foreach (LCDChar c, subLcdStr)
+      {
+        if (col >= 16)
+        {
+          col = 0;
+          line++;
+        }
+        _screen[col++][line] = c;
+      }
+  }
 }
