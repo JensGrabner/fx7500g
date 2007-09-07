@@ -13,7 +13,8 @@ HEADERS += main_window.h \
   misc.h \
   text_screen.h \
   run_screen.h \
-  prog_screen.h
+  prog_screen.h \
+  program.h
 
 SOURCES += main.cpp \
   main_window.cpp \
@@ -23,7 +24,8 @@ SOURCES += main.cpp \
   misc.cpp \
   text_screen.cpp \
   run_screen.cpp \
-  prog_screen.cpp
+  prog_screen.cpp \
+  program.cpp
 
 FORMS += main_window.ui
 

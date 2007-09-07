@@ -1,3 +1,5 @@
+#include "program.h"
+
 #include "prog_screen.h"
 
 ProgScreen::ProgScreen() : TextScreen()
@@ -49,10 +51,16 @@ void ProgScreen::feedScreen()
     assignToScreen(LCDString(QString(" display : %1").arg(_calcState->displayModeString())), 0, 3);
   }
 
-  QString strBytesFree = QString("%1 Bytes Free").arg(14);
+  QString strBytesFree = QString("%1 Bytes Free").arg(Programs::instance().freeSteps());
   assignToScreen(LCDString(QString(16 - strBytesFree.length(), ' ') + strBytesFree), 0, 5);
 
-  assignToScreen(LCDString(" Prog 0123456789"), 0, 7);
+  QString str = " Prog 0123456789";
+
+  Programs &programs = Programs::instance();
+  for (int i = 0; i < programs.count(); ++i)
+    if (!programs.at(i).isEmpty())
+      str[6 + i] = '_';
+  assignToScreen(LCDString(str), 0, 7);
 }
 
 void ProgScreen::sysModeChanged(SysMode oldMode)
