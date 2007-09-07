@@ -30,13 +30,13 @@ class RunScreen : public TextScreen
   Q_OBJECT
 public:
   RunScreen();
-
+ 
   bool write(LCDChar c); // Returns false if writing is forbidden
   bool write(LCDOperator o);
 
   void applyKey(int key);
 
-  void moveLeft(); // Returns false if movement is forbidden
+  void moveLeft();
   void moveRight();
   void moveUp();
   void moveDown();
@@ -44,6 +44,9 @@ public:
 
 signals:
   void promptLineChanged();
+
+protected:
+  void feedScreen(); // <_screen> of Shell ancestor is filled with <_lines> and <_promptLine>
 
 private:
   int _cursorOffset;
@@ -53,7 +56,6 @@ private:
 
   int getPromptLineIndex() const; // Return the line index of the prompt beginning
   void moveCursor(int newOffset);
-  void feedScreen(); // <_screen> of Shell ancestor is filled with <_lines> and <_promptLine>
 };
 
 #endif

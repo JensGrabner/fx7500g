@@ -9,9 +9,9 @@ MainWindow::MainWindow() : QMainWindow(0)
 
   graphicsView->setScene(_graphicsScene = new QGraphicsScene);
 
-  _calculator.setScreen(_screen = new Screen);
-  _graphicsScene->addItem(_screen);
-  _screen->setPlotSize(5);
+  _calculator.setLCDDisplay(_lcdDisplay = new LCDDisplay);
+  _graphicsScene->addItem(_lcdDisplay);
+  _lcdDisplay->setPlotSize(5);
 
   graphicsView->installEventFilter(this);
 
@@ -20,28 +20,28 @@ MainWindow::MainWindow() : QMainWindow(0)
 
 void MainWindow::on_sliderSize_sliderMoved(int value)
 {
-  _screen->setPlotSize(value);
+  _lcdDisplay->setPlotSize(value);
 }
 
 void MainWindow::on_pushButtonRUN_clicked()
 {
   _calculator.setScreenMode(Calculator::ScreenMode_Normal);
-  _calculator.setSysMode(Calculator::SysMode_RUN);
-  _calculator.runScreen().write(LCDOp_Log);
+  _calculator.setSysMode(SysMode_RUN);
+//  _calculator.runScreen().write(LCDOp_Log);
   graphicsView->setFocus(Qt::OtherFocusReason);
 }
 
 void MainWindow::on_pushButtonWRT_clicked()
 {
+  _calculator.setSysMode(SysMode_WRT);
   _calculator.setScreenMode(Calculator::ScreenMode_Normal);
-  _calculator.setSysMode(Calculator::SysMode_WRT);
   graphicsView->setFocus(Qt::OtherFocusReason);
 }
 
 void MainWindow::on_pushButtonPCL_clicked()
 {
+  _calculator.setSysMode(SysMode_PCL);
   _calculator.setScreenMode(Calculator::ScreenMode_Normal);
-  _calculator.setSysMode(Calculator::SysMode_PCL);
   graphicsView->setFocus(Qt::OtherFocusReason);
 }
 
@@ -51,6 +51,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     return QMainWindow::eventFilter(obj, event);
 
   QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-  _calculator.runScreen().applyKey(keyEvent->key());
+  _calculator.applyKey(keyEvent->key());
   return true;
 }

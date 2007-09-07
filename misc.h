@@ -3,6 +3,7 @@
 
 #include <QList>
 #include <QChar>
+#include <QObject>
 
 enum LCDChar {
   LCDChar_0 = 0,
@@ -191,6 +192,51 @@ public:
 
 private:
   void assignString(const QString &str);
+};
+
+enum ScreenMode { ScreenMode_Normal, ScreenMode_Resume, ScreenMode_Graphical };
+enum AngleMode { Deg, Rad, Grad };
+enum SysMode { SysMode_RUN, SysMode_WRT, SysMode_PCL };
+enum CalMode { CalMode_COMP, CalMode_BASE_N, CalMode_SD1, CalMode_LR1, CalMode_SD2, CalMode_LR2 };
+enum BaseMode { BaseMode_Dec, BaseMode_Hex, BaseMode_Bin, BaseMode_Oct };
+enum DisplayMode { DisplayMode_Norm, DisplayMode_Fix, DisplayMode_Sci };
+
+class CalculatorState : public QObject
+{
+  Q_OBJECT
+public:
+  CalculatorState();
+
+  SysMode sysMode() const { return _sysMode; }
+  void setSysMode(SysMode value);
+
+  AngleMode angleMode() const { return _angleMode; }
+  void setAngleMode(AngleMode value) { _angleMode = value; }
+
+  CalMode calMode() const { return _calMode; }
+  void setCalMode(CalMode value) { _calMode = value; }
+
+  BaseMode baseMode() const { return _baseMode; }
+  void setBaseMode(BaseMode value) { _baseMode = value; }
+
+  DisplayMode displayMode() const { return _displayMode; }
+  void setDisplayMode(DisplayMode value) { _displayMode = value; }
+
+  QString sysModeString() const;
+  QString calModeString() const;
+  QString baseModeString() const;
+  QString angleModeString() const;
+  QString displayModeString() const;
+
+signals:
+  void sysModeChanged(SysMode oldMode);
+
+private:
+  SysMode _sysMode;
+  AngleMode _angleMode;
+  CalMode _calMode;
+  BaseMode _baseMode;
+  DisplayMode _displayMode;
 };
 
 #endif

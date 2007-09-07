@@ -1,10 +1,10 @@
 #include <QStyleOptionGraphicsItem>
 #include <QKeyEvent>
 
-#include "screen.h"
+#include "lcd_display.h"
 #include "text_printer.h"
 
-Screen::Screen(QGraphicsItem *parent) : QGraphicsItem(parent),
+LCDDisplay::LCDDisplay(QGraphicsItem *parent) : QGraphicsItem(parent),
   _plotSize(1),
   _backgroundColor(QColor(200, 200, 200)),
   _pixelOnColor(QColor(50, 50, 50)),
@@ -23,7 +23,7 @@ Screen::Screen(QGraphicsItem *parent) : QGraphicsItem(parent),
   drawNormalScreenInPixmap();
 }
 
-void Screen::drawImageInPixmap(const QImage &image)
+void LCDDisplay::drawImageInPixmap(const QImage &image)
 {
   _pixmap = QPixmap(tracingAreaWidth() + _leftBorder + _rightBorder,
                     tracingAreaHeight() + _topBorder + _bottomBorder);
@@ -54,12 +54,12 @@ void Screen::drawImageInPixmap(const QImage &image)
         painter.fillRect(getPlotRect(column, line), _pixelOnColor);
 }
 
-void Screen::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
+void LCDDisplay::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
 {
   painter->drawPixmap(option->exposedRect, _pixmap, option->exposedRect);
 }
 
-void Screen::setPlotSize(int value)
+void LCDDisplay::setPlotSize(int value)
 {
   if (value != _plotSize && value >= 1)
   {
@@ -70,13 +70,13 @@ void Screen::setPlotSize(int value)
   }
 }
 
-QRectF Screen::boundingRect () const
+QRectF LCDDisplay::boundingRect () const
 {
   return QRectF(0, 0, tracingAreaWidth() + _leftBorder + _rightBorder,
                 tracingAreaHeight() + _topBorder + _bottomBorder);
 }
 
-int Screen::tracingAreaWidth() const
+int LCDDisplay::tracingAreaWidth() const
 {
   if (_plotSize < _plotSizeForGrid)
     return widthInPlots * _plotSize;
@@ -84,7 +84,7 @@ int Screen::tracingAreaWidth() const
     return widthInPlots * _plotSize - 1;
 }
 
-int Screen::tracingAreaHeight() const
+int LCDDisplay::tracingAreaHeight() const
 {
   if (_plotSize < _plotSizeForGrid)
     return heightInPlots * _plotSize;
@@ -92,7 +92,7 @@ int Screen::tracingAreaHeight() const
     return heightInPlots * _plotSize - 1;
 }
 
-QRect Screen::getPlotRect(int x, int y) const
+QRect LCDDisplay::getPlotRect(int x, int y) const
 {
   if (_plotSize < _plotSizeForGrid)
     return QRect(_leftBorder + x * _plotSize, _topBorder + y * _plotSize,
@@ -102,31 +102,31 @@ QRect Screen::getPlotRect(int x, int y) const
                _plotSize - 1, _plotSize - 1);
 }
 
-QRect Screen::getCharRectInPixmap(int column, int line) const
+QRect LCDDisplay::getCharRectInPixmap(int column, int line) const
 {
-  Q_ASSERT_X(column >= 0 && column < 16 && line >= 0 && line < 8, "Screen::getCharRectInPixmap()",
+  Q_ASSERT_X(column >= 0 && column < 16 && line >= 0 && line < 8, "LCDDisplay::getCharRectInPixmap()",
              qPrintable(QString("Invalid <column> (%1) or <line> (%2)").arg(column).arg(line)));
   return QRect(_leftBorder + _plotSize * (column * 6 + 1), _topBorder + _plotSize * line * 6,
                _plotSize * 6 - 1, _plotSize * 8 - 1);
 }
 
-QRect Screen::getCharRect(int column, int line) const
+QRect LCDDisplay::getCharRect(int column, int line) const
 {
-  Q_ASSERT_X(column >= 0 && column < 16 && line >= 0 && line < 8, "Screen::getCharRect()",
+  Q_ASSERT_X(column >= 0 && column < 16 && line >= 0 && line < 8, "LCDDisplay::getCharRect()",
              qPrintable(QString("Invalid <column> (%1) or <line> (%2)").arg(column).arg(line)));
   return QRect(column * 6 + 1, line * 8, 5, 7);
 }
 
-void Screen::drawChar(LCDChar c, int column, int line)
+void LCDDisplay::drawChar(LCDChar c, int column, int line)
 {
-  Q_ASSERT_X(column >= 0 && column < 16 && line >= 0 && line < 8, "Screen::drawChar()",
+  Q_ASSERT_X(column >= 0 && column < 16 && line >= 0 && line < 8, "LCDDisplay::drawChar()",
              qPrintable(QString("Invalid <column> (%1) or <line> (%2)").arg(column).arg(line)));
   TextPrinter::instance().printChar(_normalScreen, c, column, line);
   copyImageInPixmap(getCharRect(column, line));
   update(imageRectToPixmapRect(getCharRect(column, line)));
 }
 
-void Screen::copyImageInPixmap(const QRect &rect)
+void LCDDisplay::copyImageInPixmap(const QRect &rect)
 {
   QPainter painter(&_pixmap);
 
@@ -154,7 +154,7 @@ void Screen::copyImageInPixmap(const QRect &rect)
         painter.fillRect(getPlotRect(column, line), _pixelOnColor);
 }
 
-QRect Screen::imageRectToPixmapRect(const QRect &rect) const
+QRect LCDDisplay::imageRectToPixmapRect(const QRect &rect) const
 {
   QRect r;
 
@@ -171,14 +171,14 @@ QRect Screen::imageRectToPixmapRect(const QRect &rect) const
   return r;
 }
 
-void Screen::clearNormalScreen()
+void LCDDisplay::clearNormalScreen()
 {
   _normalScreen.fill(0);
   drawNormalScreenInPixmap();
   update();
 }
 
-void Screen::drawScreen(const QList<LCDString> &screen)
+void LCDDisplay::drawScreen(const QList<LCDString> &screen)
 {
   clearNormalScreen();
 

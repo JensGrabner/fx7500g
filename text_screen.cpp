@@ -1,10 +1,11 @@
 #include "text_screen.h"
 
 TextScreen::TextScreen() :
+  _calcState(0),
   _cursorLine(0),
   _cursorCol(0),
   _cursorVisible(true),
-  _cursorMode(Cursor),
+  _cursorMode(CursorMode_Normal),
   _displayCursorTurn(true)
 {
   clear();
@@ -12,6 +13,12 @@ TextScreen::TextScreen() :
   _blinkTimer.setInterval(500); // Cursor blinks every second
   connect(&_blinkTimer, SIGNAL(timeout()), this, SLOT(doBlinkCursor()));
   _blinkTimer.start();
+}
+
+void TextScreen::init(const CalculatorState *calcState)
+{
+  _calcState = calcState;
+  feedScreen();
 }
 
 void TextScreen::doBlinkCursor()
@@ -24,11 +31,12 @@ void TextScreen::doBlinkCursor()
   {
     switch (_cursorMode)
     {
-    case InsertCursor:         charToDisplay = LCDChar_InsertCursor; break;
-    case InsertCapsLockCursor: charToDisplay = LCDChar_InsertCapsLockCursor; break;
-    case ShiftCursor:          charToDisplay = LCDChar_ShiftCursor; break;
-    case CapsLockCursor:       charToDisplay = LCDChar_CapsLockCursor; break;
-    default:                   charToDisplay = LCDChar_Cursor;
+    case CursorMode_Insert:         charToDisplay = LCDChar_InsertCursor; break;
+    case CursorMode_InsertCapsLock: charToDisplay = LCDChar_InsertCapsLockCursor; break;
+    case CursorMode_Shift:          charToDisplay = LCDChar_ShiftCursor; break;
+    case CursorMode_CapsLock:       charToDisplay = LCDChar_CapsLockCursor; break;
+    case CursorMode_Space:          charToDisplay = LCDChar_Space; break;
+    default:                        charToDisplay = LCDChar_Cursor;
     }
   } else
     charToDisplay = _screen[_cursorCol][_cursorLine];
@@ -79,10 +87,6 @@ void TextScreen::clear()
   for (int line = 0; line < 8; ++line)
     for (int col = 0; col < 16; ++col)
       _screen[col][line] = LCDChar_Space;
-
-  // Cursor
-  _cursorLine = 0;
-  _cursorCol = 0;
 }
 
 void TextScreen::setCursorMode(CursorMode mode)
@@ -104,4 +108,17 @@ void TextScreen::moveCursor(int col, int line)
   _cursorLine = line;
 
   restartBlink();
+}
+
+void TextScreen::assignToScreen(const LCDString &str, int col, int line)
+{
+  Q_ASSERT_X(col >= 0 && col < 16 && line >= 0 && line < 8, "assignToScreen()", QString("Invalid <col> (%1) or <line> (%2)").arg(col, line));
+
+  int offset = 0;
+  foreach (LCDChar c, str)
+  {
+    if (col + offset > 15)
+      break;
+    _screen[col + offset++][line] = c;
+  }
 }

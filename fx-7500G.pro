@@ -7,7 +7,7 @@ CONFIG += release
 
 # Input
 HEADERS += main_window.h \
-  screen.h \
+  lcd_display.h \
   calculator.h \
   text_printer.h \
   misc.h \
@@ -17,7 +17,7 @@ HEADERS += main_window.h \
 
 SOURCES += main.cpp \
   main_window.cpp \
-  screen.cpp \
+  lcd_display.cpp \
   calculator.cpp \
   text_printer.cpp \
   misc.cpp \

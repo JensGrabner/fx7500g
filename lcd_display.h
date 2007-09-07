@@ -1,15 +1,15 @@
-#ifndef LCD_SCREEN_H
-#define LCD_SCREEN_H
+#ifndef LCD_DISPLAY_H
+#define LCD_DISPLAY_H
 
 #include <QGraphicsItem>
 #include <QPainter>
 
 #include "misc.h"
 
-class Screen : public QGraphicsItem
+class LCDDisplay : public QGraphicsItem
 {
 public:
-  Screen(QGraphicsItem *parent = 0);
+  LCDDisplay(QGraphicsItem *parent = 0);
 
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
   QRectF boundingRect () const;

@@ -28,7 +28,7 @@ private slots:
 private:
   QGraphicsScene *_graphicsScene;
   Calculator _calculator;
-  Screen *_screen;
+  LCDDisplay *_lcdDisplay;
 };
 
 #endif // MAIN_WINDOW_H
