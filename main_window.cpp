@@ -27,6 +27,7 @@ void MainWindow::on_pushButtonRUN_clicked()
 {
   _calculator.setScreenMode(Calculator::ScreenMode_Normal);
   _calculator.setSysMode(Calculator::SysMode_RUN);
+  _calculator.runScreen().write(LCDOp_Log);
   graphicsView->setFocus(Qt::OtherFocusReason);
 }
 
@@ -50,6 +51,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     return QMainWindow::eventFilter(obj, event);
 
   QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-  _calculator.shell().applyKey(keyEvent->key());
+  _calculator.runScreen().applyKey(keyEvent->key());
   return true;
 }

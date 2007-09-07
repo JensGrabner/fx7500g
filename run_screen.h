@@ -1,11 +1,11 @@
 // Manage normal mode shell
 
-#ifndef SHELL
-#define SHELL
+#ifndef RUN_SCREEN
+#define RUN_SCREEN
 
 #include <QTimer>
 
-#include "misc.h"
+#include "text_screen.h"
 
 // A ShellLine is a list of strings
 class ShellLine : public QList<LCDString>
@@ -25,27 +25,11 @@ private:
   bool _isRightJustified;
 };
 
-class Shell : public QObject
+class RunScreen : public TextScreen
 {
   Q_OBJECT
 public:
-  enum CursorMode
-  {
-    Cursor,
-    InsertCursor,
-    InsertCapsLockCursor,
-    ShiftCursor,
-    CapsLockCursor
-  };
-
-  Shell();
-
-  CursorMode cursorMode() const { return _cursorMode; }
-  void setCursorMode(CursorMode mode);
-
-  void restartBlink();
-
-  QList<LCDString> currentScreen() const; // Returns an instantaneous state of the screen
+  RunScreen();
 
   bool write(LCDChar c); // Returns false if writing is forbidden
   bool write(LCDOperator o);
@@ -59,23 +43,17 @@ public:
   void deleteString(); // Delete the string under cursor .. WANTED A BETTER NAME
 
 signals:
-  void changeChar(int col, int line, LCDChar c);
   void promptLineChanged();
 
 private:
   int _cursorOffset;
-  CursorMode _cursorMode;
   bool _prompt; // If true, the prompt line is present and cursor is blinking
   ShellLine _promptLine;
-  QTimer _blinkTimer;
-  bool _displayCursorTurn;
   QList<ShellLine> _lines;
 
   int getPromptLineIndex() const; // Return the line index of the prompt beginning
   void moveCursor(int newOffset);
-
-private slots:
-  void doBlinkCursor();
+  void feedScreen(); // <_screen> of Shell ancestor is filled with <_lines> and <_promptLine>
 };
 
 #endif

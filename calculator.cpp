@@ -10,9 +10,9 @@ Calculator::Calculator() :
   _screen(0),
   _steps(4006)
 {
-  connect(&_shell, SIGNAL(changeChar(int, int, LCDChar)),
+  connect(&_runScreen, SIGNAL(changeChar(int, int, LCDChar)),
           this, SLOT(shellChangeChar(int, int, LCDChar)));
-  connect(&_shell, SIGNAL(promptLineChanged()),
+  connect(&_runScreen, SIGNAL(promptLineChanged()),
           this, SLOT(shellPromptLineChanged()));
 }
 
@@ -36,12 +36,12 @@ void Calculator::setDisplayMode(DisplayMode value)
   _displayMode = value;
 
   if (_screenMode == ScreenMode_Normal)
-    _shell.restartBlink();
+    _runScreen.restartBlink();
 }
 
 void Calculator::shellPromptLineChanged()
 {
-  _screen->drawScreen(_shell.currentScreen());
+  _screen->drawScreen(_runScreen.currentScreen());
 }
 
 QList<LCDString> Calculator::getResumeScreen() const
@@ -85,8 +85,8 @@ void Calculator::setScreenMode(ScreenMode value)
 
   if (_screenMode == ScreenMode_Normal)
   {
-    _screen->drawScreen(_shell.currentScreen());
-    _shell.restartBlink();
+    _screen->drawScreen(_runScreen.currentScreen());
+    _runScreen.restartBlink();
   }
 }
 
@@ -164,7 +164,7 @@ void Calculator::setSysMode(SysMode value)
   switch (_sysMode)
   {
   case SysMode_RUN:
-    _screen->drawScreen(_shell.currentScreen());
+    _screen->drawScreen(_runScreen.currentScreen());
     break;
   case SysMode_WRT:
     _screen->drawScreen(getWRTScreen());
@@ -174,7 +174,7 @@ void Calculator::setSysMode(SysMode value)
     break;
   }
 
-  _shell.restartBlink();
+  _runScreen.restartBlink();
 }
 
 QString Calculator::displayModeString() const

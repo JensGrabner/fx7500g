@@ -11,7 +11,9 @@ HEADERS += main_window.h \
   calculator.h \
   text_printer.h \
   misc.h \
-  shell.h
+  text_screen.h \
+  run_screen.h \
+  prog_screen.h
 
 SOURCES += main.cpp \
   main_window.cpp \
@@ -19,7 +21,9 @@ SOURCES += main.cpp \
   calculator.cpp \
   text_printer.cpp \
   misc.cpp \
-  shell.cpp
+  text_screen.cpp \
+  run_screen.cpp \
+  prog_screen.cpp
 
 FORMS += main_window.ui
 
