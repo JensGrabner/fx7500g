@@ -2,8 +2,7 @@
 
 Calculator::Calculator() :
   _screenMode(ScreenMode_Resume),
-  _lcdDisplay(0),
-  _steps(4006)
+  _lcdDisplay(0)
 {
   // Init run screen
   _runScreen.init(&_calcState);
@@ -16,6 +15,11 @@ Calculator::Calculator() :
   _progScreen.init(&_calcState);
   connect(&_progScreen, SIGNAL(changeChar(int, int, LCDChar)),
           this, SLOT(progChangeChar(int, int, LCDChar)));
+
+  // Init editor screen
+  _editorScreen.init(&_calcState);
+  connect(&_editorScreen, SIGNAL(changeChar(int, int, LCDChar)),
+          this, SLOT(editorChangeChar(int, int, LCDChar)));
 }
 
 void Calculator::setAngleMode(AngleMode value)
@@ -149,4 +153,10 @@ void Calculator::applyKey(int key)
     break;
   default:;
   }
+}
+
+void Calculator::editorChangeChar(int col, int line, LCDChar c)
+{
+  if (_lcdDisplay && _screenMode == ScreenMode_Editor && _calcState.sysMode() == SysMode_WRT)
+    _lcdDisplay->drawChar(c, col, line);
 }

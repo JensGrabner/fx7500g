@@ -1,5 +1,71 @@
 #include "text_screen.h"
 
+ShellLine::ShellLine(const LCDString &lcdStr, bool rightJustified) :
+  _isRightJustified(rightJustified)
+{
+  (*this) << lcdStr;
+}
+
+LCDChar ShellLine::charAtOffset(int offset) const
+{
+  if (offset >= length())
+    return LCDChar_Space;
+
+  int l = offset;
+
+  foreach (const LCDString &lcdStr, *this)
+    if (l - lcdStr.count() >= 0)
+      l -= lcdStr.count();
+    else
+      return lcdStr[l];
+
+  return LCDChar_Space;
+}
+
+int ShellLine::stringIndexAtOffset(int offset) const
+{
+  Q_ASSERT_X(offset >= 0, "ShellLine::stringIndexAtOffset()", "<offset> is negative!");
+
+  if (offset >= length())
+    return -1;
+
+  int l = offset;
+  int index = 0;
+  foreach (const LCDString &lcdStr, *this)
+    if (l - lcdStr.count() >= 0)
+    {
+      l -= lcdStr.count();
+      index++;
+    } else
+      return index;
+
+  return -1;
+}
+
+int ShellLine::offsetByStringIndex(int strIndex) const
+{
+  if (strIndex >= count())
+    return length();
+
+  int offset = 0;
+  for (int i = 1; i <= strIndex; ++i)
+    offset += at(i - 1).count();
+  return offset;
+}
+
+int ShellLine::length() const
+{
+  int length = 0;
+  foreach (const LCDString &lcdStr, *this)
+    length += lcdStr.count();
+
+  return length;
+}
+
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+
 TextScreen::TextScreen() :
   _calcState(0),
   _cursorLine(0),

@@ -5,6 +5,23 @@
 
 #include "misc.h"
 
+class ShellLine : public QList<LCDString>
+{
+public:
+  ShellLine(bool rightJustified = false) : _isRightJustified(rightJustified) {}
+  ShellLine(const LCDString &lcdStr, bool rightJustified = false);
+
+  bool isRightJustified() const { return _isRightJustified; }
+
+  int length() const; // Returns the LCDChars length
+
+  LCDChar charAtOffset(int offset) const; // Returns LCD_Space if offset is incorrect
+  int stringIndexAtOffset(int offset) const; // Returns -1 if offset is incorrect
+  int offsetByStringIndex(int strIndex) const; // Returns count() if strIndex is too high
+private:
+  bool _isRightJustified;
+};
+
 class TextScreen : public QObject
 {
   Q_OBJECT
