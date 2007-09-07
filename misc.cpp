@@ -55,6 +55,8 @@ LCDChar charToLCDChar(const QChar &c, bool *found)
     return LCDChar_Dot;
   else if (ch == ' ')
     return LCDChar_Space;
+  else if (ch == '_')
+    return LCDChar_Cursor;
   else
   {
     if (found)
