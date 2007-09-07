@@ -4,7 +4,7 @@
 #include "lcd_display.h"
 #include "run_screen.h"
 #include "prog_screen.h"
-#include "misc.h"
+#include "editor_screen.h"
 
 class Calculator : QObject
 {
@@ -15,7 +15,12 @@ public:
   // Display the resume screen
   void init();
 
-  enum ScreenMode { ScreenMode_Normal, ScreenMode_Resume, ScreenMode_Graphical };
+  enum ScreenMode {
+    ScreenMode_Normal,      // Normal screen when sysMode is RUN and sysMode is WRT
+    ScreenMode_Resume,      // Resume screen
+    ScreenMode_Graphical,   // Graphical screen
+    ScreenMode_Editor       // Editor screen when sysMode is WRT
+  };
 
   ScreenMode screenMode() const { return _screenMode; }
   void setScreenMode(ScreenMode value);
@@ -40,8 +45,8 @@ private:
   ScreenMode _screenMode;
   RunScreen _runScreen;
   ProgScreen _progScreen;
+  EditorScreen _editorScreen;
   LCDDisplay *_lcdDisplay;
-  int _steps; // TEMPORARY => replace by a more complete object
 
   QList<LCDString> getResumeScreen() const;
 
@@ -50,6 +55,8 @@ private slots:
   void shellPromptLineChanged();
 
   void progChangeChar(int col, int line, LCDChar c);
+
+  void editorChangeChar(int col, int line, LCDChar c);
 };
 
 #endif
