@@ -35,9 +35,9 @@ private:
   int _cursorLineIndex; // Absolute index of the line where cursor is
   int _cursorOffset; // Offset in the line
 
-  void moveCursor(int newLineIndex, int newOffset);
-  void scrollUp();
-  void scrollDown();
+  void moveCursor(int newLineIndex, int newOffset); // Move cursor can invoke scrollUp() or scrollDown() if cursor is out of the screen
+  void scrollUp(); // Scroll up the screen if it's possible
+  void scrollDown(); // Scroll down the screen if it's possible
 
   void writeEntity(int entity);
 };
