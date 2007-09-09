@@ -19,18 +19,23 @@ void ProgScreen::applyKey(int key)
   {
   case Qt::Key_Left: moveLeft(); break;
   case Qt::Key_Right: moveRight(); break;
+  case Qt::Key_Return: if (_calcState->sysMode() == SysMode_WRT) emit editProgram(_cursorCol - _startCursorCol);
   }
 }
 
 void ProgScreen::moveLeft()
 {
-  if (_cursorCol > _startCursorCol)
+  if (_cursorCol <= _startCursorCol)
+    moveCursor(_startCursorCol + 9, _cursorLine);
+  else
     moveCursor(_cursorCol - 1, _cursorLine);
 }
 
 void ProgScreen::moveRight()
 {
-  if (_cursorCol < _startCursorCol + 9)
+  if (_cursorCol >= _startCursorCol + 9)
+    moveCursor(_startCursorCol, _cursorLine);
+  else
     moveCursor(_cursorCol + 1, _cursorLine);
 }
 

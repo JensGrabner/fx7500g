@@ -27,7 +27,7 @@ int ShellLine::stringIndexAtOffset(int offset) const
   Q_ASSERT_X(offset >= 0, "ShellLine::stringIndexAtOffset()", "<offset> is negative!");
 
   if (offset >= length())
-    return -1;
+    return count();
 
   int l = offset;
   int index = 0;
@@ -60,6 +60,11 @@ int ShellLine::length() const
     length += lcdStr.count();
 
   return length;
+}
+
+int ShellLine::rowCount() const
+{
+  return length() / 16 + 1;
 }
 
 //////////////////////////////////////////////////////

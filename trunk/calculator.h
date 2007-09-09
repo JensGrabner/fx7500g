@@ -55,8 +55,10 @@ private slots:
   void shellPromptLineChanged();
 
   void progChangeChar(int col, int line, LCDChar c);
+  void progEditProgram(int programIndex);
 
   void editorChangeChar(int col, int line, LCDChar c);
+  void editorScreenChanged();
 };
 
 #endif

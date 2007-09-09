@@ -10,13 +10,13 @@ class Program
 public:
   bool isEmpty() const { return !_steps.count(); }
 
-  QList<LCDString> &steps() { return _steps; }
-  void setSteps(QList<LCDString> value);
+  QList<LCDLine> &steps() { return _steps; }
+  void setSteps(QList<LCDLine> value);
 
   int size() const;
 
 private:
-  QList<LCDString> _steps;
+  QList<LCDLine> _steps;
 };
 
 class Programs
