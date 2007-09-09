@@ -11,8 +11,8 @@ public:
 
   void setProgram(int programIndex);
 
-  void write(LCDChar c);
-  void write(LCDOperator o);
+  void write(LCDChar c) { writeEntity(c); }
+  void write(LCDOperator o) { writeEntity(o); }
 
   void applyKey(int key);
 
@@ -38,6 +38,8 @@ private:
   void moveCursor(int newLineIndex, int newOffset);
   void scrollUp();
   void scrollDown();
+
+  void writeEntity(int entity);
 };
 
 #endif
