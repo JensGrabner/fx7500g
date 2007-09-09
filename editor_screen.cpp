@@ -38,7 +38,7 @@ void EditorScreen::feedScreen()
   {
     if (line > 7)
       break;
-    ShellLine &shellLine = _lines[lineIndex];
+    const ShellLine &shellLine = _lines[lineIndex];
     int startOffset = 0;
     if (lineIndex == _topLineIndex)
       startOffset = _topLineSubIndex * 16;
@@ -136,10 +136,9 @@ void EditorScreen::moveLeft()
     return;
   }
 
-  ShellLine &shellLine = _lines[_cursorLineIndex];
+  const ShellLine &shellLine = _lines[_cursorLineIndex];
   int newCursorLineIndex = _cursorLineIndex;
   int newCursorOffset;
-  int index;
   if (!_cursorOffset)
   {
     newCursorLineIndex--;
@@ -160,7 +159,7 @@ void EditorScreen::moveRight()
     return;
   }
 
-  ShellLine &shellLine = _lines[_cursorLineIndex];
+  const ShellLine &shellLine = _lines[_cursorLineIndex];
 
   if (_cursorLineIndex >= _lines.count() - 1 && _cursorOffset >= shellLine.length())
   {
@@ -170,7 +169,6 @@ void EditorScreen::moveRight()
 
   int newCursorLineIndex = _cursorLineIndex;
   int newCursorOffset;
-  int index;
   if (_cursorOffset >= shellLine.length())
   {
     newCursorLineIndex++;
@@ -189,7 +187,7 @@ void EditorScreen::moveUp()
     return;
   }
 
-  ShellLine &shellLine = _lines[_cursorLineIndex];
+  const ShellLine &shellLine = _lines[_cursorLineIndex];
 
   if (_cursorOffset < 16)
   {
@@ -219,7 +217,7 @@ void EditorScreen::moveDown()
     return;
   }
 
-  ShellLine &shellLine = _lines[_cursorLineIndex];
+  const ShellLine &shellLine = _lines[_cursorLineIndex];
 
   if (_cursorOffset + 16 < shellLine.length())
   {
@@ -253,14 +251,36 @@ void EditorScreen::moveDown()
 
 void EditorScreen::deleteString()
 {
+  if (!_lines.count())
+  {
+    restartBlink();
+    return;
+  }
+
+  ShellLine &shellLine = _lines[_cursorLineIndex];
+  if (_cursorOffset < shellLine.length())
+  {
+    shellLine.removeAt(shellLine.stringIndexAtOffset(_cursorOffset));
+    feedScreen();
+    emit screenChanged();
+  } else if (_cursorLineIndex < _lines.count() - 1)
+  {
+    // stick the next line to the previous one
+    const ShellLine &nextLine = _lines[_cursorLineIndex + 1];
+    shellLine << nextLine;
+
+    _lines.removeAt(_cursorLineIndex + 1);
+    feedScreen();
+    emit screenChanged();
+  }
 /*  if (_cursorOffset < _promptLine.length())
   {
     _promptLine.removeAt(_promptLine.stringIndexAtOffset(_cursorOffset));
     feedScreen();
     emit promptLineChanged();
-  }
+  } */
 
-  restartBlink();*/
+  restartBlink();
 }
 
 void EditorScreen::moveCursor(int newLineIndex, int newOffset)
@@ -323,7 +343,6 @@ void EditorScreen::scrollDown()
   if (!_lines.count())
     return;
 
-  ShellLine &lastLine = _lines[_lines.count() - 1];
   // Compute the number of *real* screen lines between <_topLineIndex> and <lastLine>
   int linesCount = 0;
   for (int index = _topLineIndex; index < _lines.count(); ++index)
