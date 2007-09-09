@@ -15,11 +15,15 @@ Calculator::Calculator() :
   _progScreen.init(&_calcState);
   connect(&_progScreen, SIGNAL(changeChar(int, int, LCDChar)),
           this, SLOT(progChangeChar(int, int, LCDChar)));
+  connect(&_progScreen, SIGNAL(editProgram(int)),
+          this, SLOT(progEditProgram(int)));
 
   // Init editor screen
   _editorScreen.init(&_calcState);
   connect(&_editorScreen, SIGNAL(changeChar(int, int, LCDChar)),
           this, SLOT(editorChangeChar(int, int, LCDChar)));
+  connect(&_editorScreen, SIGNAL(screenChanged()),
+          this, SLOT(editorScreenChanged()));
 }
 
 void Calculator::setAngleMode(AngleMode value)
@@ -107,6 +111,15 @@ void Calculator::setScreenMode(ScreenMode value)
     default:;
     }
     break;
+  case ScreenMode_Editor:
+    switch (_calcState.sysMode())
+    {
+    case SysMode_WRT:
+      _lcdDisplay->drawScreen(_editorScreen.currentScreen());
+      _editorScreen.restartBlink();
+      break;
+    default:;
+    }
   default:;
   }
 }
@@ -149,7 +162,10 @@ void Calculator::applyKey(int key)
     break;
   case SysMode_WRT:
   case SysMode_PCL:
-    _progScreen.applyKey(key);
+    if (_screenMode == ScreenMode_Normal)
+      _progScreen.applyKey(key);
+    else if (_screenMode == ScreenMode_Editor)
+      _editorScreen.applyKey(key);
     break;
   default:;
   }
@@ -159,4 +175,15 @@ void Calculator::editorChangeChar(int col, int line, LCDChar c)
 {
   if (_lcdDisplay && _screenMode == ScreenMode_Editor && _calcState.sysMode() == SysMode_WRT)
     _lcdDisplay->drawChar(c, col, line);
+}
+
+void Calculator::progEditProgram(int programIndex)
+{
+  _editorScreen.setProgram(programIndex);
+  setScreenMode(ScreenMode_Editor);
+}
+
+void Calculator::editorScreenChanged()
+{
+  _lcdDisplay->drawScreen(_editorScreen.currentScreen());
 }

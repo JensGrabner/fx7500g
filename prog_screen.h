@@ -16,6 +16,9 @@ public:
   void moveLeft();
   void moveRight();
 
+signals:
+  void editProgram(int programIndex); // Used to signal that user want edition of a program
+
 protected:
   void feedScreen(); // <_screen> of Shell ancestor is filled with <_lines> and <_promptLine>
 

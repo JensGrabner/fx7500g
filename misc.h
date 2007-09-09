@@ -135,7 +135,7 @@ LCDChar charToLCDChar(const QChar &c, bool *found = 0);
 // 'Log', 'Ln', all atomic entities
 enum LCDOperator
 {
-  LCDOp_Log,
+  LCDOp_Log = 256,
   LCDOp_Ln,
   LCDOp_Sin,
   LCDOp_Cos,
@@ -189,6 +189,19 @@ public:
   LCDString(const QString &str) { assignString(str); }
   LCDString(LCDChar c);
   LCDString(LCDOperator op);
+  LCDString(int entity);
+
+private:
+  void assignString(const QString &str);
+  void assignByOperator(LCDOperator op);
+};
+
+// LCDLine can contain LCDChar AND LCDOp
+class LCDLine : public QList<int>
+{
+public:
+  LCDLine() : QList<int>() {}
+  LCDLine(const QString &str) { assignString(str); }
 
 private:
   void assignString(const QString &str);

@@ -9,6 +9,8 @@ class EditorScreen : public TextScreen
 public:
   EditorScreen();
 
+  void setProgram(int programIndex);
+
   void write(LCDChar c);
   void write(LCDOperator o);
 
@@ -29,10 +31,13 @@ protected:
 private:
   QList<ShellLine> _lines;
   int _topLineIndex; // Absolute index of the top line (the most top visible line at screen) in <_lines>
+  int _topLineSubIndex; // Index of the subline of the top line
   int _cursorLineIndex; // Absolute index of the line where cursor is
   int _cursorOffset; // Offset in the line
 
-  void moveCursor(int newOffset);
+  void moveCursor(int newLineIndex, int newOffset);
+  void scrollUp();
+  void scrollDown();
 };
 
 #endif

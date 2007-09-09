@@ -14,10 +14,11 @@ public:
   bool isRightJustified() const { return _isRightJustified; }
 
   int length() const; // Returns the LCDChars length
+  int rowCount() const;
 
   LCDChar charAtOffset(int offset) const; // Returns LCD_Space if offset is incorrect
-  int stringIndexAtOffset(int offset) const; // Returns -1 if offset is incorrect
-  int offsetByStringIndex(int strIndex) const; // Returns count() if strIndex is too high
+  int stringIndexAtOffset(int offset) const; // Returns count() if offset is incorrect
+  int offsetByStringIndex(int strIndex) const; // Returns length() if strIndex is too high
 private:
   bool _isRightJustified;
 };
@@ -51,6 +52,7 @@ public:
 
 signals:
   void changeChar(int col, int line, LCDChar c);
+  void screenChanged();
 
 protected:
   LCDChar _screen[16][8];

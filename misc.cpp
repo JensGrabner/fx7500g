@@ -67,13 +67,36 @@ LCDChar charToLCDChar(const QChar &c, bool *found)
 
 LCDString::LCDString(LCDChar c)
 {
-  clear();
   (*this) << c;
 }
 
 LCDString::LCDString(LCDOperator op)
 {
-  clear();
+  assignByOperator(op);
+}
+
+LCDString::LCDString(int entity)
+{
+  if (entity < 256)
+    (*this) << (LCDChar) entity;
+  else
+    assignByOperator((LCDOperator) entity);
+}
+
+void LCDString::assignString(const QString &str)
+{
+  foreach (const QChar &c, str)
+  {
+    bool found;
+    LCDChar ch = charToLCDChar(c, &found);
+
+    if (found)
+      (*this) << ch;
+  }
+}
+
+void LCDString::assignByOperator(LCDOperator op)
+{
   switch (op)
   {
   case LCDOp_Log: assignString("log "); break;
@@ -125,7 +148,11 @@ LCDString::LCDString(LCDOperator op)
   }
 }
 
-void LCDString::assignString(const QString &str)
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+
+void LCDLine::assignString(const QString &str)
 {
   foreach (const QChar &c, str)
   {
@@ -136,6 +163,10 @@ void LCDString::assignString(const QString &str)
       (*this) << ch;
   }
 }
+
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+////////////////////////////////////////////////
 
 CalculatorState::CalculatorState() :
   _sysMode(SysMode_RUN),
