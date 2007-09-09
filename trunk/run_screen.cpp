@@ -47,7 +47,6 @@ bool RunScreen::write(LCDOperator o)
   {
     _promptLine << LCDString(o);
     newOffset = _promptLine.length();
-    moveCursor(_promptLine.length());
   } else
   {
     // Get LCDString under the cursor

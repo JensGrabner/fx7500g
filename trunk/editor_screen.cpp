@@ -64,56 +64,40 @@ void EditorScreen::feedScreen()
   }
 }
 
-void EditorScreen::write(LCDChar c)
+void EditorScreen::writeEntity(int entity)
 {
-/*  if (_cursorOffset >= _promptLine.length())
-    _promptLine << LCDString(c);
+  LCDString lcdStr(entity);
+  if (!_lines.count())
+    _lines << ShellLine(lcdStr);
   else
   {
-    // Get LCDString under the cursor
-    int index = _promptLine.stringIndexAtOffset(_cursorOffset);
-    if (index >= 0)
-      _promptLine[index] = LCDString(c);
-  }
+    ShellLine &shellLine = _lines[_cursorLineIndex];
 
-  feedScreen();
+    if (_cursorOffset >= shellLine.length())
+    {
+      shellLine << lcdStr;
 
-  emit promptLineChanged();
-
-  moveCursor(_cursorOffset + 1);
-
-  return true;*/
-}
-
-void EditorScreen::write(LCDOperator o)
-{
-/*  int newOffset;
-  if (_cursorOffset >= _promptLine.length())
-  {
-    _promptLine << LCDString(o);
-    newOffset = _promptLine.length();
-    moveCursor(_promptLine.length());
-  } else
-  {
-    // Get LCDString under the cursor
-    int index = _promptLine.stringIndexAtOffset(_cursorOffset);
-    if (index >= 0)
-      _promptLine[index] = LCDString(o);
-
-    // Cursor move to the right
-    if (index >= _promptLine.count())
-      newOffset = _promptLine.length();
+      // Append the next line
+      if (_cursorLineIndex < _lines.count() - 1)
+      {
+        shellLine << _lines[_cursorLineIndex + 1];
+        _lines.removeAt(_cursorLineIndex + 1);
+      }
+    }
     else
-      newOffset = _promptLine.offsetByStringIndex(index + 1);
+    {
+      // Get LCDString under the cursor
+      int index = shellLine.stringIndexAtOffset(_cursorOffset);
+      if (index >= 0)
+        shellLine[index] = lcdStr;
+    }
   }
 
   feedScreen();
 
-  emit promptLineChanged();
-
-  moveCursor(newOffset);
-
-  return true;*/
+  emit screenChanged();
+  moveCursor(_cursorLineIndex, _cursorOffset + lcdStr.count());
+  restartBlink();
 }
 
 void EditorScreen::applyKey(int key)
@@ -125,6 +109,9 @@ void EditorScreen::applyKey(int key)
   case Qt::Key_Up: moveUp(); break;
   case Qt::Key_Down: moveDown(); break;
   case Qt::Key_Delete: deleteString(); break;
+  case Qt::Key_A: write(LCDChar_A); break;
+  case Qt::Key_B: write(LCDOp_Log); break;
+  case Qt::Key_C: write(LCDOp_YonMinusOne); break;
   }
 }
 
@@ -273,12 +260,6 @@ void EditorScreen::deleteString()
     feedScreen();
     emit screenChanged();
   }
-/*  if (_cursorOffset < _promptLine.length())
-  {
-    _promptLine.removeAt(_promptLine.stringIndexAtOffset(_cursorOffset));
-    feedScreen();
-    emit promptLineChanged();
-  } */
 
   restartBlink();
 }
