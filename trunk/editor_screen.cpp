@@ -254,11 +254,8 @@ void EditorScreen::moveDown()
       if (downOffset == nextOffset)
         moveCursor(_cursorLineIndex + 1, nextLine.maximumCursorPositionIfTooHigh(nextOffset));
       else
-      {
-        int offset = nextLine.offsetByStringIndex(downIndex + 1);
         moveCursor(_cursorLineIndex + 1,
                    nextLine.maximumCursorPositionIfTooHigh(nextLine.offsetByStringIndex(downIndex + 1)));
-      }
     }
   }
 }
