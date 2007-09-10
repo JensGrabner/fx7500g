@@ -2,6 +2,8 @@
     <qresource prefix="/" >
         <file>images/casio-charset.png</file>
         <file>images/pad1.png</file>
+        <file>images/pad1-mask.png</file>
         <file>images/pad2.png</file>
+        <file>images/pad2-mask.png</file>
     </qresource>
 </RCC>
