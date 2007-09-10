@@ -17,6 +17,16 @@ bool ShellLine::cursorCanMoveRight(int cursorOffset) const
          (!isBreakerEndedLine() && cursorOffset < length());
 }
 
+int ShellLine::maximumCursorPosition() const
+{
+  return isBreakerEndedLine() ? length() - 1 : length();
+}
+
+int ShellLine::maximumCursorPositionIfTooHigh(int cursorOffset) const
+{
+  return cursorOffset > maximumCursorPosition() ? maximumCursorPosition() : cursorOffset;
+}
+
 LCDChar ShellLine::charAtOffset(int offset) const
 {
   if (offset >= length())

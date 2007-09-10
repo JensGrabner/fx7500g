@@ -205,9 +205,9 @@ void EditorScreen::moveUp()
     if (_cursorLineIndex)
     {
       ShellLine &previousLine = _lines[_cursorLineIndex - 1];
-      int previousOffset = (previousLine.rowCount() - 1) * 16 + (_cursorOffset % 16);
-      if (previousOffset >= previousLine.length())
-        moveCursor(_cursorLineIndex - 1, previousLine.length());
+      int previousOffset = (previousLine.rowCount() - 1) * 16 + _cursorOffset;
+      if (!previousLine.cursorCanMoveRight(previousOffset))
+        moveCursor(_cursorLineIndex - 1, previousLine.maximumCursorPosition());
       else
         moveCursor(_cursorLineIndex - 1, previousLine.offsetByStringIndex(previousLine.stringIndexAtOffset(previousOffset)));
     } else
@@ -238,11 +238,11 @@ void EditorScreen::moveDown()
     else
       moveCursor(_cursorLineIndex, shellLine.offsetByStringIndex(downIndex + 1));
   } else if (_cursorOffset + 16 == shellLine.length())
-    moveCursor(_cursorLineIndex, shellLine.length());
+    moveCursor(_cursorLineIndex, shellLine.maximumCursorPosition());
   else
   {
     if (_cursorLineIndex == _lines.count() - 1 || _cursorOffset / 16 < shellLine.rowCount() - 1)
-      moveCursor(_cursorLineIndex, shellLine.length());
+      moveCursor(_cursorLineIndex, shellLine.maximumCursorPosition());
     else
     {
       // To the next line
@@ -252,9 +252,13 @@ void EditorScreen::moveDown()
       int downIndex = nextLine.stringIndexAtOffset(nextOffset);
       int downOffset = nextLine.offsetByStringIndex(downIndex);
       if (downOffset == nextOffset)
-        moveCursor(_cursorLineIndex + 1, nextOffset);
+        moveCursor(_cursorLineIndex + 1, nextLine.maximumCursorPositionIfTooHigh(nextOffset));
       else
-        moveCursor(_cursorLineIndex + 1, nextLine.offsetByStringIndex(downIndex + 1));
+      {
+        int offset = nextLine.offsetByStringIndex(downIndex + 1);
+        moveCursor(_cursorLineIndex + 1,
+                   nextLine.maximumCursorPositionIfTooHigh(nextLine.offsetByStringIndex(downIndex + 1)));
+      }
     }
   }
 }
@@ -268,14 +272,17 @@ void EditorScreen::deleteString()
   }
 
   ShellLine &shellLine = _lines[_cursorLineIndex];
-  if (_cursorOffset < shellLine.length())
+  if (shellLine.cursorCanMoveRight(_cursorOffset))
   {
     shellLine.removeAt(shellLine.stringIndexAtOffset(_cursorOffset));
     feedScreen();
     emit screenChanged();
   } else if (_cursorLineIndex < _lines.count() - 1)
   {
-    // stick the next line to the previous one
+    if (shellLine.isBreakerEndedLine())
+      shellLine.removeLast();
+
+    // Stick the next line to the previous one
     const ShellLine &nextLine = _lines[_cursorLineIndex + 1];
     shellLine << nextLine;
 

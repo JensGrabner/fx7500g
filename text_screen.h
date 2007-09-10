@@ -14,6 +14,8 @@ public:
   bool isRightJustified() const { return _isRightJustified; }
   bool isBreakerEndedLine() const;
   bool cursorCanMoveRight(int cursorOffset) const;
+  int maximumCursorPosition() const;
+  int maximumCursorPositionIfTooHigh(int cursorOffset) const;
 
   int length() const; // Returns the LCDChars length
   int rowCount() const;
