@@ -252,4 +252,64 @@ private:
   DisplayMode _displayMode;
 };
 
+enum Pad1Button
+{
+  Button_Shift = 1,
+  Button_Alpha,
+  Button_Mode,
+  Button_7,
+  Button_8,
+  Button_9,
+  Button_Del,
+  Button_Ac,
+  Button_Cls,
+  Button_Eng,
+  Button_Prog,
+  Button_4,
+  Button_5,
+  Button_6,
+  Button_Multiply,
+  Button_Divide,
+  Button_Graph,
+  Button_Range,
+  Button_Plot,
+  Button_1,
+  Button_2,
+  Button_3,
+  Button_Add,
+  Button_Substract,
+  Button_Trace,
+  Button_Factor,
+  Button_Line,
+  Button_0,
+  Button_Dot,
+  Button_Exp,
+  Button_Ans,
+  Button_Exe
+};
+
+enum Pad2Button
+{
+  Button_SquareRoot,
+  Button_Square,
+  Button_Log,
+  Button_Ln,
+  Button_MinusOne,
+  Button_Degree,
+  Button_Ten,
+  Button_Euler,
+  Button_Hyp,
+  Button_Sin,
+  Button_Cos,
+  Button_Tan,
+  Button_Question,
+  Button_Arrow,
+  Button_OpenParen,
+  Button_CloseParen,
+  Button_Minus,
+  Button_Colon,
+  Button_Xy,
+  Button_xSquareRoot
+};
+
 #endif
