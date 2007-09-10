@@ -15,10 +15,10 @@ MainWindow::MainWindow() : QMainWindow(0)
 
   _lcdDisplay->setPos(70, 0);
 
-  _graphicsScene->addItem(_pad1 = new Pad("pad1"));
+  _graphicsScene->addItem(_pad1 = new Pad(1, &_calculator));
   _pad1->setPos(0, 340);
 
-  _graphicsScene->addItem(_pad2 = new Pad("pad2"));
+  _graphicsScene->addItem(_pad2 = new Pad(2, &_calculator));
   _pad2->setPos(490, 340);
 
   graphicsView->installEventFilter(this);
@@ -35,7 +35,6 @@ void MainWindow::on_pushButtonRUN_clicked()
 {
   _calculator.setScreenMode(Calculator::ScreenMode_Normal);
   _calculator.setSysMode(SysMode_RUN);
-//  _calculator.runScreen().write(LCDOp_Log);
   graphicsView->setFocus(Qt::OtherFocusReason);
 }
 

@@ -187,3 +187,8 @@ void Calculator::editorScreenChanged()
 {
   _lcdDisplay->drawScreen(_editorScreen.currentScreen());
 }
+
+void Calculator::buttonClicked(int padIndex, int buttonIndex)
+{
+  qDebug("Pad: %d, buttonIndex: %d", padIndex, buttonIndex);
+}

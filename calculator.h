@@ -40,6 +40,8 @@ public:
 
   void applyKey(int key);
 
+  void buttonClicked(int padIndex, int buttonIndex);
+
 private:
   CalculatorState _calcState;
   ScreenMode _screenMode;

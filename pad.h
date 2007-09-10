@@ -4,17 +4,25 @@
 #include <QGraphicsItem>
 #include <QPainter>
 
+#include "calculator.h"
+
 class Pad : public QGraphicsItem
 {
 public:
-  Pad(const QString &padName, QGraphicsItem *parent = 0);
-
+  Pad(int padIndex, Calculator *calculator, QGraphicsItem *parent = 0);
 
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
   QRectF boundingRect () const;
 
+protected:
+  void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
+  void mousePressEvent(QGraphicsSceneMouseEvent *event);
+
 private:
+  Calculator *_calculator;
+  int _padIndex;
   QImage _padImage;
+  QImage _padMask;
   QPixmap _pixmap;
 };
 
