@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/" >
         <file>images/casio-charset.png</file>
+        <file>images/pad1.png</file>
+        <file>images/pad2.png</file>
     </qresource>
 </RCC>

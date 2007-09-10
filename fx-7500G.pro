@@ -15,7 +15,8 @@ HEADERS += main_window.h \
   run_screen.h \
   prog_screen.h \
   program.h \
-  editor_screen.h
+  editor_screen.h \
+  pad.h
 
 SOURCES += main.cpp \
   main_window.cpp \
@@ -27,7 +28,8 @@ SOURCES += main.cpp \
   run_screen.cpp \
   prog_screen.cpp \
   program.cpp \
-  editor_screen.cpp
+  editor_screen.cpp \
+  pad.cpp
 
 FORMS += main_window.ui
 

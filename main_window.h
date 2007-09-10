@@ -8,6 +8,7 @@
 #include "ui_main_window.h"
 
 #include "calculator.h"
+#include "pad.h"
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -29,6 +30,7 @@ private:
   QGraphicsScene *_graphicsScene;
   Calculator _calculator;
   LCDDisplay *_lcdDisplay;
+  Pad *_pad1, *_pad2;
 };
 
 #endif // MAIN_WINDOW_H
