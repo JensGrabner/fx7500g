@@ -6,6 +6,17 @@ ShellLine::ShellLine(const LCDString &lcdStr, bool rightJustified) :
   (*this) << lcdStr;
 }
 
+bool ShellLine::isBreakerEndedLine() const
+{
+  return length() && charAtOffset(length() - 1) == LCDChar_RBTriangle;
+}
+
+bool ShellLine::cursorCanMoveRight(int cursorOffset) const
+{
+  return (isBreakerEndedLine() && cursorOffset < length() - 1) ||
+         (!isBreakerEndedLine() && cursorOffset < length());
+}
+
 LCDChar ShellLine::charAtOffset(int offset) const
 {
   if (offset >= length())

@@ -67,9 +67,15 @@ void EditorScreen::feedScreen()
 void EditorScreen::writeEntity(int entity)
 {
   LCDString lcdStr(entity);
+  bool breaker = entity == (int) LCDChar_RBTriangle;
+  int newCursorLineIndex = breaker ? _cursorLineIndex + 1 : _cursorLineIndex;
+  int newCursorOffset = breaker ? 0 : _cursorOffset + lcdStr.count();
   if (!_lines.count())
+  {
     _lines << ShellLine(lcdStr);
-  else
+    if (breaker)
+      _lines << ShellLine();
+  } else
   {
     ShellLine &shellLine = _lines[_cursorLineIndex];
 
@@ -77,12 +83,13 @@ void EditorScreen::writeEntity(int entity)
     {
       shellLine << lcdStr;
 
-      // Append the next line
-      if (_cursorLineIndex < _lines.count() - 1)
+      // Append the next line if new char is not a breaker
+      if (!breaker && _cursorLineIndex < _lines.count() - 1)
       {
         shellLine << _lines[_cursorLineIndex + 1];
         _lines.removeAt(_cursorLineIndex + 1);
-      }
+      } else if (breaker)
+        _lines << ShellLine();
     }
     else
     {
@@ -90,13 +97,25 @@ void EditorScreen::writeEntity(int entity)
       int index = shellLine.stringIndexAtOffset(_cursorOffset);
       if (index >= 0)
         shellLine[index] = lcdStr;
+      if (breaker && _cursorOffset < shellLine.length() - 1)
+      {
+        // Insert a new line
+        ShellLine newLine;
+        for (int i = index + 1; i < shellLine.count(); ++i)
+          newLine << shellLine[i];
+        _lines.insert(_cursorLineIndex + 1, newLine);
+        // Remove the last string in <shellLine>
+        int newCount = shellLine.count() - index - 1;
+        for (int i = 0; i < newCount; ++i)
+          shellLine.removeLast();
+      }
     }
   }
 
   feedScreen();
 
   emit screenChanged();
-  moveCursor(_cursorLineIndex, _cursorOffset + lcdStr.count());
+  moveCursor(newCursorLineIndex, newCursorOffset);
   restartBlink();
 }
 
@@ -110,8 +129,10 @@ void EditorScreen::applyKey(int key)
   case Qt::Key_Down: moveDown(); break;
   case Qt::Key_Delete: deleteString(); break;
   case Qt::Key_A: write(LCDChar_A); break;
-  case Qt::Key_B: write(LCDOp_Log); break;
-  case Qt::Key_C: write(LCDOp_YonMinusOne); break;
+  case Qt::Key_B: write(LCDChar_B); break;
+  case Qt::Key_C: write(LCDOp_Log); break;
+  case Qt::Key_D: write(LCDOp_YonMinusOne); break;
+  case Qt::Key_Z: write(LCDChar_RBTriangle); break;
   }
 }
 
@@ -130,6 +151,8 @@ void EditorScreen::moveLeft()
   {
     newCursorLineIndex--;
     newCursorOffset = _lines[newCursorLineIndex].length();
+    if (_lines[newCursorLineIndex].isBreakerEndedLine())
+      newCursorOffset--;
   } else if (shellLine.length() && _cursorOffset >= shellLine.length())
     newCursorOffset = shellLine.offsetByStringIndex(shellLine.count() - 1);
   else
@@ -148,7 +171,7 @@ void EditorScreen::moveRight()
 
   const ShellLine &shellLine = _lines[_cursorLineIndex];
 
-  if (_cursorLineIndex >= _lines.count() - 1 && _cursorOffset >= shellLine.length())
+  if (_cursorLineIndex >= _lines.count() - 1 && !shellLine.cursorCanMoveRight(_cursorOffset))
   {
     restartBlink();
     return;
@@ -156,7 +179,7 @@ void EditorScreen::moveRight()
 
   int newCursorLineIndex = _cursorLineIndex;
   int newCursorOffset;
-  if (_cursorOffset >= shellLine.length())
+  if (!shellLine.cursorCanMoveRight(_cursorOffset))
   {
     newCursorLineIndex++;
     newCursorOffset = 0;
