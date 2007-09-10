@@ -16,6 +16,7 @@ public:
 
 protected:
   void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
+  void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
   void mousePressEvent(QGraphicsSceneMouseEvent *event);
 
 private:
@@ -23,7 +24,10 @@ private:
   int _padIndex;
   QImage _padImage;
   QImage _padMask;
+  QImage _highlight;
   QPixmap _pixmap;
+
+  void refreshHighlight(int buttonIndex);
 };
 
 #endif

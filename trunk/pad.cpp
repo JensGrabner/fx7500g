@@ -18,11 +18,14 @@ Pad::Pad(int padIndex, Calculator *calculator, QGraphicsItem *parent) : QGraphic
   _pixmap = QPixmap(_padImage.width(), _padImage.height());
   QPainter painter(&_pixmap);
   painter.drawImage(0, 0, _padImage);
+
+  _highlight = QImage(_padMask.width(), _padMask.height(), QImage::Format_ARGB32);
 }
 
 void Pad::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
 {
   painter->drawPixmap(option->exposedRect, _pixmap, option->exposedRect);
+  painter->drawImage(0, 0, _highlight);
 }
 
 QRectF Pad::boundingRect () const
@@ -37,6 +40,13 @@ void Pad::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
   QColor color = _padMask.pixel(point.x(), point.y());
 
   int buttonIndex = color.red();
+
+  refreshHighlight(buttonIndex);
+}
+
+void Pad::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+  refreshHighlight(255);
 }
 
 void Pad::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -51,4 +61,27 @@ void Pad::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
   if (buttonIndex < 255)
     _calculator->buttonClicked(_padIndex, buttonIndex);
+}
+
+void Pad::refreshHighlight(int buttonIndex)
+{
+  _highlight.fill(0);
+
+  if (buttonIndex == 255)
+  {
+    update();
+    return;
+  }
+
+  QColor color(buttonIndex, buttonIndex, buttonIndex);
+  int c = color.rgba();
+  QColor setColor(Qt::red);
+  setColor.setAlpha(50);
+  int setC = setColor.rgba();
+  for (int i = 0; i < _highlight.width(); ++i)
+    for (int j = 0; j < _highlight.height(); ++j)
+      if (_padMask.pixel(i, j) == c)
+        _highlight.setPixel(i, j, setC);
+
+  update();
 }
