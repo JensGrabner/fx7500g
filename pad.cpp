@@ -44,7 +44,7 @@ void Pad::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
   refreshHighlight(buttonIndex);
 }
 
-void Pad::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+void Pad::hoverLeaveEvent(QGraphicsSceneHoverEvent *)
 {
   refreshHighlight(255);
 }
@@ -74,10 +74,10 @@ void Pad::refreshHighlight(int buttonIndex)
   }
 
   QColor color(buttonIndex, buttonIndex, buttonIndex);
-  int c = color.rgba();
+  QRgb c = color.rgba();
   QColor setColor(Qt::red);
   setColor.setAlpha(50);
-  int setC = setColor.rgba();
+  QRgb setC = setColor.rgba();
   for (int i = 0; i < _highlight.width(); ++i)
     for (int j = 0; j < _highlight.height(); ++j)
       if (_padMask.pixel(i, j) == c)

@@ -190,5 +190,4 @@ void Calculator::editorScreenChanged()
 
 void Calculator::buttonClicked(int padIndex, int buttonIndex)
 {
-  qDebug("Pad: %d, buttonIndex: %d", padIndex, buttonIndex);
 }
