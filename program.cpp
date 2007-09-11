@@ -10,6 +10,11 @@ void Program::setSteps(QList<LCDLine> value)
   _steps = value;
 }
 
+void Program::clear()
+{
+  _steps.clear();
+}
+
 /////////////////////////////////////////////
 /////////////////////////////////////////////
 /////////////////////////////////////////////
@@ -70,4 +75,17 @@ int Programs::freeSteps() const
     steps -= _programs[i].size();
 
   return steps;
+}
+
+void Programs::clear(int programIndex)
+{
+  Q_ASSERT_X(programIndex >= 0 && programIndex <= 9, "Programs::clear()", QString("Invalid <programIndex> (%&)").arg(programIndex));
+
+  _programs[programIndex].clear();
+}
+
+void Programs::clearAll()
+{
+  for (int i = 0; i < 10; ++i)
+    _programs[i].clear();
 }

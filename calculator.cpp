@@ -17,6 +17,8 @@ Calculator::Calculator() :
           this, SLOT(progChangeChar(int, int, LCDChar)));
   connect(&_progScreen, SIGNAL(editProgram(int)),
           this, SLOT(progEditProgram(int)));
+  connect(&_progScreen, SIGNAL(screenChanged()),
+          this, SLOT(progScreenChanged()));
 
   // Init editor screen
   _editorScreen.init(&_calcState);
@@ -169,6 +171,8 @@ void Calculator::applyKey(int key)
     break;
   default:;
   }
+ /* if (key == Qt::Key_Return)
+    buttonClicked(Button_Exe);*/
 }
 
 void Calculator::editorChangeChar(int col, int line, LCDChar c)
@@ -188,15 +192,15 @@ void Calculator::editorScreenChanged()
   _lcdDisplay->drawScreen(_editorScreen.currentScreen());
 }
 
-void Calculator::buttonClicked(int padIndex, int buttonIndex)
+void Calculator::buttonClicked(int buttonIndex)
 {
   bool noSpecialButton;
 
   // Shift, Mode, Alpha stuffs
-  _calcState.changeKeyModeByButton(padIndex, buttonIndex, noSpecialButton);
+  _calcState.changeKeyModeByButton(buttonIndex, noSpecialButton);
 
   // Switch mode?
-  if (padIndex == 1 && (_calcState.keyMode() == KeyMode_Mode) || (_calcState.keyMode() == KeyMode_ShiftMode))
+  if (_calcState.keyMode() == KeyMode_Mode || _calcState.keyMode() == KeyMode_ShiftMode)
   {
     switch (buttonIndex)
     {
@@ -225,10 +229,10 @@ void Calculator::buttonClicked(int padIndex, int buttonIndex)
     break;
   case SysMode_WRT:
   case SysMode_PCL:
-/*    if (_screenMode == ScreenMode_Normal)
-      _progScreen.applyKey(0);
-    else */if (_screenMode == ScreenMode_Editor)
-      _editorScreen.buttonClicked(padIndex, buttonIndex);
+    if (_screenMode == ScreenMode_Normal)
+      _progScreen.buttonClicked(buttonIndex);
+    else if (_screenMode == ScreenMode_Editor)
+      _editorScreen.buttonClicked(buttonIndex);
     break;
   default:;
   }
@@ -245,4 +249,9 @@ void Calculator::buttonClicked(int padIndex, int buttonIndex)
     case KeyMode_ShiftHyp: _calcState.setKeyMode(KeyMode_Normal); break;
     default:;
     }
+}
+
+void Calculator::progScreenChanged()
+{
+  _lcdDisplay->drawScreen(_progScreen.currentScreen());
 }

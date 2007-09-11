@@ -13,6 +13,8 @@ public:
 
   void applyKey(int key);
 
+  void buttonClicked(int button);
+
   void moveLeft();
   void moveRight();
 
@@ -26,6 +28,8 @@ private slots:
   void sysModeChanged(SysMode oldMode);
 
 private:
+  int currentProgramIndex() const;
+
   static const int _startCursorCol = 6;
   static const int _startCursorLine = 7;
 };

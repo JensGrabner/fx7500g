@@ -15,6 +15,8 @@ public:
 
   int size() const;
 
+  void clear();
+
 private:
   QList<LCDLine> _steps;
 };
@@ -26,6 +28,9 @@ public:
 
   int count() const { return _programs.count(); }
   Program &at(int index);
+
+  void clear(int programIndex);
+  void clearAll();
 
   int freeSteps() const;
 

@@ -40,7 +40,7 @@ public:
 
   void applyKey(int key);
 
-  void buttonClicked(int padIndex, int buttonIndex);
+  void buttonClicked(int buttonIndex);
 
 private:
   CalculatorState _calcState;
@@ -58,6 +58,7 @@ private slots:
 
   void progChangeChar(int col, int line, LCDChar c);
   void progEditProgram(int programIndex);
+  void progScreenChanged();
 
   void editorChangeChar(int col, int line, LCDChar c);
   void editorScreenChanged();

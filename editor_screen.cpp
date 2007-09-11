@@ -375,15 +375,15 @@ void EditorScreen::scrollDown()
   emit screenChanged();
 }
 
-void EditorScreen::buttonClicked(int pad, int button)
+void EditorScreen::buttonClicked(int button)
 {
-  int entity = _calcState->printableEntityByButton(pad, button);
+  int entity = _calcState->printableEntityByButton(button);
 
   if (entity >= 0) // Printable entity
     writeEntity(entity);
 }
 
-void EditorScreen::keyModeChanged(KeyMode)
+void EditorScreen::keyModeChanged(KeyMode oldMode)
 {
   switch (_calcState->keyMode())
   {

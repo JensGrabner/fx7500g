@@ -266,91 +266,78 @@ void CalculatorState::setKeyMode(KeyMode value)
   emit keyModeChanged(oldMode);
 }
 
-void CalculatorState::changeKeyModeByButton(int pad, int button, bool &noSpecialButton)
+void CalculatorState::changeKeyModeByButton(int button, bool &noSpecialButton)
 {
   noSpecialButton = false;
-  switch (pad)
+
+  switch (button)
   {
-  case 1:
-    switch (button)
+  case Button_Shift:
+    switch (_keyMode)
     {
-    case Button_Shift:
-      switch (_keyMode)
-      {
-      case KeyMode_Normal: setKeyMode(KeyMode_Shift); break;
-      case KeyMode_Shift: setKeyMode(KeyMode_Normal); break;
-      case KeyMode_Alpha: setKeyMode(KeyMode_Shift); break;
-      case KeyMode_Mode: setKeyMode(KeyMode_ShiftMode); break;
-      case KeyMode_ShiftMode: setKeyMode(KeyMode_Normal); break;
-      case KeyMode_ShiftAlpha: setKeyMode(KeyMode_Shift); break;
-      case KeyMode_Hyp: setKeyMode(KeyMode_ShiftHyp); break;
-      case KeyMode_ShiftHyp: setKeyMode(KeyMode_Normal); break;
-      default:;
-      }
-      break;
-    case Button_Alpha:
-      switch (_keyMode)
-      {
-      case KeyMode_Normal: setKeyMode(KeyMode_Alpha); break;
-      case KeyMode_Shift: setKeyMode(KeyMode_ShiftAlpha); break;
-      case KeyMode_Alpha: setKeyMode(KeyMode_Normal); break;
-      case KeyMode_Mode: setKeyMode(KeyMode_Alpha); break;
-      case KeyMode_ShiftMode: setKeyMode(KeyMode_ShiftAlpha); break;
-      case KeyMode_ShiftAlpha: setKeyMode(KeyMode_Normal); break;
-      case KeyMode_Hyp: setKeyMode(KeyMode_Alpha); break;
-      case KeyMode_ShiftHyp: setKeyMode(KeyMode_ShiftAlpha); break;
-      default:;
-      }
-      break;
-    case Button_Mode:
-      switch (_keyMode)
-      {
-      case KeyMode_Normal: setKeyMode(KeyMode_Mode); break;
-      case KeyMode_Shift: setKeyMode(KeyMode_ShiftMode); break;
-      case KeyMode_Alpha: setKeyMode(KeyMode_Mode); break;
-      case KeyMode_Mode: setKeyMode(KeyMode_Mode); break;
-      case KeyMode_ShiftMode: setKeyMode(KeyMode_ShiftMode); break;
-      case KeyMode_ShiftAlpha: setKeyMode(KeyMode_Mode); break;
-      case KeyMode_Hyp: setKeyMode(KeyMode_Mode); break;
-      case KeyMode_ShiftHyp: setKeyMode(KeyMode_ShiftMode); break;
-      default:;
-      }
-      break;
-    default: noSpecialButton = true;
+    case KeyMode_Normal: setKeyMode(KeyMode_Shift); break;
+    case KeyMode_Shift: setKeyMode(KeyMode_Normal); break;
+    case KeyMode_Alpha: setKeyMode(KeyMode_Shift); break;
+    case KeyMode_Mode: setKeyMode(KeyMode_ShiftMode); break;
+    case KeyMode_ShiftMode: setKeyMode(KeyMode_Normal); break;
+    case KeyMode_ShiftAlpha: setKeyMode(KeyMode_Shift); break;
+    case KeyMode_Hyp: setKeyMode(KeyMode_ShiftHyp); break;
+    case KeyMode_ShiftHyp: setKeyMode(KeyMode_Normal); break;
+    default:;
     }
     break;
-  case 2:
-    switch (button)
+  case Button_Alpha:
+    switch (_keyMode)
     {
-    case Button_Hyp:
-      switch (_keyMode)
-      {
-      case KeyMode_Normal: setKeyMode(KeyMode_Hyp); break;
-      case KeyMode_Shift: setKeyMode(KeyMode_ShiftHyp); break;
-      case KeyMode_Alpha: break;
-      case KeyMode_Mode: setKeyMode(KeyMode_Hyp); break;
-      case KeyMode_ShiftMode: setKeyMode(KeyMode_ShiftHyp); break;
-      case KeyMode_ShiftAlpha: break;
-      case KeyMode_Hyp: break;
-      case KeyMode_ShiftHyp: break;
-      default:;
-      }
-      break;
-    default: noSpecialButton = true;;
+    case KeyMode_Normal: setKeyMode(KeyMode_Alpha); break;
+    case KeyMode_Shift: setKeyMode(KeyMode_ShiftAlpha); break;
+    case KeyMode_Alpha: setKeyMode(KeyMode_Normal); break;
+    case KeyMode_Mode: setKeyMode(KeyMode_Alpha); break;
+    case KeyMode_ShiftMode: setKeyMode(KeyMode_ShiftAlpha); break;
+    case KeyMode_ShiftAlpha: setKeyMode(KeyMode_Normal); break;
+    case KeyMode_Hyp: setKeyMode(KeyMode_Alpha); break;
+    case KeyMode_ShiftHyp: setKeyMode(KeyMode_ShiftAlpha); break;
+    default:;
+    }
+    break;
+  case Button_Mode:
+    switch (_keyMode)
+    {
+    case KeyMode_Normal: setKeyMode(KeyMode_Mode); break;
+    case KeyMode_Shift: setKeyMode(KeyMode_ShiftMode); break;
+    case KeyMode_Alpha: setKeyMode(KeyMode_Mode); break;
+    case KeyMode_Mode: setKeyMode(KeyMode_Mode); break;
+    case KeyMode_ShiftMode: setKeyMode(KeyMode_ShiftMode); break;
+    case KeyMode_ShiftAlpha: setKeyMode(KeyMode_Mode); break;
+    case KeyMode_Hyp: setKeyMode(KeyMode_Mode); break;
+    case KeyMode_ShiftHyp: setKeyMode(KeyMode_ShiftMode); break;
+    default:;
+    }
+    break;
+  case Button_Hyp:
+    switch (_keyMode)
+    {
+    case KeyMode_Normal: setKeyMode(KeyMode_Hyp); break;
+    case KeyMode_Shift: setKeyMode(KeyMode_ShiftHyp); break;
+    case KeyMode_Alpha: break;
+    case KeyMode_Mode: setKeyMode(KeyMode_Hyp); break;
+    case KeyMode_ShiftMode: setKeyMode(KeyMode_ShiftHyp); break;
+    case KeyMode_ShiftAlpha: break;
+    case KeyMode_Hyp: break;
+    case KeyMode_ShiftHyp: break;
+    default:;
     }
     break;
   default: noSpecialButton = true;
   }
 }
 
-int CalculatorState::printableEntityByButton(int pad, int button) const
+int CalculatorState::printableEntityByButton(int button) const
 {
-  switch (pad)
-  {
-  case 1: return printableEntityByButtonInPad1(button);
-  case 2: return printableEntityByButtonInPad2(button);
-  default: return -1;
-  }
+  if (button < 33)
+    return printableEntityByButtonInPad1(button);
+  else
+    return printableEntityByButtonInPad2(button);
 }
 
 int CalculatorState::printableEntityByButtonInPad1(int button) const

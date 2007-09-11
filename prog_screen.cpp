@@ -19,7 +19,7 @@ void ProgScreen::applyKey(int key)
   {
   case Qt::Key_Left: moveLeft(); break;
   case Qt::Key_Right: moveRight(); break;
-  case Qt::Key_Return: if (_calcState->sysMode() == SysMode_WRT) emit editProgram(_cursorCol - _startCursorCol);
+  case Qt::Key_Return: if (_calcState->sysMode() == SysMode_WRT) emit editProgram(currentProgramIndex());
   }
 }
 
@@ -78,4 +78,46 @@ void ProgScreen::sysModeChanged(SysMode oldMode)
     _cursorLine = _startCursorLine;
     restartBlink();
   }
+}
+
+void ProgScreen::buttonClicked(int button)
+{
+  switch (_calcState->sysMode())
+  {
+  case SysMode_WRT:
+    switch (button)
+    {
+    case Button_Exe: emit editProgram(currentProgramIndex()); break;
+    default:;
+    }
+    break;
+  case SysMode_PCL: // Only pad 2 is necessary for PCL mode
+    switch (button)
+    {
+    case Button_Ac:
+      Programs::instance().clear(currentProgramIndex());
+      feedScreen();
+      emit screenChanged();
+      break;
+    case Button_Del:
+      if (_calcState->keyMode() == KeyMode_Shift ||
+          _calcState->keyMode() == KeyMode_ShiftMode ||
+          _calcState->keyMode() == KeyMode_ShiftHyp)
+      {
+        Programs::instance().clearAll();
+        feedScreen();
+        emit screenChanged();
+      }
+      break;
+    default:;
+    }
+    break;
+  default:;
+  }
+  restartBlink();
+}
+
+int ProgScreen::currentProgramIndex() const
+{
+  return _cursorCol - _startCursorCol;
 }
