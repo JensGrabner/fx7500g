@@ -9,12 +9,16 @@ class EditorScreen : public TextScreen
 public:
   EditorScreen();
 
+  void init(const CalculatorState *calcState);
+
   void setProgram(int programIndex);
 
   void write(LCDChar c) { writeEntity(c); }
   void write(LCDOperator o) { writeEntity(o); }
 
   void applyKey(int key);
+
+  void buttonClicked(int pad, int button);
 
   void moveLeft();
   void moveRight();
@@ -40,6 +44,9 @@ private:
   void scrollDown(); // Scroll down the screen if it's possible
 
   void writeEntity(int entity);
+
+private slots:
+  void keyModeChanged(KeyMode oldMode);
 };
 
 #endif

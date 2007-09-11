@@ -10,6 +10,12 @@ EditorScreen::EditorScreen() :
 {
 }
 
+void EditorScreen::init(const CalculatorState *calcState)
+{
+  TextScreen::init(calcState);
+  connect(calcState, SIGNAL(keyModeChanged(KeyMode)), this, SLOT(keyModeChanged(KeyMode)));
+}
+
 void EditorScreen::setProgram(int programIndex)
 {
   _lines.clear();
@@ -262,32 +268,28 @@ void EditorScreen::moveDown()
 
 void EditorScreen::deleteString()
 {
-  if (!_lines.count())
+  if (_lines.count())
   {
-    restartBlink();
-    return;
+    ShellLine &shellLine = _lines[_cursorLineIndex];
+    if (shellLine.cursorCanMoveRight(_cursorOffset))
+    {
+      shellLine.removeAt(shellLine.stringIndexAtOffset(_cursorOffset));
+      feedScreen();
+      emit screenChanged();
+    } else if (_cursorLineIndex < _lines.count() - 1)
+    {
+      if (shellLine.isBreakerEndedLine())
+        shellLine.removeLast();
+
+      // Stick the next line to the previous one
+      const ShellLine &nextLine = _lines[_cursorLineIndex + 1];
+      shellLine << nextLine;
+
+      _lines.removeAt(_cursorLineIndex + 1);
+      feedScreen();
+      emit screenChanged();
+    }
   }
-
-  ShellLine &shellLine = _lines[_cursorLineIndex];
-  if (shellLine.cursorCanMoveRight(_cursorOffset))
-  {
-    shellLine.removeAt(shellLine.stringIndexAtOffset(_cursorOffset));
-    feedScreen();
-    emit screenChanged();
-  } else if (_cursorLineIndex < _lines.count() - 1)
-  {
-    if (shellLine.isBreakerEndedLine())
-      shellLine.removeLast();
-
-    // Stick the next line to the previous one
-    const ShellLine &nextLine = _lines[_cursorLineIndex + 1];
-    shellLine << nextLine;
-
-    _lines.removeAt(_cursorLineIndex + 1);
-    feedScreen();
-    emit screenChanged();
-  }
-
   restartBlink();
 }
 
@@ -371,4 +373,30 @@ void EditorScreen::scrollDown()
 
   feedScreen();
   emit screenChanged();
+}
+
+void EditorScreen::buttonClicked(int pad, int button)
+{
+  int entity = _calcState->printableEntityByButton(pad, button);
+
+  if (entity >= 0) // Printable entity
+    writeEntity(entity);
+}
+
+void EditorScreen::keyModeChanged(KeyMode)
+{
+  switch (_calcState->keyMode())
+  {
+  case KeyMode_Normal: setCursorMode(CursorMode_Normal); break;
+  case KeyMode_Shift: setCursorMode(CursorMode_Shift); break;
+  case KeyMode_Alpha: setCursorMode(CursorMode_CapsLock); break;
+  case KeyMode_Mode: setCursorMode(CursorMode_Normal); break;
+  case KeyMode_ShiftMode: setCursorMode(CursorMode_Shift); break;
+  case KeyMode_ShiftAlpha: setCursorMode(CursorMode_CapsLock); break;
+  case KeyMode_Hyp: setCursorMode(CursorMode_Normal); break;
+  case KeyMode_ShiftHyp: setCursorMode(CursorMode_Shift); break;
+  default:;
+  }
+
+  restartBlink();
 }

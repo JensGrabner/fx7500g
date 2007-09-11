@@ -76,5 +76,6 @@ void ProgScreen::sysModeChanged(SysMode oldMode)
   {
     _cursorCol = _startCursorCol;
     _cursorLine = _startCursorLine;
+    restartBlink();
   }
 }

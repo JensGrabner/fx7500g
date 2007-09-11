@@ -127,6 +127,7 @@ void TextScreen::doBlinkCursor()
     case CursorMode_InsertCapsLock: charToDisplay = LCDChar_InsertCapsLockCursor; break;
     case CursorMode_Shift:          charToDisplay = LCDChar_ShiftCursor; break;
     case CursorMode_CapsLock:       charToDisplay = LCDChar_CapsLockCursor; break;
+    case CursorMode_InsertShift:    charToDisplay = LCDChar_InsertShiftCursor; break;
     case CursorMode_Space:          charToDisplay = LCDChar_Space; break;
     default:                        charToDisplay = LCDChar_Cursor;
     }
