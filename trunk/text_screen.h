@@ -38,6 +38,7 @@ public:
     CursorMode_InsertCapsLock,
     CursorMode_Shift,
     CursorMode_CapsLock,
+    CursorMode_InsertShift,
     CursorMode_Space
   };
 

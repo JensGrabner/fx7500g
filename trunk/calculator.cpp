@@ -190,4 +190,59 @@ void Calculator::editorScreenChanged()
 
 void Calculator::buttonClicked(int padIndex, int buttonIndex)
 {
+  bool noSpecialButton;
+
+  // Shift, Mode, Alpha stuffs
+  _calcState.changeKeyModeByButton(padIndex, buttonIndex, noSpecialButton);
+
+  // Switch mode?
+  if (padIndex == 1 && (_calcState.keyMode() == KeyMode_Mode) || (_calcState.keyMode() == KeyMode_ShiftMode))
+  {
+    switch (buttonIndex)
+    {
+    case Button_1:
+      setSysMode(SysMode_RUN);
+      setScreenMode(ScreenMode_Normal);
+      _calcState.setKeyMode(KeyMode_Normal);
+      break;
+    case Button_2:
+      setSysMode(SysMode_WRT);
+      setScreenMode(ScreenMode_Normal);
+      _calcState.setKeyMode(KeyMode_Normal);
+      break;
+    case Button_3:
+      setSysMode(SysMode_PCL);
+      setScreenMode(ScreenMode_Normal);
+      _calcState.setKeyMode(KeyMode_Normal);
+      break;
+    default:;
+    }
+  }
+
+  switch (_calcState.sysMode())
+  {
+  case SysMode_RUN:
+    break;
+  case SysMode_WRT:
+  case SysMode_PCL:
+/*    if (_screenMode == ScreenMode_Normal)
+      _progScreen.applyKey(0);
+    else */if (_screenMode == ScreenMode_Editor)
+      _editorScreen.buttonClicked(padIndex, buttonIndex);
+    break;
+  default:;
+  }
+
+  if (noSpecialButton)
+    switch (_calcState.keyMode())
+    {
+    case KeyMode_Shift: _calcState.setKeyMode(KeyMode_Normal); break;
+    case KeyMode_Alpha: _calcState.setKeyMode(KeyMode_Normal); break;
+    case KeyMode_Mode: _calcState.setKeyMode(KeyMode_Normal); break;
+    case KeyMode_ShiftMode: _calcState.setKeyMode(KeyMode_Normal); break;
+    case KeyMode_ShiftAlpha: break;
+    case KeyMode_Hyp: _calcState.setKeyMode(KeyMode_Normal); break;
+    case KeyMode_ShiftHyp: _calcState.setKeyMode(KeyMode_Normal); break;
+    default:;
+    }
 }

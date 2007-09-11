@@ -114,8 +114,8 @@ enum LCDChar {
   LCDChar_Micro,
   LCDChar_Multiply,
   LCDChar_Divide,
-  LCDChar_Plus,
-  LCDChar_Minus,
+  LCDChar_Add,
+  LCDChar_Substract,
   LCDChar_Teta,
   LCDChar_LittleA,
   LCDChar_LittleB,
@@ -125,7 +125,12 @@ enum LCDChar {
   LCDChar_InsertCapsLockCursor,
   LCDChar_ShiftCursor,
   LCDChar_CapsLockCursor,
+  LCDChar_InsertShiftCursor,
   LCDChar_MinusOne,  // -1
+  LCDChar_Exponent,  // E
+  LCDChar_LittleO,
+  LCDChar_LittleR,
+  LCDChar_LittleG,
   LCDChar_Space,
   LCDChar_End = LCDChar_Space
 };
@@ -135,7 +140,9 @@ LCDChar charToLCDChar(const QChar &c, bool *found = 0);
 // 'Log', 'Ln', all atomic entities
 enum LCDOperator
 {
-  LCDOp_Log = 256,
+  LCDOp_Int = 256,
+  LCDOp_Frac,
+  LCDOp_Log,
   LCDOp_Ln,
   LCDOp_Sin,
   LCDOp_Cos,
@@ -146,6 +153,9 @@ enum LCDOperator
   LCDOp_Sin_1, // Sin exponent -1
   LCDOp_Cos_1, // Cos exponent -1
   LCDOp_Tan_1, // Cos exponent -1
+  LCDOp_Sinh_1, // Sinh exponent -1
+  LCDOp_Cosh_1, // Cosh exponent -1
+  LCDOp_Tanh_1, // Tanh exponent -1
   LCDOp_Xy,
   LCDOp_xSquareRoot,
   LCDOp_Neg,
@@ -157,6 +167,7 @@ enum LCDOperator
   LCDOp_Cls,
   LCDOp_Prog,
   LCDOp_Graph,
+  LCDOp_Range,
   LCDOp_Plot,
   LCDOp_Factor,
   LCDOp_Deg,
@@ -179,6 +190,7 @@ enum LCDOperator
   LCDOp_XonMinusOne,
   LCDOp_Pol,
   LCDOp_Rec,
+  LCDOp_Mcl,
   LCDOp_Scl
 };
 
@@ -205,51 +217,6 @@ public:
 
 private:
   void assignString(const QString &str);
-};
-
-enum ScreenMode { ScreenMode_Normal, ScreenMode_Resume, ScreenMode_Graphical };
-enum AngleMode { Deg, Rad, Grad };
-enum SysMode { SysMode_RUN, SysMode_WRT, SysMode_PCL };
-enum CalMode { CalMode_COMP, CalMode_BASE_N, CalMode_SD1, CalMode_LR1, CalMode_SD2, CalMode_LR2 };
-enum BaseMode { BaseMode_Dec, BaseMode_Hex, BaseMode_Bin, BaseMode_Oct };
-enum DisplayMode { DisplayMode_Norm, DisplayMode_Fix, DisplayMode_Sci };
-
-class CalculatorState : public QObject
-{
-  Q_OBJECT
-public:
-  CalculatorState();
-
-  SysMode sysMode() const { return _sysMode; }
-  void setSysMode(SysMode value);
-
-  AngleMode angleMode() const { return _angleMode; }
-  void setAngleMode(AngleMode value) { _angleMode = value; }
-
-  CalMode calMode() const { return _calMode; }
-  void setCalMode(CalMode value) { _calMode = value; }
-
-  BaseMode baseMode() const { return _baseMode; }
-  void setBaseMode(BaseMode value) { _baseMode = value; }
-
-  DisplayMode displayMode() const { return _displayMode; }
-  void setDisplayMode(DisplayMode value) { _displayMode = value; }
-
-  QString sysModeString() const;
-  QString calModeString() const;
-  QString baseModeString() const;
-  QString angleModeString() const;
-  QString displayModeString() const;
-
-signals:
-  void sysModeChanged(SysMode oldMode);
-
-private:
-  SysMode _sysMode;
-  AngleMode _angleMode;
-  CalMode _calMode;
-  BaseMode _baseMode;
-  DisplayMode _displayMode;
 };
 
 enum Pad1Button
@@ -290,7 +257,7 @@ enum Pad1Button
 
 enum Pad2Button
 {
-  Button_SquareRoot,
+  Button_SquareRoot = 1,
   Button_Square,
   Button_Log,
   Button_Ln,
@@ -310,6 +277,66 @@ enum Pad2Button
   Button_Colon,
   Button_Xy,
   Button_xSquareRoot
+};
+
+enum ScreenMode { ScreenMode_Normal, ScreenMode_Resume, ScreenMode_Graphical };
+enum AngleMode { Deg, Rad, Grad };
+enum SysMode { SysMode_RUN, SysMode_WRT, SysMode_PCL };
+enum CalMode { CalMode_COMP, CalMode_BASE_N, CalMode_SD1, CalMode_LR1, CalMode_SD2, CalMode_LR2 };
+enum BaseMode { BaseMode_Dec, BaseMode_Hex, BaseMode_Bin, BaseMode_Oct };
+enum DisplayMode { DisplayMode_Norm, DisplayMode_Fix, DisplayMode_Sci };
+enum KeyMode { KeyMode_Normal, KeyMode_Shift, KeyMode_Alpha, KeyMode_Mode, KeyMode_ShiftMode, KeyMode_ShiftAlpha,
+  KeyMode_Hyp, KeyMode_ShiftHyp };
+
+class CalculatorState : public QObject
+{
+  Q_OBJECT
+public:
+  CalculatorState();
+
+  SysMode sysMode() const { return _sysMode; }
+  void setSysMode(SysMode value);
+
+  AngleMode angleMode() const { return _angleMode; }
+  void setAngleMode(AngleMode value) { _angleMode = value; }
+
+  CalMode calMode() const { return _calMode; }
+  void setCalMode(CalMode value) { _calMode = value; }
+
+  BaseMode baseMode() const { return _baseMode; }
+  void setBaseMode(BaseMode value) { _baseMode = value; }
+
+  DisplayMode displayMode() const { return _displayMode; }
+  void setDisplayMode(DisplayMode value) { _displayMode = value; }
+
+  KeyMode keyMode() const { return _keyMode; }
+  void setKeyMode(KeyMode value);
+
+  void changeKeyModeByButton(int pad, int button, bool &noSpecialButton);
+
+  // Return -1 if not printable
+  int printableEntityByButton(int pad, int button) const;
+
+  QString sysModeString() const;
+  QString calModeString() const;
+  QString baseModeString() const;
+  QString angleModeString() const;
+  QString displayModeString() const;
+
+signals:
+  void sysModeChanged(SysMode oldMode);
+  void keyModeChanged(KeyMode keyMode);
+
+private:
+  SysMode _sysMode;
+  AngleMode _angleMode;
+  CalMode _calMode;
+  BaseMode _baseMode;
+  DisplayMode _displayMode;
+  KeyMode _keyMode;
+
+  int printableEntityByButtonInPad1(int button) const;
+  int printableEntityByButtonInPad2(int button) const;
 };
 
 #endif
