@@ -60,7 +60,7 @@ void Pad::mousePressEvent(QGraphicsSceneMouseEvent *event)
   setFlag(QGraphicsItem::ItemIsMovable, buttonIndex == 255);
 
   if (buttonIndex < 255)
-    _calculator->buttonClicked(_padIndex, buttonIndex);
+    _calculator->buttonClicked(buttonIndex);
 }
 
 void Pad::refreshHighlight(int buttonIndex)

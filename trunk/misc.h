@@ -219,7 +219,7 @@ private:
   void assignString(const QString &str);
 };
 
-enum Pad1Button
+enum PadButton
 {
   Button_Shift = 1,
   Button_Alpha,
@@ -252,12 +252,8 @@ enum Pad1Button
   Button_Dot,
   Button_Exp,
   Button_Ans,
-  Button_Exe
-};
-
-enum Pad2Button
-{
-  Button_SquareRoot = 1,
+  Button_Exe,
+  Button_SquareRoot,
   Button_Square,
   Button_Log,
   Button_Ln,
@@ -312,10 +308,10 @@ public:
   KeyMode keyMode() const { return _keyMode; }
   void setKeyMode(KeyMode value);
 
-  void changeKeyModeByButton(int pad, int button, bool &noSpecialButton);
+  void changeKeyModeByButton(int button, bool &noSpecialButton);
 
   // Return -1 if not printable
-  int printableEntityByButton(int pad, int button) const;
+  int printableEntityByButton(int button) const;
 
   QString sysModeString() const;
   QString calModeString() const;

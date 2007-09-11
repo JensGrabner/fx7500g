@@ -18,7 +18,7 @@ public:
 
   void applyKey(int key);
 
-  void buttonClicked(int pad, int button);
+  void buttonClicked(int button);
 
   void moveLeft();
   void moveRight();
