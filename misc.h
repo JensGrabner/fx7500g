@@ -272,7 +272,14 @@ enum PadButton
   Button_Minus,
   Button_Colon,
   Button_Xy,
-  Button_xSquareRoot
+  Button_xSquareRoot,
+  Button_MDisp,
+  Button_GT,
+  Button_Up,
+  Button_Down,
+  Button_Left,
+  Button_Right,
+  Button_Ins
 };
 
 enum ScreenMode { ScreenMode_Normal, ScreenMode_Resume, ScreenMode_Graphical };

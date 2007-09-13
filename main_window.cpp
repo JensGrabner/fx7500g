@@ -13,13 +13,16 @@ MainWindow::MainWindow() : QMainWindow(0)
   _graphicsScene->addItem(_lcdDisplay);
   _lcdDisplay->setPlotSize(5);
 
-  _lcdDisplay->setPos(70, 0);
+  _lcdDisplay->setPos(0, 0);
 
   _graphicsScene->addItem(_pad1 = new Pad(1, &_calculator));
-  _pad1->setPos(0, 340);
+  _pad1->setPos(0, 399);
 
   _graphicsScene->addItem(_pad2 = new Pad(2, &_calculator));
-  _pad2->setPos(490, 340);
+  _pad2->setPos(461, 397);
+
+  _graphicsScene->addItem(_pad3 = new Pad(3, &_calculator));
+  _pad3->setPos(0, 329);
 
   graphicsView->installEventFilter(this);
 

@@ -53,8 +53,8 @@ private:
   QList<LCDString> getResumeScreen() const;
 
 private slots:
-  void shellChangeChar(int col, int line, LCDChar c);
-  void shellPromptLineChanged();
+  void runChangeChar(int col, int line, LCDChar c);
+  void runScreenChanged();
 
   void progChangeChar(int col, int line, LCDChar c);
   void progEditProgram(int programIndex);

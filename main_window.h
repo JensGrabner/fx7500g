@@ -30,7 +30,7 @@ private:
   QGraphicsScene *_graphicsScene;
   Calculator _calculator;
   LCDDisplay *_lcdDisplay;
-  Pad *_pad1, *_pad2;
+  Pad *_pad1, *_pad2, *_pad3;
 };
 
 #endif // MAIN_WINDOW_H

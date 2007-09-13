@@ -7,9 +7,9 @@ Calculator::Calculator() :
   // Init run screen
   _runScreen.init(&_calcState);
   connect(&_runScreen, SIGNAL(changeChar(int, int, LCDChar)),
-          this, SLOT(shellChangeChar(int, int, LCDChar)));
-  connect(&_runScreen, SIGNAL(promptLineChanged()),
-          this, SLOT(shellPromptLineChanged()));
+          this, SLOT(runChangeChar(int, int, LCDChar)));
+  connect(&_runScreen, SIGNAL(screenChanged()),
+          this, SLOT(runScreenChanged()));
 
   // Init prog screen
   _progScreen.init(&_calcState);
@@ -33,7 +33,7 @@ void Calculator::setAngleMode(AngleMode value)
   _calcState.setAngleMode(value);
 }
 
-void Calculator::shellChangeChar(int col, int line, LCDChar c)
+void Calculator::runChangeChar(int col, int line, LCDChar c)
 {
   if (_lcdDisplay && _screenMode == ScreenMode_Normal &&
       _calcState.sysMode() == SysMode_RUN)
@@ -52,7 +52,7 @@ void Calculator::setDisplayMode(DisplayMode value)
   _calcState.setDisplayMode(value);
 }
 
-void Calculator::shellPromptLineChanged()
+void Calculator::runScreenChanged()
 {
   _lcdDisplay->drawScreen(_runScreen.currentScreen());
 }
@@ -223,9 +223,11 @@ void Calculator::buttonClicked(int buttonIndex)
     }
   }
 
+  // Dispatch button clicks
   switch (_calcState.sysMode())
   {
   case SysMode_RUN:
+    _runScreen.buttonClicked(buttonIndex);
     break;
   case SysMode_WRT:
   case SysMode_PCL:
@@ -237,6 +239,7 @@ void Calculator::buttonClicked(int buttonIndex)
   default:;
   }
 
+  // Restore key normal mode?
   if (noSpecialButton)
     switch (_calcState.keyMode())
     {

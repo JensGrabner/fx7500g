@@ -381,6 +381,15 @@ void EditorScreen::buttonClicked(int button)
 
   if (entity >= 0) // Printable entity
     writeEntity(entity);
+  else
+    switch (button)
+    {
+    case Button_Up: moveUp(); break;
+    case Button_Down: moveDown(); break;
+    case Button_Left: moveLeft(); break;
+    case Button_Right: moveRight(); break;
+    default:;
+    }
 }
 
 void EditorScreen::keyModeChanged(KeyMode oldMode)

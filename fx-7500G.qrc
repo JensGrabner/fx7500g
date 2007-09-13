@@ -5,5 +5,7 @@
         <file>images/pad1-mask.png</file>
         <file>images/pad2.png</file>
         <file>images/pad2-mask.png</file>
+        <file>images/pad3.png</file>
+        <file>images/pad3-mask.png</file>
     </qresource>
 </RCC>
