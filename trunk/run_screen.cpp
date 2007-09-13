@@ -19,57 +19,6 @@ int RunScreen::getPromptLineIndex() const
   return lineIndex;
 }
 
-bool RunScreen::write(LCDChar c)
-{
-  if (_cursorOffset >= _promptLine.length())
-    _promptLine << LCDString(c);
-  else
-  {
-    // Get LCDString under the cursor
-    int index = _promptLine.stringIndexAtOffset(_cursorOffset);
-    if (index >= 0)
-      _promptLine[index] = LCDString(c);
-  }
-
-  feedScreen();
-
-  emit promptLineChanged();
-
-  moveCursor(_cursorOffset + 1);
-
-  return true;
-}
-
-bool RunScreen::write(LCDOperator o)
-{
-  int newOffset;
-  if (_cursorOffset >= _promptLine.length())
-  {
-    _promptLine << LCDString(o);
-    newOffset = _promptLine.length();
-  } else
-  {
-    // Get LCDString under the cursor
-    int index = _promptLine.stringIndexAtOffset(_cursorOffset);
-    if (index >= 0)
-      _promptLine[index] = LCDString(o);
-
-    // Cursor move to the right
-    if (index >= _promptLine.count())
-      newOffset = _promptLine.length();
-    else
-      newOffset = _promptLine.offsetByStringIndex(index + 1);
-  }
-
-  feedScreen();
-
-  emit promptLineChanged();
-
-  moveCursor(newOffset);
-
-  return true;
-}
-
 void RunScreen::moveLeft()
 {
   int index;
@@ -148,7 +97,7 @@ void RunScreen::deleteString()
   {
     _promptLine.removeAt(_promptLine.stringIndexAtOffset(_cursorOffset));
     feedScreen();
-    emit promptLineChanged();
+    emit screenChanged();
   }
 
   restartBlink();
@@ -205,4 +154,32 @@ void RunScreen::feedScreen()
         _screen[col++][line] = c;
       }
   }
+}
+
+void RunScreen::buttonClicked(int button)
+{
+  int entity = _calcState->printableEntityByButton(button);
+
+  if (entity >= 0) // Printable entity
+    writeEntity(entity);
+}
+
+void RunScreen::writeEntity(int entity)
+{
+  int offsetToAdd = LCDString(entity).count();
+  if (_cursorOffset >= _promptLine.length())
+    _promptLine << LCDString(entity);
+  else
+  {
+    // Get LCDString under the cursor
+    int index = _promptLine.stringIndexAtOffset(_cursorOffset);
+    if (index >= 0)
+      _promptLine[index] = LCDString(entity);
+  }
+
+  feedScreen();
+
+  emit screenChanged();
+
+  moveCursor(_cursorOffset + offsetToAdd);
 }

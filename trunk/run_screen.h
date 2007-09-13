@@ -13,19 +13,18 @@ class RunScreen : public TextScreen
 public:
   RunScreen();
  
-  bool write(LCDChar c); // Returns false if writing is forbidden
-  bool write(LCDOperator o);
+  void write(LCDChar c) { writeEntity(c); }
+  void write(LCDOperator o) { writeEntity(o); }
 
   void applyKey(int key);
+
+  void buttonClicked(int button);
 
   void moveLeft();
   void moveRight();
   void moveUp();
   void moveDown();
   void deleteString(); // Delete the string under cursor .. WANTED A BETTER NAME
-
-signals:
-  void promptLineChanged();
 
 protected:
   void feedScreen(); // <_screen> of Shell ancestor is filled with <_lines> and <_promptLine>
@@ -38,6 +37,7 @@ private:
 
   int getPromptLineIndex() const; // Return the line index of the prompt beginning
   void moveCursor(int newOffset);
+  void writeEntity(int entity);
 };
 
 #endif
