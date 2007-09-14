@@ -16,7 +16,8 @@ HEADERS += main_window.h \
   prog_screen.h \
   program.h \
   editor_screen.h \
-  pad.h
+  pad.h \
+  expression_computer.h
 
 SOURCES += main.cpp \
   main_window.cpp \
@@ -29,7 +30,8 @@ SOURCES += main.cpp \
   prog_screen.cpp \
   program.cpp \
   editor_screen.cpp \
-  pad.cpp
+  pad.cpp \
+  expression_computer.cpp
 
 FORMS += main_window.ui
 
