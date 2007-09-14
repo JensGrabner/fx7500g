@@ -9,14 +9,12 @@ class EditorScreen : public TextScreen
 public:
   EditorScreen();
 
-  void init(const CalculatorState *calcState);
+  void init(CalculatorState *calcState);
 
   void setProgram(int programIndex);
 
   void write(LCDChar c) { writeEntity(c); }
   void write(LCDOperator o) { writeEntity(o); }
-
-  void applyKey(int key);
 
   void buttonClicked(int button);
 
@@ -39,9 +37,11 @@ private:
   int _cursorLineIndex; // Absolute index of the line where cursor is
   int _cursorOffset; // Offset in the line
 
-  void moveCursor(int newLineIndex, int newOffset); // Move cursor can invoke scrollUp() or scrollDown() if cursor is out of the screen
+  void moveCursor(int newLineIndex, int newOffset, bool *scrolled = 0); // Move cursor can invoke scrollUp() or scrollDown() if cursor is out of the screen
   void scrollUp(); // Scroll up the screen if it's possible
   void scrollDown(); // Scroll down the screen if it's possible
+  void execute();
+  void insertClicked();
 
   void writeEntity(int entity);
 

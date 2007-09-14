@@ -9,9 +9,7 @@ class ProgScreen : public TextScreen
 public:
   ProgScreen();
 
-  void init(const CalculatorState *calcState);
-
-  void applyKey(int key);
+  void init(CalculatorState *calcState);
 
   void buttonClicked(int button);
 

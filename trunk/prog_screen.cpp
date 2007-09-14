@@ -7,20 +7,10 @@ ProgScreen::ProgScreen() : TextScreen()
   setCursorMode(CursorMode_Space);
 }
 
-void ProgScreen::init(const CalculatorState *calcState)
+void ProgScreen::init(CalculatorState *calcState)
 {
   TextScreen::init(calcState);
   connect(calcState, SIGNAL(sysModeChanged(SysMode)), this, SLOT(sysModeChanged(SysMode)));
-}
-
-void ProgScreen::applyKey(int key)
-{
-  switch (key)
-  {
-  case Qt::Key_Left: moveLeft(); break;
-  case Qt::Key_Right: moveRight(); break;
-  case Qt::Key_Return: if (_calcState->sysMode() == SysMode_WRT) emit editProgram(currentProgramIndex());
-  }
 }
 
 void ProgScreen::moveLeft()
@@ -114,6 +104,14 @@ void ProgScreen::buttonClicked(int button)
     break;
   default:;
   }
+
+  switch (button)
+  {
+  case Button_Left: moveLeft(); break;
+  case Button_Right: moveRight(); break;
+  default:;
+  }
+
   restartBlink();
 }
 

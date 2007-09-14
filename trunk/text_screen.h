@@ -44,7 +44,7 @@ public:
 
   TextScreen();
 
-  virtual void init(const CalculatorState *calcState);
+  virtual void init(CalculatorState *calcState);
 
   void clear();
 
@@ -61,8 +61,10 @@ signals:
 
 protected:
   LCDChar _screen[16][8];
-  const CalculatorState *_calcState;
+  CalculatorState *_calcState;
   int _cursorLine, _cursorCol;
+  CursorMode _cursorMode;
+  bool _insertMode;
 
   bool cursorVisible() const { return _cursorVisible; }
   void setCursorVisible(bool value);
@@ -72,11 +74,12 @@ protected:
 
   void assignToScreen(const LCDString &str, int col, int line);
 
+  CursorMode getCursorMode() const;
+
   virtual void feedScreen() = 0; // Used by inherited screen to feed _screen
 
 private:
   bool _cursorVisible;
-  CursorMode _cursorMode;
   QTimer _blinkTimer;
   bool _displayCursorTurn;
 

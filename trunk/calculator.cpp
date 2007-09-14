@@ -157,22 +157,29 @@ void Calculator::setSysMode(SysMode value)
 
 void Calculator::applyKey(int key)
 {
-  switch (_calcState.sysMode())
+  switch (key)
   {
-  case SysMode_RUN:
-    _runScreen.applyKey(key);
-    break;
-  case SysMode_WRT:
-  case SysMode_PCL:
-    if (_screenMode == ScreenMode_Normal)
-      _progScreen.applyKey(key);
-    else if (_screenMode == ScreenMode_Editor)
-      _editorScreen.applyKey(key);
-    break;
-  default:;
+  case Qt::Key_F1: buttonClicked(Button_Shift); break;
+  case Qt::Key_F2: buttonClicked(Button_Alpha); break;
+  case Qt::Key_F3: buttonClicked(Button_Mode); break;
+  case Qt::Key_Left: buttonClicked(Button_Left); break;
+  case Qt::Key_Right: buttonClicked(Button_Right); break;
+  case Qt::Key_Up: buttonClicked(Button_Up); break;
+  case Qt::Key_Down: buttonClicked(Button_Down); break;
+  case Qt::Key_Delete: buttonClicked(Button_Del); break;
+  case Qt::Key_Return: buttonClicked(Button_Exe); break;
+  case Qt::Key_0: buttonClicked(Button_0); break;
+  case Qt::Key_1: buttonClicked(Button_1); break;
+  case Qt::Key_2: buttonClicked(Button_2); break;
+  case Qt::Key_3: buttonClicked(Button_3); break;
+  case Qt::Key_4: buttonClicked(Button_4); break;
+  case Qt::Key_5: buttonClicked(Button_5); break;
+  case Qt::Key_6: buttonClicked(Button_6); break;
+  case Qt::Key_7: buttonClicked(Button_7); break;
+  case Qt::Key_8: buttonClicked(Button_8); break;
+  case Qt::Key_9: buttonClicked(Button_9); break;
+  case Qt::Key_Insert: buttonClicked(Button_Ins); break;
   }
- /* if (key == Qt::Key_Return)
-    buttonClicked(Button_Exe);*/
 }
 
 void Calculator::editorChangeChar(int col, int line, LCDChar c)

@@ -10,7 +10,7 @@ EditorScreen::EditorScreen() :
 {
 }
 
-void EditorScreen::init(const CalculatorState *calcState)
+void EditorScreen::init(CalculatorState *calcState)
 {
   TextScreen::init(calcState);
   connect(calcState, SIGNAL(keyModeChanged(KeyMode)), this, SLOT(keyModeChanged(KeyMode)));
@@ -89,8 +89,8 @@ void EditorScreen::writeEntity(int entity)
     {
       shellLine << lcdStr;
 
-      // Append the next line if new char is not a breaker
-      if (!breaker && _cursorLineIndex < _lines.count() - 1)
+      // Append the next line if new char is not a breaker and we aren't in insert mode
+      if (!breaker && !_insertMode && _cursorLineIndex < _lines.count() - 1)
       {
         shellLine << _lines[_cursorLineIndex + 1];
         _lines.removeAt(_cursorLineIndex + 1);
@@ -102,7 +102,12 @@ void EditorScreen::writeEntity(int entity)
       // Get LCDString under the cursor
       int index = shellLine.stringIndexAtOffset(_cursorOffset);
       if (index >= 0)
-        shellLine[index] = lcdStr;
+      {
+        if (_insertMode)
+          shellLine.insert(index, lcdStr);
+        else
+          shellLine[index] = lcdStr;
+      }
       if (breaker && _cursorOffset < shellLine.length() - 1)
       {
         // Insert a new line
@@ -125,25 +130,12 @@ void EditorScreen::writeEntity(int entity)
   restartBlink();
 }
 
-void EditorScreen::applyKey(int key)
-{
-  switch (key)
-  {
-  case Qt::Key_Left: moveLeft(); break;
-  case Qt::Key_Right: moveRight(); break;
-  case Qt::Key_Up: moveUp(); break;
-  case Qt::Key_Down: moveDown(); break;
-  case Qt::Key_Delete: deleteString(); break;
-  case Qt::Key_A: write(LCDChar_A); break;
-  case Qt::Key_B: write(LCDChar_B); break;
-  case Qt::Key_C: write(LCDOp_Log); break;
-  case Qt::Key_D: write(LCDOp_YonMinusOne); break;
-  case Qt::Key_Z: write(LCDChar_RBTriangle); break;
-  }
-}
-
 void EditorScreen::moveLeft()
 {
+  // Re-init insert mode
+  _insertMode = false;
+  _cursorMode = getCursorMode();
+
   if (!_cursorLineIndex && !_cursorOffset)
   {
     restartBlink();
@@ -169,6 +161,10 @@ void EditorScreen::moveLeft()
 
 void EditorScreen::moveRight()
 {
+  // Re-init insert mode
+  _insertMode = false;
+  _cursorMode = getCursorMode();
+
   if (!_lines.count())
   {
     restartBlink();
@@ -197,6 +193,10 @@ void EditorScreen::moveRight()
 
 void EditorScreen::moveUp()
 {
+  // Re-init insert mode
+  _insertMode = false;
+  _cursorMode = getCursorMode();
+
   if (!_lines.count())
   {
     restartBlink();
@@ -227,6 +227,10 @@ void EditorScreen::moveUp()
 
 void EditorScreen::moveDown()
 {
+  // Re-init insert mode
+  _insertMode = false;
+  _cursorMode = getCursorMode();
+
   if (!_lines.count())
   {
     restartBlink();
@@ -293,14 +297,18 @@ void EditorScreen::deleteString()
   restartBlink();
 }
 
-void EditorScreen::moveCursor(int newLineIndex, int newOffset)
+void EditorScreen::moveCursor(int newLineIndex, int newOffset, bool *scrolled)
 {
   int line = 0;
   int col = 0;
 
   // Must scroll up?
   if (newLineIndex < _topLineIndex || (newLineIndex == _topLineIndex && newOffset / 16 < _topLineSubIndex))
+  {
     scrollUp();
+    if (scrolled)
+      *scrolled = true;
+  }
 
   for (int index = _topLineIndex; index < newLineIndex; ++index)
   {
@@ -322,6 +330,8 @@ void EditorScreen::moveCursor(int newLineIndex, int newOffset)
   {
     scrollDown();
     line = 7;
+    if (scrolled)
+      *scrolled = true;
   }
 
   TextScreen::moveCursor(col, line);
@@ -388,24 +398,51 @@ void EditorScreen::buttonClicked(int button)
     case Button_Down: moveDown(); break;
     case Button_Left: moveLeft(); break;
     case Button_Right: moveRight(); break;
+    case Button_Del: deleteString(); break;
+    case Button_Exe: execute(); break;
+    case Button_Ins: insertClicked(); break;
     default:;
     }
 }
 
-void EditorScreen::keyModeChanged(KeyMode oldMode)
+void EditorScreen::keyModeChanged(KeyMode)
 {
-  switch (_calcState->keyMode())
+  setCursorMode(getCursorMode());
+
+  restartBlink();
+}
+
+void EditorScreen::execute()
+{
+  if (_cursorLineIndex >= _lines.count() - 1)
+    _lines << ShellLine();
+
+  bool scrolled;
+  moveCursor(_cursorLineIndex + 1, 0, &scrolled); // Go to the next line
+  if (scrolled)
+    emit screenChanged();
+  restartBlink();
+}
+
+void EditorScreen::insertClicked()
+{
+  if (_insertMode) // We deactivate insert mode
   {
-  case KeyMode_Normal: setCursorMode(CursorMode_Normal); break;
-  case KeyMode_Shift: setCursorMode(CursorMode_Shift); break;
-  case KeyMode_Alpha: setCursorMode(CursorMode_CapsLock); break;
-  case KeyMode_Mode: setCursorMode(CursorMode_Normal); break;
-  case KeyMode_ShiftMode: setCursorMode(CursorMode_Shift); break;
-  case KeyMode_ShiftAlpha: setCursorMode(CursorMode_CapsLock); break;
-  case KeyMode_Hyp: setCursorMode(CursorMode_Normal); break;
-  case KeyMode_ShiftHyp: setCursorMode(CursorMode_Shift); break;
-  default:;
+    _insertMode = false;
+    _cursorMode = getCursorMode();
+  } else
+  {
+    // No insert mode when we are at the end of the text
+    if (_lines.count() && (_cursorLineIndex < _lines.count() - 1 || _cursorOffset < _lines[_cursorLineIndex].length()))
+    {
+      _insertMode = true;
+      _cursorMode = getCursorMode();
+    }
   }
+
+  // Annihilate all key mode BUT ShiftAlpha
+  if (_calcState->keyMode() != KeyMode_ShiftAlpha)
+    _calcState->setKeyMode(KeyMode_Normal);
 
   restartBlink();
 }

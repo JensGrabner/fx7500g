@@ -96,8 +96,9 @@ TextScreen::TextScreen() :
   _calcState(0),
   _cursorLine(0),
   _cursorCol(0),
-  _cursorVisible(true),
   _cursorMode(CursorMode_Normal),
+  _insertMode(false),
+  _cursorVisible(true),
   _displayCursorTurn(true)
 {
   clear();
@@ -107,7 +108,7 @@ TextScreen::TextScreen() :
   _blinkTimer.start();
 }
 
-void TextScreen::init(const CalculatorState *calcState)
+void TextScreen::init(CalculatorState *calcState)
 {
   _calcState = calcState;
   feedScreen();
@@ -214,4 +215,34 @@ void TextScreen::assignToScreen(const LCDString &str, int col, int line)
       break;
     _screen[col + offset++][line] = c;
   }
+}
+
+TextScreen::CursorMode TextScreen::getCursorMode() const
+{
+  if (_insertMode)
+    switch (_calcState->keyMode())
+    {
+    case KeyMode_Normal: return CursorMode_Insert;
+    case KeyMode_Shift: return CursorMode_InsertShift;
+    case KeyMode_Alpha: return CursorMode_InsertCapsLock;
+    case KeyMode_Mode: return CursorMode_Insert;
+    case KeyMode_ShiftMode: return CursorMode_InsertShift;
+    case KeyMode_ShiftAlpha: return CursorMode_InsertCapsLock;
+    case KeyMode_Hyp: return CursorMode_Insert;
+    case KeyMode_ShiftHyp: return CursorMode_InsertShift;
+    default: return CursorMode_Normal;
+    }
+  else
+    switch (_calcState->keyMode())
+    {
+    case KeyMode_Normal: return CursorMode_Normal;
+    case KeyMode_Shift: return CursorMode_Shift;
+    case KeyMode_Alpha: return CursorMode_CapsLock;
+    case KeyMode_Mode: return CursorMode_Normal;
+    case KeyMode_ShiftMode: return CursorMode_Shift;
+    case KeyMode_ShiftAlpha: return CursorMode_CapsLock;
+    case KeyMode_Hyp: return CursorMode_Normal;
+    case KeyMode_ShiftHyp: return CursorMode_Shift;
+    default: return CursorMode_Normal;
+    }
 }

@@ -43,7 +43,7 @@ Programs::Programs() :
       LCDLine lcdLine;
       lcdLine << (int) LCDOp_Log << (int) LCDChar_LessEqual;
       steps << lcdLine;
-      for (int i = 0; i < 10; ++i)
+      for (int i = 0; i < 5; ++i)
       {
         LCDLine lcdLine1;
         lcdLine1 << (int) LCDOp_Log << (int) LCDChar_LessEqual;
@@ -52,8 +52,7 @@ Programs::Programs() :
         lcdLine2 << (int) LCDOp_Ln << (int) LCDOp_Ln << (int) LCDOp_Ln << (int) LCDChar_LessEqual;
         steps << lcdLine2;
       }
-    } else if (i == 5)
-      steps << LCDLine("LES COPAINS");
+    }
     program.setSteps(steps);
 
     _programs.insert(i, program);
