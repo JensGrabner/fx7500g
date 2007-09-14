@@ -1,15 +1,15 @@
 <Exp> ::= <Exp> <Binop> <Exp> |
           <Unop> <Exp> |
-          '(' <Exp> ')' |
+          ( <Exp> ) |
           <Function> |
           <Numeric>
 
-<Binop> ::= '+' | '-' | '*' | '/'
+<Binop> ::= + | - | * | /
 <Unop> ::= Cos | Sin | Tan
 <Function> ::= <Pol> | <Rec>
-<Pol> ::= Pol <Exp> ',' <Exp> ')'
-<Rec> ::= Rec <Exp> ',' <Exp> ')'
-<Numeric> ::= <Cipherlist> ['.' <Cipherlist>]
+<Pol> ::= Pol <Exp> , <Exp> )
+<Rec> ::= Rec <Exp> , <Exp> )
+<Numeric> ::= <Cipherlist> [. <Cipherlist>]
 <Cipherlist> ::= <Cipher> <CipherList> |
                  <Cipher>
 <Cipher> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
