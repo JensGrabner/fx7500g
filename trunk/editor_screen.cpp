@@ -414,12 +414,60 @@ void EditorScreen::keyModeChanged(KeyMode)
 
 void EditorScreen::execute()
 {
-  if (_cursorLineIndex >= _lines.count() - 1)
+  bool insertion = false;
+  if (_insertMode)
+  {
+    insertion = true;
+    if (!_lines.count())
+      _lines << ShellLine();
+    else
+    {
+      ShellLine &shellLine = _lines[_cursorLineIndex];
+      if (_cursorOffset < shellLine.length())
+      {
+        ShellLine newShellLine;
+        int toRemove = 0;
+        int strIndex = shellLine.stringIndexAtOffset(_cursorOffset);
+        for (int i = strIndex; i < shellLine.count(); ++i)
+        {
+          newShellLine << shellLine[i];
+          toRemove++;
+        }
+        _lines.insert(_cursorLineIndex + 1, newShellLine);
+
+        while (toRemove)
+        {
+          shellLine.removeLast();
+          toRemove--;
+        }
+      } else if (_cursorLineIndex < _lines.count() - 1)
+        _lines.insert(_cursorLineIndex + 1, ShellLine());
+      else
+        _lines << ShellLine();
+    }
+  } else if (_cursorLineIndex >= _lines.count() - 1)
+  {
     _lines << ShellLine();
+    insertion = true;
+  }
+
+  if (insertion)
+    feedScreen();
+
+/*
+  else if (_insertMode && _lines.count())
+  {
+    ShellLine &shellLine = _lines[_cursorLineIndex];
+    if (_cursorOffset < shellLine.length() || _cursorLineIndex < _lines.count() - 1)
+    {
+      // Insert a blank line
+      qDebug("Insert a blank line") 
+    }
+  }*/
 
   bool scrolled;
   moveCursor(_cursorLineIndex + 1, 0, &scrolled); // Go to the next line
-  if (scrolled)
+  if (scrolled || insertion)
     emit screenChanged();
   restartBlink();
 }
