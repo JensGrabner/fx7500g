@@ -179,6 +179,42 @@ void Calculator::applyKey(int key)
   case Qt::Key_8: buttonClicked(Button_8); break;
   case Qt::Key_9: buttonClicked(Button_9); break;
   case Qt::Key_Insert: buttonClicked(Button_Ins); break;
+  case Qt::Key_Backspace: buttonClicked(Button_Left); buttonClicked(Button_Del); break;
+  }
+
+  if ((key >= Qt::Key_A && key <= Qt::Key_Z) || (key == Qt::Key_Space))
+  {
+    buttonClicked(Button_Alpha);
+    switch (key)
+    {
+    case Qt::Key_A: buttonClicked(Button_MinusOne); break;
+    case Qt::Key_B: buttonClicked(Button_Degree); break;
+    case Qt::Key_C: buttonClicked(Button_Ten); break;
+    case Qt::Key_D: buttonClicked(Button_Euler); break;
+    case Qt::Key_E: buttonClicked(Button_Hyp); break;
+    case Qt::Key_F: buttonClicked(Button_Sin); break;
+    case Qt::Key_G: buttonClicked(Button_Cos); break;
+    case Qt::Key_H: buttonClicked(Button_Tan); break;
+    case Qt::Key_I: buttonClicked(Button_Question); break;
+    case Qt::Key_J: buttonClicked(Button_Arrow); break;
+    case Qt::Key_K: buttonClicked(Button_OpenParen); break;
+    case Qt::Key_L: buttonClicked(Button_CloseParen); break;
+    case Qt::Key_M: buttonClicked(Button_7); break;
+    case Qt::Key_N: buttonClicked(Button_8); break;
+    case Qt::Key_O: buttonClicked(Button_9); break;
+    case Qt::Key_P: buttonClicked(Button_4); break;
+    case Qt::Key_Q: buttonClicked(Button_5); break;
+    case Qt::Key_R: buttonClicked(Button_6); break;
+    case Qt::Key_S: buttonClicked(Button_Multiply); break;
+    case Qt::Key_T: buttonClicked(Button_Divide); break;
+    case Qt::Key_U: buttonClicked(Button_1); break;
+    case Qt::Key_V: buttonClicked(Button_2); break;
+    case Qt::Key_W: buttonClicked(Button_3); break;
+    case Qt::Key_X: buttonClicked(Button_Add); break;
+    case Qt::Key_Y: buttonClicked(Button_Substract); break;
+    case Qt::Key_Z: buttonClicked(Button_0); break;
+    case Qt::Key_Space: buttonClicked(Button_Ans); break;
+    }
   }
 }
 

@@ -319,10 +319,10 @@ void CalculatorState::changeKeyModeByButton(int button, bool &noSpecialButton)
     {
     case KeyMode_Normal: setKeyMode(KeyMode_Hyp); break;
     case KeyMode_Shift: setKeyMode(KeyMode_ShiftHyp); break;
-    case KeyMode_Alpha: break;
+    case KeyMode_Alpha: noSpecialButton = true; break;
     case KeyMode_Mode: setKeyMode(KeyMode_Hyp); break;
     case KeyMode_ShiftMode: setKeyMode(KeyMode_ShiftHyp); break;
-    case KeyMode_ShiftAlpha: break;
+    case KeyMode_ShiftAlpha: noSpecialButton = true; break;
     case KeyMode_Hyp: break;
     case KeyMode_ShiftHyp: break;
     default:;
