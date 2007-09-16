@@ -6,7 +6,8 @@ EditorScreen::EditorScreen() :
   _topLineIndex(0),
   _topLineSubIndex(0),
   _cursorLineIndex(0),
-  _cursorOffset(0)
+  _cursorOffset(0),
+  _editZoneTopLineIndex(0)
 {
 }
 
@@ -136,7 +137,7 @@ void EditorScreen::moveLeft()
   _insertMode = false;
   _cursorMode = getCursorMode();
 
-  if (!_cursorLineIndex && !_cursorOffset)
+  if (_cursorLineIndex == _editZoneTopLineIndex && !_cursorOffset)
   {
     restartBlink();
     return;
@@ -208,7 +209,7 @@ void EditorScreen::moveUp()
   if (_cursorOffset < 16)
   {
     // Previous line?
-    if (_cursorLineIndex)
+    if (_cursorLineIndex > _editZoneTopLineIndex)
     {
       ShellLine &previousLine = _lines[_cursorLineIndex - 1];
       int previousOffset = (previousLine.rowCount() - 1) * 16 + _cursorOffset;
@@ -389,6 +390,13 @@ void EditorScreen::buttonClicked(int button)
 {
   int entity = _calcState->printableEntityByButton(button);
 
+  if (button == Button_Question) // TEMP
+  {
+    _editZoneTopLineIndex = 5;
+    moveCursor(_editZoneTopLineIndex, 0);
+    return;
+  }
+
   if (entity >= 0) // Printable entity
     writeEntity(entity);
   else
@@ -399,7 +407,7 @@ void EditorScreen::buttonClicked(int button)
     case Button_Left: moveLeft(); break;
     case Button_Right: moveRight(); break;
     case Button_Del: deleteString(); break;
-    case Button_Exe: execute(); break;
+    case Button_Exe: carriageReturn(); break;
     case Button_Ins: insertClicked(); break;
     default:;
     }
@@ -412,7 +420,7 @@ void EditorScreen::keyModeChanged(KeyMode)
   restartBlink();
 }
 
-void EditorScreen::execute()
+void EditorScreen::carriageReturn()
 {
   bool insertion = false;
   if (_insertMode)
@@ -453,17 +461,6 @@ void EditorScreen::execute()
 
   if (insertion)
     feedScreen();
-
-/*
-  else if (_insertMode && _lines.count())
-  {
-    ShellLine &shellLine = _lines[_cursorLineIndex];
-    if (_cursorOffset < shellLine.length() || _cursorLineIndex < _lines.count() - 1)
-    {
-      // Insert a blank line
-      qDebug("Insert a blank line") 
-    }
-  }*/
 
   bool scrolled;
   moveCursor(_cursorLineIndex + 1, 0, &scrolled); // Go to the next line
