@@ -22,7 +22,6 @@ int main(int argc, char *argv[])
   case ExpressionComputer::Error_CommandStack: qDebug("Command stack error"); break;
   default:;
   }
-  return 0;
 
   QApplication app(argc, argv);
 

@@ -34,27 +34,6 @@ void MainWindow::on_sliderSize_sliderMoved(int value)
   _lcdDisplay->setPlotSize(value);
 }
 
-void MainWindow::on_pushButtonRUN_clicked()
-{
-  _calculator.setScreenMode(Calculator::ScreenMode_Normal);
-  _calculator.setSysMode(SysMode_RUN);
-  graphicsView->setFocus(Qt::OtherFocusReason);
-}
-
-void MainWindow::on_pushButtonWRT_clicked()
-{
-  _calculator.setSysMode(SysMode_WRT);
-  _calculator.setScreenMode(Calculator::ScreenMode_Normal);
-  graphicsView->setFocus(Qt::OtherFocusReason);
-}
-
-void MainWindow::on_pushButtonPCL_clicked()
-{
-  _calculator.setSysMode(SysMode_PCL);
-  _calculator.setScreenMode(Calculator::ScreenMode_Normal);
-  graphicsView->setFocus(Qt::OtherFocusReason);
-}
-
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
   if (/*obj != graphicsView || */event->type() != QEvent::KeyPress)
