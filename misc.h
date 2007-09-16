@@ -128,14 +128,14 @@ enum LCDChar {
   LCDChar_InsertShiftCursor,
   LCDChar_MinusOne,  // -1
   LCDChar_Exponent,  // E
-  LCDChar_LittleO,
-  LCDChar_LittleR,
-  LCDChar_LittleG,
+  LCDChar_LittleO,   // Suffix for degree values
+  LCDChar_LittleR,   // Suffix for radian values
+  LCDChar_LittleG,   // Suffix for gradian values
   LCDChar_Space,
   LCDChar_End = LCDChar_Space
 };
 
-LCDChar charToLCDChar(const QChar &c, bool *found = 0);
+int charToEntity(const QChar &c, bool *found = 0);
 
 // 'Log', 'Ln', all atomic entities
 enum LCDOperator
