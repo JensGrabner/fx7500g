@@ -7,12 +7,11 @@
 
 int main(int argc, char *argv[])
 {
-//  LCDLine line("1/(2^(0+2)"); PROBLEM WITH PARENTHESIS
-  LCDLine line;
+  LCDLine line("(1/(2x(1+2)))^10");
+//  LCDLine line;
   QList<int> expression;
   foreach (int entity, line)
     expression << entity;
-  expression << LCDOp_Cosh_1 << LCDChar_3;
   ExpressionComputer::Error error;
   ExpressionComputer::compute(expression, error);
 

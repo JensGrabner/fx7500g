@@ -115,7 +115,6 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression)
       }
 
       performOperation(token.command());
-//      pushCommand(token.command(), commandStackError);
       break;
     case ExpressionToken::TokenType_OpenParen: // (
       pushCommand(token.command(), commandStackError);
@@ -155,12 +154,12 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression)
   }
 
   // Consume all resting operators
-  performStackOperations();
+  performStackOperations(true);
 
   QString sortie;
   double n = _numberStack.top();
   if (fabs(n) < 0.01)
-    sortie = QString::number(_numberStack.top(), 'E');
+    sortie = QString::number(_numberStack.top(), 'E', 10);
   else
     sortie = QString::number(_numberStack.top(), 'G', 10);
   qDebug(qPrintable(sortie));
@@ -236,7 +235,7 @@ void ExpressionComputer::performStackOperations(bool manageOpenParen)
   while (!_commandStack.isEmpty())
   {
     if (isOperator(_commandStack.top()) || isPreFunc(_commandStack.top()) ||
-        isPostFunc(_commandStack.pop()))
+        isPostFunc(_commandStack.top()))
       performOperation(_commandStack.pop());
     else if (_commandStack.top() == LCDChar_OpenParen && manageOpenParen)
       _commandStack.pop();
