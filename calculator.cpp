@@ -21,10 +21,10 @@ Calculator::Calculator() :
           this, SLOT(progScreenChanged()));
 
   // Init editor screen
-  _editorScreen.init(&_calcState);
-  connect(&_editorScreen, SIGNAL(changeChar(int, int, LCDChar)),
+  _progEditScreen.init(&_calcState);
+  connect(&_progEditScreen, SIGNAL(changeChar(int, int, LCDChar)),
           this, SLOT(editorChangeChar(int, int, LCDChar)));
-  connect(&_editorScreen, SIGNAL(screenChanged()),
+  connect(&_progEditScreen, SIGNAL(screenChanged()),
           this, SLOT(editorScreenChanged()));
 }
 
@@ -117,8 +117,8 @@ void Calculator::setScreenMode(ScreenMode value)
     switch (_calcState.sysMode())
     {
     case SysMode_WRT:
-      _lcdDisplay->drawScreen(_editorScreen.currentScreen());
-      _editorScreen.restartBlink();
+      _lcdDisplay->drawScreen(_progEditScreen.currentScreen());
+      _progEditScreen.restartBlink();
       break;
     default:;
     }
@@ -228,13 +228,13 @@ void Calculator::editorChangeChar(int col, int line, LCDChar c)
 
 void Calculator::progEditProgram(int programIndex)
 {
-  _editorScreen.setProgram(programIndex);
+  _progEditScreen.setProgram(programIndex);
   setScreenMode(ScreenMode_Editor);
 }
 
 void Calculator::editorScreenChanged()
 {
-  _lcdDisplay->drawScreen(_editorScreen.currentScreen());
+  _lcdDisplay->drawScreen(_progEditScreen.currentScreen());
 }
 
 void Calculator::buttonClicked(int buttonIndex)
@@ -279,7 +279,7 @@ void Calculator::buttonClicked(int buttonIndex)
     if (_screenMode == ScreenMode_Normal)
       _progScreen.buttonClicked(buttonIndex);
     else if (_screenMode == ScreenMode_Editor)
-      _editorScreen.buttonClicked(buttonIndex);
+      _progEditScreen.buttonClicked(buttonIndex);
     break;
   default:;
   }

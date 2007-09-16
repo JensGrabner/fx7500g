@@ -3,7 +3,8 @@
 
 #include "lcd_display.h"
 #include "prog_screen.h"
-#include "editor_screen.h"
+#include "prog_edit_screen.h"
+#include "run_screen.h"
 
 class Calculator : QObject
 {
@@ -35,7 +36,7 @@ public:
   LCDDisplay *lcdDisplay() { return _lcdDisplay; }
   void setLCDDisplay(LCDDisplay *value) { _lcdDisplay = value; };
 
-  EditorScreen &runScreen() { return _runScreen; }
+  RunScreen &runScreen() { return _runScreen; }
 
   void applyKey(int key);
 
@@ -44,9 +45,9 @@ public:
 private:
   CalculatorState _calcState;
   ScreenMode _screenMode;
-  EditorScreen _runScreen;
+  RunScreen _runScreen;
   ProgScreen _progScreen;
-  EditorScreen _editorScreen;
+  ProgEditScreen _progEditScreen;
   LCDDisplay *_lcdDisplay;
 
   QList<LCDString> getResumeScreen() const;
