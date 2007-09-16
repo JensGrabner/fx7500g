@@ -12,7 +12,6 @@ HEADERS += main_window.h \
   text_printer.h \
   misc.h \
   text_screen.h \
-  run_screen.h \
   prog_screen.h \
   program.h \
   editor_screen.h \
@@ -26,7 +25,6 @@ SOURCES += main.cpp \
   text_printer.cpp \
   misc.cpp \
   text_screen.cpp \
-  run_screen.cpp \
   prog_screen.cpp \
   program.cpp \
   editor_screen.cpp \

@@ -13,9 +13,6 @@ public:
 
   void setProgram(int programIndex);
 
-  void write(LCDChar c) { writeEntity(c); }
-  void write(LCDOperator o) { writeEntity(o); }
-
   void buttonClicked(int button);
 
   void moveLeft();
@@ -36,11 +33,12 @@ private:
   int _topLineSubIndex; // Index of the subline of the top line
   int _cursorLineIndex; // Absolute index of the line where cursor is
   int _cursorOffset; // Offset in the line
+  int _editZoneTopLineIndex; // If 0, all zone is editable, this value is absolute
 
   void moveCursor(int newLineIndex, int newOffset, bool *scrolled = 0); // Move cursor can invoke scrollUp() or scrollDown() if cursor is out of the screen
   void scrollUp(); // Scroll up the screen if it's possible
   void scrollDown(); // Scroll down the screen if it's possible
-  void execute();
+  void carriageReturn();
   void insertClicked();
 
   void writeEntity(int entity);

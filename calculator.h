@@ -2,7 +2,6 @@
 #define CALCULATOR_H
 
 #include "lcd_display.h"
-#include "run_screen.h"
 #include "prog_screen.h"
 #include "editor_screen.h"
 
@@ -36,7 +35,7 @@ public:
   LCDDisplay *lcdDisplay() { return _lcdDisplay; }
   void setLCDDisplay(LCDDisplay *value) { _lcdDisplay = value; };
 
-  RunScreen &runScreen() { return _runScreen; }
+  EditorScreen &runScreen() { return _runScreen; }
 
   void applyKey(int key);
 
@@ -45,7 +44,7 @@ public:
 private:
   CalculatorState _calcState;
   ScreenMode _screenMode;
-  RunScreen _runScreen;
+  EditorScreen _runScreen;
   ProgScreen _progScreen;
   EditorScreen _editorScreen;
   LCDDisplay *_lcdDisplay;

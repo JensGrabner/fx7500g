@@ -37,7 +37,7 @@ Programs::Programs() :
   {
     Program program;
     QList<LCDLine> steps;
-    if (i == 3)
+    if (i == 0)
     {
       steps << LCDLine("SALUT LES COPAIN");
       LCDLine lcdLine;
