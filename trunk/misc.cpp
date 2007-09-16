@@ -2,7 +2,7 @@
 
 #include "misc.h"
 
-LCDChar charToLCDChar(const QChar &c, bool *found)
+int charToEntity(const QChar &c, bool *found)
 {
   const char ch = c.toLatin1();
 
@@ -13,6 +13,8 @@ LCDChar charToLCDChar(const QChar &c, bool *found)
     return (LCDChar) ((int) LCDChar_0 + ch - '0');
   else if (ch >= 'A' && ch <= 'Z')
     return (LCDChar) ((int) LCDChar_A + ch - 'A');
+  else if (ch == 'x')
+    return LCDChar_Multiply;
   else if (ch >= 'a' && ch <= 'z')
     return (LCDChar) ((int) LCDChar_a + ch - 'a');
   else if (ch == '!')
@@ -58,7 +60,7 @@ LCDChar charToLCDChar(const QChar &c, bool *found)
   else if (ch == '_')
     return LCDChar_Cursor;
   else if (ch == '^')
-    return LCDChar_Multiply;
+    return LCDOp_Xy;
   else
   {
     if (found)
@@ -90,10 +92,16 @@ void LCDString::assignString(const QString &str)
   foreach (const QChar &c, str)
   {
     bool found;
-    LCDChar ch = charToLCDChar(c, &found);
+    int entity = charToEntity(c, &found);
 
     if (found)
-      (*this) << ch;
+    {
+      if (entity < 256)
+        (*this) << (LCDChar) entity;
+      else
+        foreach (LCDChar c, LCDString((LCDOperator) entity))
+          (*this) << c;
+    }
   }
 }
 
@@ -168,10 +176,11 @@ void LCDLine::assignString(const QString &str)
   foreach (const QChar &c, str)
   {
     bool found;
-    LCDChar ch = charToLCDChar(c, &found);
+
+    int entity = charToEntity(c, &found);
 
     if (found)
-      (*this) << ch;
+      (*this) << entity;
   }
 }
 

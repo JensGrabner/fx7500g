@@ -12,6 +12,8 @@ public:
     TokenType_EOL,
     TokenType_Number,
     TokenType_Operator,
+    TokenType_PreFunc,
+    TokenType_PostFunc,
     TokenType_OpenParen,
     TokenType_CloseParen
   };
@@ -21,6 +23,8 @@ public:
 
   bool isNumber() const { return _tokenType == TokenType_Number; }
   bool isOperator() const { return _tokenType == TokenType_Operator; }
+  bool isPreFunc() const { return _tokenType == TokenType_PreFunc; }
+  bool isPostFunc() const { return _tokenType == TokenType_PostFunc; }
   bool isOpenParen() const { return _tokenType == TokenType_OpenParen; }
   bool isCloseParen() const { return _tokenType == TokenType_CloseParen; }
   bool isEOL() const { return _tokenType == TokenType_EOL; }
@@ -70,6 +74,8 @@ private:
   QList<int> computeExpression(const QList<int> &expression);
 
   bool isOperator(int entity) const;
+  bool isPreFunc(int entity) const;
+  bool isPostFunc(int entity) const;
 
   void performOperation(int entity);
   void performStackOperations(bool manageOpenParen = false);
@@ -81,6 +87,10 @@ private:
   void pushCommand(int command, bool &stackError);
 
   void displayCommandStack() const;
+
+  double deg2rad(double deg) const { return (deg * M_PI) / 180.0; }
+  double rad2deg(double rad) const { return (rad * 180.0) / M_PI; }
+  double factorial(double value) const;
 };
 
 #endif

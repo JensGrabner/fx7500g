@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include <QApplication>
 
 #include "main_window.h"
@@ -5,11 +7,12 @@
 
 int main(int argc, char *argv[])
 {
-//  LCDString exp("(1+2)^(2+3)/(5-16.45)");
-  LCDString exp("2^3+4");
+//  LCDLine line("1/(2^(0+2)"); PROBLEM WITH PARENTHESIS
+  LCDLine line;
   QList<int> expression;
-  foreach (LCDChar c, exp)
-    expression << c;
+  foreach (int entity, line)
+    expression << entity;
+  expression << LCDOp_Cosh_1 << LCDChar_3;
   ExpressionComputer::Error error;
   ExpressionComputer::compute(expression, error);
 
