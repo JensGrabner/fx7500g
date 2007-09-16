@@ -156,6 +156,8 @@ enum LCDOperator
   LCDOp_Sinh_1, // Sinh exponent -1
   LCDOp_Cosh_1, // Cosh exponent -1
   LCDOp_Tanh_1, // Tanh exponent -1
+  LCDOp_Not,
+  LCDOp_Xor,
   LCDOp_Xy,
   LCDOp_xSquareRoot,
   LCDOp_Neg,
@@ -193,6 +195,13 @@ enum LCDOperator
   LCDOp_Mcl,
   LCDOp_Scl
 };
+
+int getEntityPriority(int entity);
+// Return :
+// 0 if priorities are equal
+// 1 if <entity1> is more prioritary than <entity2>
+// -1 if <entity1> is less prioritary than <entity2>
+int comparePriorities(int entity1, int entity2);
 
 class LCDString : public QList<LCDChar>
 {
