@@ -27,8 +27,6 @@ LCDChar charToLCDChar(const QChar &c, bool *found)
     return LCDChar_Comma;
   else if (ch == ';')
     return LCDChar_Semicolon;
-  else if (ch == '-')
-    return LCDChar_MinusPrefix;
   else if (ch == ':')
     return LCDChar_Colon;
   else if (ch == '"')
@@ -49,6 +47,8 @@ LCDChar charToLCDChar(const QChar &c, bool *found)
     return LCDChar_Asterix;
   else if (ch == '+')
     return LCDChar_Add;
+  else if (ch == '-')
+    return LCDChar_Substract;
   else if (ch == '/')
     return LCDChar_Divide;
   else if (ch == '.')
@@ -57,6 +57,8 @@ LCDChar charToLCDChar(const QChar &c, bool *found)
     return LCDChar_Space;
   else if (ch == '_')
     return LCDChar_Cursor;
+  else if (ch == '^')
+    return LCDChar_Multiply;
   else
   {
     if (found)
@@ -115,6 +117,8 @@ void LCDString::assignByOperator(LCDOperator op)
   case LCDOp_Sinh_1: assignString("sinh"); (*this) << LCDChar_MinusOneUp << LCDChar_Space; break;
   case LCDOp_Cosh_1: assignString("cosh"); (*this) << LCDChar_MinusOneUp << LCDChar_Space; break;
   case LCDOp_Tanh_1: assignString("tanh"); (*this) << LCDChar_MinusOneUp << LCDChar_Space; break;
+  case LCDOp_Not: assignString("Not"); break;
+  case LCDOp_Xor: assignString("xor"); break;
   case LCDOp_Xy: (*this) << LCDChar_x << LCDChar_ExpY; break;
   case LCDOp_xSquareRoot: (*this) << LCDChar_SquareRootX << LCDChar_SquareRoot; break;
   case LCDOp_Neg: assignString("Neg "); break;
@@ -589,4 +593,88 @@ int CalculatorState::printableEntityByButtonInPad2(int button) const
     default:;
     }
     return -1;
+}
+
+int getEntityPriority(int entity)
+{
+  switch (entity)
+  {
+  // Here come Pol and Rect (priority 1)
+
+  case LCDChar_Square:
+  case LCDChar_MinusOneUp:
+  case LCDChar_Exclamation:
+  case LCDChar_LittleO:
+  case LCDChar_LittleR:
+  case LCDChar_LittleG:
+  case LCDChar_Degree:
+    return 2;
+
+  case LCDOp_Xy:
+  case LCDOp_xSquareRoot:
+    return 3;
+
+  // Here come the first abregged multiplication forms (priority 4)
+
+  case LCDChar_SquareRoot:
+  case LCDOp_CubeSquareRoot:
+  case LCDOp_Log:
+  case LCDChar_Ten:
+  case LCDOp_Ln:
+  case LCDChar_Euler:
+  case LCDOp_Sin:
+  case LCDOp_Cos:
+  case LCDOp_Tan:
+  case LCDOp_Sinh:
+  case LCDOp_Cosh:
+  case LCDOp_Tanh:
+  case LCDOp_Sin_1:
+  case LCDOp_Cos_1:
+  case LCDOp_Tan_1:
+  case LCDOp_Sinh_1:
+  case LCDOp_Cosh_1:
+  case LCDOp_Tanh_1:
+  case LCDChar_MinusPrefix:
+  case LCDOp_Abs:
+  case LCDOp_Int:
+  case LCDOp_Frac:
+  case LCDChar_h:
+  case LCDChar_d:
+  case LCDChar_b:
+  case LCDChar_o:
+  case LCDOp_Neg:
+  case LCDOp_Not:
+    return 5;
+
+  // Here come the second abregged multiplication forms (priority 6)
+
+  case LCDChar_Multiply:
+  case LCDChar_Divide:
+    return 7;
+
+  case LCDChar_Add:
+  case LCDChar_Substract:
+    return 8;
+
+  case LCDOp_And:
+    return 9;
+
+  case LCDOp_Or:
+  case LCDOp_Xor:
+    return 10;
+
+  default: return -1;
+  }
+}
+
+int comparePriorities(int entity1, int entity2)
+{
+  int p1 = getEntityPriority(entity1);
+  int p2 = getEntityPriority(entity2);
+  if (p1 < p2)
+    return 1;
+  else if (p1 > p2)
+    return -1;
+  else
+    return 0;
 }
