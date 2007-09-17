@@ -156,19 +156,21 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression)
 
   QString sortie;
   double n = _numberStack.top();
-  if (fabs(n) < 0.01)
+  if (fabs(n) < 0.01 || fabs(n) >= 10000000000.0)
     sortie = QString::number(_numberStack.top(), 'E', 9);
   else
     sortie = QString::number(_numberStack.top(), 'G', 10);
 
   if (sortie.indexOf('.') < 0)
     sortie.append('.');
-  // Remove all 0
+
+  // Remove all excessive 0
   int p;
   while ((p = sortie.indexOf("0E")) >= 0)
     sortie.remove(p, 1);
-  while ((p = sortie.indexOf('0')) == sortie.length() - 1)
-    sortie.remove(p, 1);
+  if (sortie.indexOf('E') < 0)
+    while ((p = sortie.indexOf('0')) == sortie.length() - 1)
+      sortie.remove(p, 1);
 
   // Convert to a QList<int>
   foreach (const QChar &c, sortie)
@@ -181,6 +183,8 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression)
       result << LCDChar_Dot;
     else if (ch == '-')
       result << LCDChar_MinusPrefix;
+    else if (ch == '+')
+      result << LCDChar_Add;
     else if (ch == 'E')
       result << LCDChar_Exponent;
   }
