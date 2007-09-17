@@ -10,15 +10,15 @@ class Program
 public:
   bool isEmpty() const { return !_steps.count(); }
 
-  QList<LCDLine> &steps() { return _steps; }
-  void setSteps(QList<LCDLine> value);
+  QList<TextLine> &steps() { return _steps; }
+  void setSteps(QList<TextLine> value);
 
   int size() const;
 
   void clear();
 
 private:
-  QList<LCDLine> _steps;
+  QList<TextLine> _steps;
 };
 
 class Programs

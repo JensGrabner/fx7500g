@@ -13,7 +13,7 @@ public:
 
   void setProgram(int programIndex);
 
-  void buttonClicked(int button);
+  virtual void buttonClicked(int button);
 
   void moveLeft();
   void moveRight();
@@ -25,20 +25,20 @@ signals:
   void promptLineChanged();
 
 protected:
+  QList<TextLine> _lines;
+  int _editZoneTopLineIndex; // If 0, all zone is editable, this value is absolute
   void feedScreen(); // <_screen> of Shell ancestor is filled with <_lines> and <_promptLine>
+  void carriageReturn();
+  void moveCursor(int newLineIndex, int newOffset, bool *scrolled = 0); // Move cursor can invoke scrollUp() or scrollDown() if cursor is out of the screen
 
 private:
-  QList<ShellLine> _lines;
   int _topLineIndex; // Absolute index of the top line (the most top visible line at screen) in <_lines>
   int _topLineSubIndex; // Index of the subline of the top line
   int _cursorLineIndex; // Absolute index of the line where cursor is
   int _cursorOffset; // Offset in the line
-  int _editZoneTopLineIndex; // If 0, all zone is editable, this value is absolute
 
-  void moveCursor(int newLineIndex, int newOffset, bool *scrolled = 0); // Move cursor can invoke scrollUp() or scrollDown() if cursor is out of the screen
   void scrollUp(); // Scroll up the screen if it's possible
   void scrollDown(); // Scroll down the screen if it's possible
-  void carriageReturn();
   void insertClicked();
 
   void writeEntity(int entity);

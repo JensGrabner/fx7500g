@@ -2,7 +2,7 @@
 
 #include "misc.h"
 
-int charToEntity(const QChar &c, bool *found)
+LCDChar charToLCDChar(const QChar &c, bool *found)
 {
   const char ch = c.toLatin1();
 
@@ -13,8 +13,6 @@ int charToEntity(const QChar &c, bool *found)
     return (LCDChar) ((int) LCDChar_0 + ch - '0');
   else if (ch >= 'A' && ch <= 'Z')
     return (LCDChar) ((int) LCDChar_A + ch - 'A');
-  else if (ch == 'x')
-    return LCDChar_Multiply;
   else if (ch >= 'a' && ch <= 'z')
     return (LCDChar) ((int) LCDChar_a + ch - 'a');
   else if (ch == '!')
@@ -59,14 +57,112 @@ int charToEntity(const QChar &c, bool *found)
     return LCDChar_Space;
   else if (ch == '_')
     return LCDChar_Cursor;
-  else if (ch == '^')
-    return LCDOp_Xy;
   else
   {
     if (found)
       *found = false;
     return LCDChar_0;
   }
+}
+
+QList<LCDChar> stringToChars(const QString &str)
+{
+  QList<LCDChar> list;
+
+  bool found;
+  LCDChar lcdChar;
+  foreach (const QChar &c, str)
+  {
+    lcdChar = charToLCDChar(c, &found);
+    if (found)
+      list << lcdChar;
+  }
+
+  return list;
+}
+
+bool isLCDChar(int entity)
+{
+  return entity >= 0 && entity < 256;
+}
+
+bool isLCDOperator(int entity)
+{
+  return entity >= 256;
+}
+
+QList<LCDChar> operatorToChars(LCDOperator op)
+{
+  QList<LCDChar> list;
+  switch (op)
+  {
+  case LCDOp_Int: return stringToChars("Int ");
+  case LCDOp_Frac: return stringToChars("Frac ");
+  case LCDOp_Log: return stringToChars("log ");
+  case LCDOp_Ln: return stringToChars("ln ");
+  case LCDOp_Sin: return stringToChars("sin ");
+  case LCDOp_Cos: return stringToChars("cos ");
+  case LCDOp_Tan: return stringToChars("tan ");
+  case LCDOp_Sinh: return stringToChars("sinh ");
+  case LCDOp_Cosh: return stringToChars("cosh ");
+  case LCDOp_Tanh: return stringToChars("tanh ");
+  case LCDOp_Sin_1: list = stringToChars("sin"); list << LCDChar_MinusOneUp << LCDChar_Space; break;
+  case LCDOp_Cos_1: list = stringToChars("cos"); list << LCDChar_MinusOneUp << LCDChar_Space; break;
+  case LCDOp_Tan_1: list = stringToChars("tan"); list << LCDChar_MinusOneUp << LCDChar_Space; break;
+  case LCDOp_Sinh_1: list = stringToChars("sinh"); list << LCDChar_MinusOneUp << LCDChar_Space; break;
+  case LCDOp_Cosh_1: list = stringToChars("cosh"); list << LCDChar_MinusOneUp << LCDChar_Space; break;
+  case LCDOp_Tanh_1: list = stringToChars("tanh"); list << LCDChar_MinusOneUp << LCDChar_Space; break;
+  case LCDOp_Not: return stringToChars("Not");
+  case LCDOp_Xor: return stringToChars("xor");
+  case LCDOp_Xy: list << LCDChar_x << LCDChar_ExpY; break;
+  case LCDOp_xSquareRoot: list << LCDChar_SquareRootX << LCDChar_SquareRoot; break;
+  case LCDOp_Neg: return stringToChars("Neg "); break;
+  case LCDOp_And: return stringToChars("and"); break;
+  case LCDOp_Or: return stringToChars("or"); break;
+  case LCDOp_Abs: return stringToChars("Abs "); break;
+  case LCDOp_CubeSquareRoot: list << LCDChar_Cube << LCDChar_SquareRoot; break;
+  case LCDOp_Ans: return stringToChars("Ans"); break;
+  case LCDOp_Cls: return stringToChars("Cls"); break;
+  case LCDOp_Prog: return stringToChars("Prog "); break;
+  case LCDOp_Graph: return stringToChars("Graph Y="); break;
+  case LCDOp_Range: return stringToChars("Range "); break;
+  case LCDOp_Plot: return stringToChars("Plot "); break;
+  case LCDOp_Factor: return stringToChars("Factor "); break;
+  case LCDOp_Deg: return stringToChars("Deg"); break;
+  case LCDOp_Rad: return stringToChars("Rad"); break;
+  case LCDOp_Gra: return stringToChars("Gra"); break;
+  case LCDOp_Fix: return stringToChars("Fix "); break;
+  case LCDOp_Sci: return stringToChars("Sci "); break;
+  case LCDOp_Norm: return stringToChars("Norm"); break;
+  case LCDOp_Defm: return stringToChars("Defm "); break;
+  case LCDOp_Rnd: return stringToChars("Rnd"); break;
+  case LCDOp_RanSharp: return stringToChars("Ran#"); break;
+  case LCDOp_Line: return stringToChars("Line"); break;
+  case LCDOp_Goto: return stringToChars("Goto "); break;
+  case LCDOp_Lbl: return stringToChars("Lbl "); break;
+  case LCDOp_Dsz: return stringToChars("Dsz "); break;
+  case LCDOp_Isz: return stringToChars("Isz "); break;
+  case LCDOp_Yon: list << LCDChar_y << LCDChar_Teta << LCDChar_n; break;
+  case LCDOp_YonMinusOne: list << LCDChar_y << LCDChar_Teta << LCDChar_n << LCDChar_MinusOne; break;
+  case LCDOp_Xon: list << LCDChar_x << LCDChar_Teta << LCDChar_n; break;
+  case LCDOp_XonMinusOne: list << LCDChar_x << LCDChar_Teta << LCDChar_n << LCDChar_MinusOne; break;
+  case LCDOp_Pol: return stringToChars("Pol("); break;
+  case LCDOp_Rec: return stringToChars("Rec("); break;
+  case LCDOp_Mcl: return stringToChars("Mcl"); break;
+  case LCDOp_Scl: return stringToChars("Scl"); break;
+  default:;
+  }
+  return list;
+}
+
+QList<LCDChar> entityToChars(int entity)
+{
+  QList<LCDChar> list;
+  if (entity < 256)
+    list << (LCDChar) entity;
+  else
+    list = operatorToChars((LCDOperator) entity);
+  return list;
 }
 
 LCDString::LCDString(LCDChar c)
@@ -92,16 +188,10 @@ void LCDString::assignString(const QString &str)
   foreach (const QChar &c, str)
   {
     bool found;
-    int entity = charToEntity(c, &found);
+    LCDChar lcdChar = charToLCDChar(c, &found);
 
     if (found)
-    {
-      if (entity < 256)
-        (*this) << (LCDChar) entity;
-      else
-        foreach (LCDChar c, LCDString((LCDOperator) entity))
-          (*this) << c;
-    }
+      (*this) << lcdChar;
   }
 }
 
@@ -164,23 +254,6 @@ void LCDString::assignByOperator(LCDOperator op)
   case LCDOp_Mcl: assignString("Mcl"); break;
   case LCDOp_Scl: assignString("Scl"); break;
   default:;
-  }
-}
-
-////////////////////////////////////////////////
-////////////////////////////////////////////////
-////////////////////////////////////////////////
-
-void LCDLine::assignString(const QString &str)
-{
-  foreach (const QChar &c, str)
-  {
-    bool found;
-
-    int entity = charToEntity(c, &found);
-
-    if (found)
-      (*this) << entity;
   }
 }
 
@@ -686,4 +759,138 @@ int comparePriorities(int entity1, int entity2)
     return -1;
   else
     return 0;
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+/////////////////////////////////////
+
+TextLine::TextLine(const QString &str, bool rightJustified) :
+  _rightJustified(rightJustified)
+{
+  assignString(str);
+}
+
+TextLine::TextLine(int entity, bool rightJustified) :
+  _rightJustified(rightJustified)
+{
+  append(entity);
+}
+
+void TextLine::assignString(const QString &str)
+{
+  clear();
+
+  bool found;
+  LCDChar lcdChar;
+  foreach (const QChar &c, str)
+  {
+    lcdChar = charToLCDChar(c, &found);
+    if (found)
+      append(lcdChar);
+  }
+}
+
+LCDChar TextLine::charAt(int offset) const
+{
+  int currentLength = 0;
+  foreach (int entity, *this)
+  {
+    QList<LCDChar> list;
+    if (isLCDChar(entity))
+      list << (LCDChar) entity;
+    else
+      list = operatorToChars((LCDOperator) entity);
+
+    if (offset >= currentLength && offset < currentLength + list.count())
+      return list[offset - currentLength];
+    currentLength += list.count();
+  }
+  return LCDChar_0;
+}
+
+int TextLine::charLength() const
+{
+  int length = 0;
+  foreach (int entity, *this)
+    if (isLCDChar(entity))
+      length++;
+    else
+      length += operatorToChars((LCDOperator) entity).count();
+  return length;
+}
+
+QList<LCDChar> TextLine::charLine() const
+{
+  QList<LCDChar> list;
+  foreach (int entity, *this)
+    if (isLCDChar(entity))
+      list << LCDChar(entity);
+    else
+      list << operatorToChars((LCDOperator) entity);
+  return list;
+}
+
+int TextLine::rowCount() const
+{
+  return charLength() / 16 + 1;
+}
+
+int TextLine::entityAt(int offset) const
+{
+  int currentLength = 0;
+  for (int i = 0; i < count(); ++i)
+  {
+    int entity = at(i);
+    QList<LCDChar> list;
+    if (isLCDChar(entity))
+      list << (LCDChar) entity;
+    else
+      list = operatorToChars((LCDOperator) entity);
+
+    if (offset >= currentLength && offset < currentLength + list.count())
+      return i;
+    currentLength += list.count();
+  }
+  return count();
+}
+
+bool TextLine::isBreakerEndedLine() const
+{
+  return count() && at(count() - 1) == LCDChar_RBTriangle;
+}
+
+int TextLine::offsetAt(int entityIndex) const
+{
+  if (entityIndex >= count())
+    return charLength();
+
+  int currentLength = 0;
+  for (int i = 0; i < entityIndex; ++i)
+  {
+    int entity = at(i);
+    QList<LCDChar> list;
+    if (isLCDChar(entity))
+      list << (LCDChar) entity;
+    else
+      list = operatorToChars((LCDOperator) entity);
+    currentLength += list.count();
+  }
+  return currentLength;
+}
+
+bool TextLine::cursorCanMoveRight(int offset) const
+{
+  return (isBreakerEndedLine() && offset < charLength() - 1) ||
+         (!isBreakerEndedLine() && offset < charLength());
+}
+
+int TextLine::maximumCursorPosition() const
+{
+  return isBreakerEndedLine() ? charLength() - 1 : charLength();
+}
+
+int TextLine::maximumCursorPositionIfTooHigh(int cursorOffset) const
+{
+  return cursorOffset > maximumCursorPosition() ? maximumCursorPosition() : cursorOffset;
 }

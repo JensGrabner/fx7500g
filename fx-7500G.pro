@@ -3,7 +3,7 @@ TARGET =
 DEPENDPATH += .
 INCLUDEPATH += .
 
-CONFIG += release
+CONFIG += debug
 
 # Input
 HEADERS += main_window.h \

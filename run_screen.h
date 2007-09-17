@@ -8,6 +8,11 @@ class RunScreen : public EditorScreen
   Q_OBJECT
 public:
   RunScreen() : EditorScreen() {}
+
+  void buttonClicked(int button);
+
+private:
+  void validate();
 };
 
 #endif
