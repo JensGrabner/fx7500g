@@ -148,6 +148,7 @@ void Calculator::applyKey(int key)
   case Qt::Key_Backspace: buttonClicked(Button_Left); buttonClicked(Button_Del); break;
   case Qt::Key_Plus: buttonClicked(Button_Add); break;
   case Qt::Key_Slash: buttonClicked(Button_Divide); break;
+  case Qt::Key_Asterisk: buttonClicked(Button_Multiply); break;
   }
 
   if ((key >= Qt::Key_A && key <= Qt::Key_Z) || (key == Qt::Key_Space))
