@@ -135,7 +135,8 @@ enum LCDChar {
   LCDChar_End = LCDChar_Space
 };
 
-int charToEntity(const QChar &c, bool *found = 0);
+LCDChar charToLCDChar(const QChar &c, bool *found = 0);
+QList<LCDChar> stringToChars(const QString &str);
 
 // 'Log', 'Ln', all atomic entities
 enum LCDOperator
@@ -196,6 +197,11 @@ enum LCDOperator
   LCDOp_Scl
 };
 
+QList<LCDChar> operatorToChars(LCDOperator op);
+QList<LCDChar> entityToChars(int entity);
+bool isLCDChar(int entity);
+bool isLCDOperator(int entity);
+
 int getEntityPriority(int entity);
 // Return :
 // 0 if priorities are equal
@@ -215,17 +221,6 @@ public:
 private:
   void assignString(const QString &str);
   void assignByOperator(LCDOperator op);
-};
-
-// LCDLine can contain LCDChar AND LCDOp
-class LCDLine : public QList<int>
-{
-public:
-  LCDLine() : QList<int>() {}
-  LCDLine(const QString &str) { assignString(str); }
-
-private:
-  void assignString(const QString &str);
 };
 
 enum PadButton
@@ -349,6 +344,34 @@ private:
 
   int printableEntityByButtonInPad1(int button) const;
   int printableEntityByButtonInPad2(int button) const;
+};
+
+class TextLine : public QList<int>
+{
+public:
+  TextLine(const QString &str = "", bool rightJustified = false);
+  TextLine(int entity, bool rightJustified = false);
+
+  bool rightJustified() const { return _rightJustified; }
+  void setRightJustified(bool value) { _rightJustified = value; }
+
+  void assignString(const QString &str); // Transforms a QString into a QList of entities
+
+  LCDChar charAt(int offset) const; // Returns LCDChar_0 if offset is not valid
+  int charLength() const;
+  QList<LCDChar> charLine() const;
+  int rowCount() const; // Returns the row line in the screen (16 is the screen width)
+
+  int entityAt(int offset) const; // Returns the entity index. If offset is too big, returns count()
+  int offsetAt(int entityIndex) const; // Returns the offset of the first LCDChar of the entity given by its index. If entityIndex is too big, returns charLength()
+
+  bool isBreakerEndedLine() const;
+  bool cursorCanMoveRight(int offset) const;
+  int maximumCursorPosition() const;
+  int maximumCursorPositionIfTooHigh(int cursorOffset) const;
+
+private:
+  bool _rightJustified;
 };
 
 #endif

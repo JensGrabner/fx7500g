@@ -8,6 +8,8 @@ class ProgEditScreen : public EditorScreen
   Q_OBJECT
 public:
   ProgEditScreen() : EditorScreen() {}
+
+  void buttonClicked(int button);
 };
 
 #endif

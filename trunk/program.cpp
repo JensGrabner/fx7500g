@@ -5,7 +5,7 @@ int Program::size() const
   return _steps.count();
 }
 
-void Program::setSteps(QList<LCDLine> value)
+void Program::setSteps(QList<TextLine> value)
 {
   _steps = value;
 }
@@ -36,21 +36,21 @@ Programs::Programs() :
   for (int i = 0; i < 10; ++i)
   {
     Program program;
-    QList<LCDLine> steps;
+    QList<TextLine> steps;
     if (i == 0)
     {
-      steps << LCDLine("SALUT LES COPAIN");
-      LCDLine lcdLine;
-      lcdLine << (int) LCDOp_Log << (int) LCDChar_LessEqual;
-      steps << lcdLine;
+      steps << TextLine("SALUT LES COPAIN");
+      TextLine textLine;
+      textLine << (int) LCDOp_Log << (int) LCDChar_LessEqual;
+      steps << textLine;
       for (int i = 0; i < 5; ++i)
       {
-        LCDLine lcdLine1;
-        lcdLine1 << (int) LCDOp_Log << (int) LCDChar_LessEqual;
-        steps << lcdLine1;
-        LCDLine lcdLine2;
-        lcdLine2 << (int) LCDOp_Ln << (int) LCDOp_Ln << (int) LCDOp_Ln << (int) LCDChar_LessEqual;
-        steps << lcdLine2;
+        TextLine textLine1;
+        textLine1 << (int) LCDOp_Log << (int) LCDChar_LessEqual;
+        steps << textLine1;
+        TextLine textLine2;
+        textLine2 << (int) LCDOp_Ln << (int) LCDOp_Ln << (int) LCDOp_Ln << (int) LCDChar_LessEqual;
+        steps << textLine2;
       }
     }
     program.setSteps(steps);
@@ -61,7 +61,7 @@ Programs::Programs() :
 
 Program &Programs::at(int index)
 {
-  Q_ASSERT_X(index >= 0 && index < 10, "Programs::at()", QString("Invalid <index> (%1)!").arg(index));
+  Q_ASSERT_X(index >= 0 && index < 10, "Programs::at()", qPrintable(QString("Invalid <index> (%1)!").arg(index)));
 
   return _programs[index];
 }
@@ -78,7 +78,7 @@ int Programs::freeSteps() const
 
 void Programs::clear(int programIndex)
 {
-  Q_ASSERT_X(programIndex >= 0 && programIndex <= 9, "Programs::clear()", QString("Invalid <programIndex> (%&)").arg(programIndex));
+  Q_ASSERT_X(programIndex >= 0 && programIndex <= 9, "Programs::clear()", qPrintable(QString("Invalid <programIndex> (%&)").arg(programIndex)));
 
   _programs[programIndex].clear();
 }

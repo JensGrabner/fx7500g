@@ -3,11 +3,11 @@
 #include "editor_screen.h"
 
 EditorScreen::EditorScreen() :
+  _editZoneTopLineIndex(0),
   _topLineIndex(0),
   _topLineSubIndex(0),
   _cursorLineIndex(0),
-  _cursorOffset(0),
-  _editZoneTopLineIndex(0)
+  _cursorOffset(0)
 {
 }
 
@@ -22,16 +22,12 @@ void EditorScreen::setProgram(int programIndex)
   _lines.clear();
   Program &program = Programs::instance().at(programIndex);
 
-  QList<LCDLine> &lines = program.steps();
-
-  foreach (const LCDLine &lcdLine, lines)
-  {
-    ShellLine shellLine;
-    for (int offset = 0; offset < lcdLine.count(); ++offset)
-      shellLine << LCDString(lcdLine[offset]);
-
-    _lines << shellLine;
-  }
+  _lines = program.steps();
+  _editZoneTopLineIndex = 0;
+  _topLineIndex = 0;
+  _topLineSubIndex = 0;
+  _cursorLineIndex = 0;
+  _cursorOffset = 0;
 
   feedScreen();
 }
@@ -45,12 +41,15 @@ void EditorScreen::feedScreen()
   {
     if (line > 7)
       break;
-    const ShellLine &shellLine = _lines[lineIndex];
+    const TextLine &textLine = _lines[lineIndex];
     int startOffset = 0;
     if (lineIndex == _topLineIndex)
       startOffset = _topLineSubIndex * 16;
     int col = 0;
-    for (int offset = startOffset; offset < shellLine.length(); ++offset)
+    QList<LCDChar> charLine = textLine.charLine();
+    if (textLine.rightJustified() && charLine.count() <= 15)
+      col = 16 - charLine.count();
+    for (int offset = startOffset; offset < charLine.count(); ++offset)
     {
       if (col > 15)
       {
@@ -59,12 +58,12 @@ void EditorScreen::feedScreen()
       }
       if (line > 7)
         break;
-      _screen[col][line] = shellLine.charAtOffset(offset);
+      _screen[col][line] = charLine[offset];
       col++;
     }
 
     // For empty end line in multi-lines cases
-    if (shellLine.length() && !(shellLine.length() % 16) && _topLineSubIndex < shellLine.rowCount() - 1)
+    if (charLine.count() && !(charLine.count() % 16) && _topLineSubIndex < textLine.rowCount() - 1)
       line++;
 
     line++;
@@ -73,53 +72,52 @@ void EditorScreen::feedScreen()
 
 void EditorScreen::writeEntity(int entity)
 {
-  LCDString lcdStr(entity);
   bool breaker = entity == (int) LCDChar_RBTriangle;
   int newCursorLineIndex = breaker ? _cursorLineIndex + 1 : _cursorLineIndex;
-  int newCursorOffset = breaker ? 0 : _cursorOffset + lcdStr.count();
+  int newCursorOffset = breaker ? 0 : _cursorOffset + entityToChars((LCDOperator) entity).count();
   if (!_lines.count())
   {
-    _lines << ShellLine(lcdStr);
+    _lines << TextLine(entity);
     if (breaker)
-      _lines << ShellLine();
+      _lines << TextLine();
   } else
   {
-    ShellLine &shellLine = _lines[_cursorLineIndex];
+    TextLine &textLine = _lines[_cursorLineIndex];
 
-    if (_cursorOffset >= shellLine.length())
+    if (_cursorOffset >= textLine.charLength())
     {
-      shellLine << lcdStr;
+      textLine << entity;
 
       // Append the next line if new char is not a breaker and we aren't in insert mode
       if (!breaker && !_insertMode && _cursorLineIndex < _lines.count() - 1)
       {
-        shellLine << _lines[_cursorLineIndex + 1];
+        textLine << _lines[_cursorLineIndex + 1];
         _lines.removeAt(_cursorLineIndex + 1);
       } else if (breaker)
-        _lines << ShellLine();
+        _lines << TextLine();
     }
     else
     {
       // Get LCDString under the cursor
-      int index = shellLine.stringIndexAtOffset(_cursorOffset);
+      int index = textLine.entityAt(_cursorOffset);
       if (index >= 0)
       {
         if (_insertMode)
-          shellLine.insert(index, lcdStr);
+          textLine.insert(index, entity);
         else
-          shellLine[index] = lcdStr;
+          textLine[index] = entity;
       }
-      if (breaker && _cursorOffset < shellLine.length() - 1)
+      if (breaker && _cursorOffset < textLine.charLength() - 1)
       {
         // Insert a new line
-        ShellLine newLine;
-        for (int i = index + 1; i < shellLine.count(); ++i)
-          newLine << shellLine[i];
+        TextLine newLine;
+        for (int i = index + 1; i < textLine.count(); ++i)
+          newLine << textLine[i];
         _lines.insert(_cursorLineIndex + 1, newLine);
-        // Remove the last string in <shellLine>
-        int newCount = shellLine.count() - index - 1;
+        // Remove the last entities in <textLine>
+        int newCount = textLine.count() - index - 1;
         for (int i = 0; i < newCount; ++i)
-          shellLine.removeLast();
+          textLine.removeLast();
       }
     }
   }
@@ -143,19 +141,19 @@ void EditorScreen::moveLeft()
     return;
   }
 
-  const ShellLine &shellLine = _lines[_cursorLineIndex];
+  const TextLine &textLine = _lines[_cursorLineIndex];
   int newCursorLineIndex = _cursorLineIndex;
   int newCursorOffset;
   if (!_cursorOffset)
   {
     newCursorLineIndex--;
-    newCursorOffset = _lines[newCursorLineIndex].length();
+    newCursorOffset = _lines[newCursorLineIndex].charLength();
     if (_lines[newCursorLineIndex].isBreakerEndedLine())
       newCursorOffset--;
-  } else if (shellLine.length() && _cursorOffset >= shellLine.length())
-    newCursorOffset = shellLine.offsetByStringIndex(shellLine.count() - 1);
+  } else if (textLine.charLength() && _cursorOffset >= textLine.charLength())
+    newCursorOffset = textLine.offsetAt(textLine.count() - 1);
   else
-    newCursorOffset = shellLine.offsetByStringIndex(shellLine.stringIndexAtOffset(_cursorOffset) - 1);
+    newCursorOffset = textLine.offsetAt(textLine.entityAt(_cursorOffset) - 1);
 
   moveCursor(newCursorLineIndex, newCursorOffset);
 }
@@ -172,9 +170,9 @@ void EditorScreen::moveRight()
     return;
   }
 
-  const ShellLine &shellLine = _lines[_cursorLineIndex];
+  const TextLine &textLine = _lines[_cursorLineIndex];
 
-  if (_cursorLineIndex >= _lines.count() - 1 && !shellLine.cursorCanMoveRight(_cursorOffset))
+  if (_cursorLineIndex >= _lines.count() - 1 && !textLine.cursorCanMoveRight(_cursorOffset))
   {
     restartBlink();
     return;
@@ -182,12 +180,12 @@ void EditorScreen::moveRight()
 
   int newCursorLineIndex = _cursorLineIndex;
   int newCursorOffset;
-  if (!shellLine.cursorCanMoveRight(_cursorOffset))
+  if (!textLine.cursorCanMoveRight(_cursorOffset))
   {
     newCursorLineIndex++;
     newCursorOffset = 0;
   } else
-    newCursorOffset = shellLine.offsetByStringIndex(shellLine.stringIndexAtOffset(_cursorOffset) + 1);
+    newCursorOffset = textLine.offsetAt(textLine.entityAt(_cursorOffset) + 1);
 
   moveCursor(newCursorLineIndex, newCursorOffset);
 }
@@ -204,25 +202,25 @@ void EditorScreen::moveUp()
     return;
   }
 
-  const ShellLine &shellLine = _lines[_cursorLineIndex];
+  const TextLine &textLine = _lines[_cursorLineIndex];
 
   if (_cursorOffset < 16)
   {
     // Previous line?
     if (_cursorLineIndex > _editZoneTopLineIndex)
     {
-      ShellLine &previousLine = _lines[_cursorLineIndex - 1];
+      TextLine &previousLine = _lines[_cursorLineIndex - 1];
       int previousOffset = (previousLine.rowCount() - 1) * 16 + _cursorOffset;
       if (!previousLine.cursorCanMoveRight(previousOffset))
         moveCursor(_cursorLineIndex - 1, previousLine.maximumCursorPosition());
       else
-        moveCursor(_cursorLineIndex - 1, previousLine.offsetByStringIndex(previousLine.stringIndexAtOffset(previousOffset)));
+        moveCursor(_cursorLineIndex - 1, previousLine.offsetAt(previousLine.entityAt(previousOffset)));
     } else
       moveCursor(_cursorLineIndex, 0);
   } else
   {
-    int upIndex = shellLine.stringIndexAtOffset(_cursorOffset - 16);
-    moveCursor(_cursorLineIndex, shellLine.offsetByStringIndex(upIndex));
+    int upIndex = textLine.entityAt(_cursorOffset - 16);
+    moveCursor(_cursorLineIndex, textLine.offsetAt(upIndex));
   }
 }
 
@@ -238,35 +236,35 @@ void EditorScreen::moveDown()
     return;
   }
 
-  const ShellLine &shellLine = _lines[_cursorLineIndex];
+  const TextLine &textLine = _lines[_cursorLineIndex];
 
-  if (_cursorOffset + 16 < shellLine.length())
+  if (_cursorOffset + 16 < textLine.charLength())
   {
-    int downIndex = shellLine.stringIndexAtOffset(_cursorOffset + 16);
-    int downOffset = shellLine.offsetByStringIndex(downIndex);
+    int downIndex = textLine.entityAt(_cursorOffset + 16);
+    int downOffset = textLine.offsetAt(downIndex);
     if (downOffset == _cursorOffset + 16)
       moveCursor(_cursorLineIndex, _cursorOffset + 16);
     else
-      moveCursor(_cursorLineIndex, shellLine.offsetByStringIndex(downIndex + 1));
-  } else if (_cursorOffset + 16 == shellLine.length())
-    moveCursor(_cursorLineIndex, shellLine.maximumCursorPosition());
+      moveCursor(_cursorLineIndex, textLine.offsetAt(downIndex + 1));
+  } else if (_cursorOffset + 16 == textLine.charLength())
+    moveCursor(_cursorLineIndex, textLine.maximumCursorPosition());
   else
   {
-    if (_cursorLineIndex == _lines.count() - 1 || _cursorOffset / 16 < shellLine.rowCount() - 1)
-      moveCursor(_cursorLineIndex, shellLine.maximumCursorPosition());
+    if (_cursorLineIndex == _lines.count() - 1 || _cursorOffset / 16 < textLine.rowCount() - 1)
+      moveCursor(_cursorLineIndex, textLine.maximumCursorPosition());
     else
     {
       // To the next line
-      ShellLine &nextLine = _lines[_cursorLineIndex + 1];
+      TextLine &nextLine = _lines[_cursorLineIndex + 1];
       int nextOffset = _cursorOffset % 16;
 
-      int downIndex = nextLine.stringIndexAtOffset(nextOffset);
-      int downOffset = nextLine.offsetByStringIndex(downIndex);
+      int downIndex = nextLine.entityAt(nextOffset);
+      int downOffset = nextLine.offsetAt(downIndex);
       if (downOffset == nextOffset)
         moveCursor(_cursorLineIndex + 1, nextLine.maximumCursorPositionIfTooHigh(nextOffset));
       else
         moveCursor(_cursorLineIndex + 1,
-                   nextLine.maximumCursorPositionIfTooHigh(nextLine.offsetByStringIndex(downIndex + 1)));
+                   nextLine.maximumCursorPositionIfTooHigh(nextLine.offsetAt(downIndex + 1)));
     }
   }
 }
@@ -275,20 +273,20 @@ void EditorScreen::deleteString()
 {
   if (_lines.count())
   {
-    ShellLine &shellLine = _lines[_cursorLineIndex];
-    if (shellLine.cursorCanMoveRight(_cursorOffset))
+    TextLine &textLine = _lines[_cursorLineIndex];
+    if (textLine.cursorCanMoveRight(_cursorOffset))
     {
-      shellLine.removeAt(shellLine.stringIndexAtOffset(_cursorOffset));
+      textLine.removeAt(textLine.entityAt(_cursorOffset));
       feedScreen();
       emit screenChanged();
     } else if (_cursorLineIndex < _lines.count() - 1)
     {
-      if (shellLine.isBreakerEndedLine())
-        shellLine.removeLast();
+      if (textLine.isBreakerEndedLine())
+        textLine.removeLast();
 
       // Stick the next line to the previous one
-      const ShellLine &nextLine = _lines[_cursorLineIndex + 1];
-      shellLine << nextLine;
+      const TextLine &nextLine = _lines[_cursorLineIndex + 1];
+      textLine << nextLine;
 
       _lines.removeAt(_cursorLineIndex + 1);
       feedScreen();
@@ -313,8 +311,8 @@ void EditorScreen::moveCursor(int newLineIndex, int newOffset, bool *scrolled)
 
   for (int index = _topLineIndex; index < newLineIndex; ++index)
   {
-    const ShellLine &shellLine = _lines[index];
-    line += shellLine.rowCount();
+    const TextLine &textLine = _lines[index];
+    line += textLine.rowCount();
     if (index == _topLineIndex)
       line -= _topLineSubIndex;
   }
@@ -373,7 +371,7 @@ void EditorScreen::scrollDown()
   if (linesCount <= 8)
     return;
 
-  ShellLine &topLine = _lines[_topLineIndex];
+  TextLine &topLine = _lines[_topLineIndex];
   if (_topLineSubIndex < topLine.rowCount() - 1)
     _topLineSubIndex++;
   else
@@ -390,13 +388,6 @@ void EditorScreen::buttonClicked(int button)
 {
   int entity = _calcState->printableEntityByButton(button);
 
-  if (button == Button_Question) // TEMP
-  {
-    _editZoneTopLineIndex = 5;
-    moveCursor(_editZoneTopLineIndex, 0);
-    return;
-  }
-
   if (entity >= 0) // Printable entity
     writeEntity(entity);
   else
@@ -407,7 +398,6 @@ void EditorScreen::buttonClicked(int button)
     case Button_Left: moveLeft(); break;
     case Button_Right: moveRight(); break;
     case Button_Del: deleteString(); break;
-    case Button_Exe: carriageReturn(); break;
     case Button_Ins: insertClicked(); break;
     default:;
     }
@@ -427,35 +417,35 @@ void EditorScreen::carriageReturn()
   {
     insertion = true;
     if (!_lines.count())
-      _lines << ShellLine();
+      _lines << TextLine();
     else
     {
-      ShellLine &shellLine = _lines[_cursorLineIndex];
-      if (_cursorOffset < shellLine.length())
+      TextLine &textLine = _lines[_cursorLineIndex];
+      if (_cursorOffset < textLine.charLength())
       {
-        ShellLine newShellLine;
+        TextLine newTextLine;
         int toRemove = 0;
-        int strIndex = shellLine.stringIndexAtOffset(_cursorOffset);
-        for (int i = strIndex; i < shellLine.count(); ++i)
+        int strIndex = textLine.entityAt(_cursorOffset);
+        for (int i = strIndex; i < textLine.count(); ++i)
         {
-          newShellLine << shellLine[i];
+          newTextLine << textLine[i];
           toRemove++;
         }
-        _lines.insert(_cursorLineIndex + 1, newShellLine);
+        _lines.insert(_cursorLineIndex + 1, newTextLine);
 
         while (toRemove)
         {
-          shellLine.removeLast();
+          textLine.removeLast();
           toRemove--;
         }
       } else if (_cursorLineIndex < _lines.count() - 1)
-        _lines.insert(_cursorLineIndex + 1, ShellLine());
+        _lines.insert(_cursorLineIndex + 1, TextLine());
       else
-        _lines << ShellLine();
+        _lines << TextLine();
     }
   } else if (_cursorLineIndex >= _lines.count() - 1)
   {
-    _lines << ShellLine();
+    _lines << TextLine();
     insertion = true;
   }
 
@@ -478,7 +468,7 @@ void EditorScreen::insertClicked()
   } else
   {
     // No insert mode when we are at the end of the text
-    if (_lines.count() && (_cursorLineIndex < _lines.count() - 1 || _cursorOffset < _lines[_cursorLineIndex].length()))
+    if (_lines.count() && (_cursorLineIndex < _lines.count() - 1 || _cursorOffset < _lines[_cursorLineIndex].charLength()))
     {
       _insertMode = true;
       _cursorMode = getCursorMode();

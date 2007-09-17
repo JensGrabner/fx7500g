@@ -206,7 +206,7 @@ void TextScreen::moveCursor(int col, int line)
 
 void TextScreen::assignToScreen(const LCDString &str, int col, int line)
 {
-  Q_ASSERT_X(col >= 0 && col < 16 && line >= 0 && line < 8, "assignToScreen()", QString("Invalid <col> (%1) or <line> (%2)").arg(col, line));
+  Q_ASSERT_X(col >= 0 && col < 16 && line >= 0 && line < 8, "assignToScreen()", qPrintable(QString("Invalid <col> (%1) or <line> (%2)").arg(col, line)));
 
   int offset = 0;
   foreach (LCDChar c, str)
