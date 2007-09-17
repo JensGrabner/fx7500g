@@ -1,8 +1,29 @@
+#include "expression_computer.h"
+
 #include "run_screen.h"
 
 void RunScreen::buttonClicked(int button)
 {
+  int entity = _calcState->printableEntityByButton(button);
+
+  if (entity >= 0 && !cursorVisible())
+  {
+    _lines << TextLine();
+    setCursorVisible(true);
+    moveCursor(_editZoneTopLineIndex, 0);
+  }
+
   EditorScreen::buttonClicked(button);
+
+  if (entity >= 0) // Printable entity
+  {
+    // Wake up the cursor if needed
+    if (_calcState->screenMode() != ScreenMode_Normal)
+    {
+      _calcState->setScreenMode(ScreenMode_Normal);
+      restartBlink();
+    }
+  }
 
   switch (button)
   {
@@ -23,12 +44,21 @@ void RunScreen::buttonClicked(int button)
 
 void RunScreen::validate()
 {
-  TextLine line("651651.", true);
-  _lines << line;
+  QList<int> result;
+  if (_lines.count())
+  {
+    TextLine &textLine = _lines[_lines.count() - 1];
+    ExpressionComputer::Error error;
+    result = ExpressionComputer::compute(textLine, error);
+  }
 
-  _lines << TextLine();
-  _editZoneTopLineIndex = _lines.count() - 1;
-  moveCursor(_editZoneTopLineIndex, 0);
+  TextLine line("", true);
+  line << result;
+  _lines << line;
+  moveCursor(_lines.count() - 1, 0);
+
+  _editZoneTopLineIndex = _lines.count();
+  setCursorVisible(false);
 
   feedScreen();
   emit screenChanged();

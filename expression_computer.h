@@ -1,6 +1,8 @@
 #ifndef EXPRESSION_COMPUTER
 #define EXPRESSION_COMPUTER
 
+#include <math.h>
+
 #include <QStack>
 
 #include "misc.h"
