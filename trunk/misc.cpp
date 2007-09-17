@@ -749,6 +749,22 @@ int getEntityPriority(int entity)
   }
 }
 
+void CalculatorState::setScreenMode(ScreenMode value)
+{
+  if (value == _screenMode)
+    return;
+
+  ScreenMode oldValue = _screenMode;
+
+  _screenMode = value;
+
+  emit screenModeChanged(oldValue);
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+/////////////////////////////////////
+
 int comparePriorities(int entity1, int entity2)
 {
   int p1 = getEntityPriority(entity1);

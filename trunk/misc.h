@@ -286,7 +286,13 @@ enum PadButton
   Button_Ins
 };
 
-enum ScreenMode { ScreenMode_Normal, ScreenMode_Resume, ScreenMode_Graphical };
+enum ScreenMode {
+  ScreenMode_Normal,      // Normal screen when sysMode is RUN and sysMode is WRT
+  ScreenMode_Resume,      // Resume screen
+  ScreenMode_Graphical,   // Graphical screen
+  ScreenMode_Editor       // Editor screen when sysMode is WRT
+};
+
 enum AngleMode { Deg, Rad, Grad };
 enum SysMode { SysMode_RUN, SysMode_WRT, SysMode_PCL };
 enum CalMode { CalMode_COMP, CalMode_BASE_N, CalMode_SD1, CalMode_LR1, CalMode_SD2, CalMode_LR2 };
@@ -300,6 +306,9 @@ class CalculatorState : public QObject
   Q_OBJECT
 public:
   CalculatorState();
+
+  ScreenMode screenMode() const { return _screenMode; }
+  void setScreenMode(ScreenMode value);
 
   SysMode sysMode() const { return _sysMode; }
   void setSysMode(SysMode value);
@@ -331,10 +340,12 @@ public:
   QString displayModeString() const;
 
 signals:
+  void screenModeChanged(ScreenMode oldMode);
   void sysModeChanged(SysMode oldMode);
-  void keyModeChanged(KeyMode keyMode);
+  void keyModeChanged(KeyMode oldMode);
 
 private:
+  ScreenMode _screenMode;
   SysMode _sysMode;
   AngleMode _angleMode;
   CalMode _calMode;

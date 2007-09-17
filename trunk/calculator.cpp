@@ -1,7 +1,6 @@
 #include "calculator.h"
 
 Calculator::Calculator() :
-  _screenMode(ScreenMode_Resume),
   _lcdDisplay(0)
 {
   // Init run screen
@@ -26,6 +25,10 @@ Calculator::Calculator() :
           this, SLOT(editorChangeChar(int, int, LCDChar)));
   connect(&_progEditScreen, SIGNAL(screenChanged()),
           this, SLOT(editorScreenChanged()));
+
+  // Connect to <_calcState>
+  connect(&_calcState, SIGNAL(screenModeChanged(ScreenMode)),
+          this, SLOT(screenModeChanged(ScreenMode)));
 }
 
 void Calculator::setAngleMode(AngleMode value)
@@ -35,14 +38,14 @@ void Calculator::setAngleMode(AngleMode value)
 
 void Calculator::runChangeChar(int col, int line, LCDChar c)
 {
-  if (_lcdDisplay && _screenMode == ScreenMode_Normal &&
+  if (_lcdDisplay && _calcState.screenMode() == ScreenMode_Normal &&
       _calcState.sysMode() == SysMode_RUN)
     _lcdDisplay->drawChar(c, col, line);
 }
 
 void Calculator::progChangeChar(int col, int line, LCDChar c)
 {
-  if (_lcdDisplay && _screenMode == ScreenMode_Normal &&
+  if (_lcdDisplay && _calcState.screenMode() == ScreenMode_Normal &&
       (_calcState.sysMode() == SysMode_WRT || _calcState.sysMode() == SysMode_PCL))
     _lcdDisplay->drawChar(c, col, line);
 }
@@ -85,45 +88,8 @@ void Calculator::init()
 {
   Q_ASSERT_X(_lcdDisplay, "Calculator::init()", "<_lcdDisplay> is 0!");
 
-  setScreenMode(ScreenMode_Resume);
-  _lcdDisplay->drawScreen(getResumeScreen());
-}
-
-void Calculator::setScreenMode(ScreenMode value)
-{
-  if (value == _screenMode)
-    return;
-
-  _screenMode = value;
-
-  switch (_screenMode)
-  {
-  case ScreenMode_Normal:
-    switch (_calcState.sysMode())
-    {
-    case SysMode_RUN:
-      _lcdDisplay->drawScreen(_runScreen.currentScreen());
-      _runScreen.restartBlink();
-      break;
-    case SysMode_WRT:
-    case SysMode_PCL:
-      _lcdDisplay->drawScreen(_progScreen.currentScreen());
-      _progScreen.restartBlink();
-      break;
-    default:;
-    }
-    break;
-  case ScreenMode_Editor:
-    switch (_calcState.sysMode())
-    {
-    case SysMode_WRT:
-      _lcdDisplay->drawScreen(_progEditScreen.currentScreen());
-      _progEditScreen.restartBlink();
-      break;
-    default:;
-    }
-  default:;
-  }
+  setSysMode(SysMode_RUN);
+  _calcState.setScreenMode(ScreenMode_Resume);
 }
 
 void Calculator::setCalMode(CalMode value)
@@ -222,14 +188,15 @@ void Calculator::applyKey(int key)
 
 void Calculator::editorChangeChar(int col, int line, LCDChar c)
 {
-  if (_lcdDisplay && _screenMode == ScreenMode_Editor && _calcState.sysMode() == SysMode_WRT)
+  if (_lcdDisplay && _calcState.screenMode() == ScreenMode_Editor &&
+      _calcState.sysMode() == SysMode_WRT)
     _lcdDisplay->drawChar(c, col, line);
 }
 
 void Calculator::progEditProgram(int programIndex)
 {
   _progEditScreen.setProgram(programIndex);
-  setScreenMode(ScreenMode_Editor);
+  _calcState.setScreenMode(ScreenMode_Editor);
 }
 
 void Calculator::editorScreenChanged()
@@ -251,17 +218,17 @@ void Calculator::buttonClicked(int buttonIndex)
     {
     case Button_1:
       setSysMode(SysMode_RUN);
-      setScreenMode(ScreenMode_Normal);
+      _calcState.setScreenMode(ScreenMode_Normal);
       _calcState.setKeyMode(KeyMode_Normal);
       break;
     case Button_2:
       setSysMode(SysMode_WRT);
-      setScreenMode(ScreenMode_Normal);
+      _calcState.setScreenMode(ScreenMode_Normal);
       _calcState.setKeyMode(KeyMode_Normal);
       break;
     case Button_3:
       setSysMode(SysMode_PCL);
-      setScreenMode(ScreenMode_Normal);
+      _calcState.setScreenMode(ScreenMode_Normal);
       _calcState.setKeyMode(KeyMode_Normal);
       break;
     default:;
@@ -276,9 +243,9 @@ void Calculator::buttonClicked(int buttonIndex)
     break;
   case SysMode_WRT:
   case SysMode_PCL:
-    if (_screenMode == ScreenMode_Normal)
+    if (_calcState.screenMode() == ScreenMode_Normal)
       _progScreen.buttonClicked(buttonIndex);
-    else if (_screenMode == ScreenMode_Editor)
+    else if (_calcState.screenMode() == ScreenMode_Editor)
       _progEditScreen.buttonClicked(buttonIndex);
     break;
   default:;
@@ -302,4 +269,39 @@ void Calculator::buttonClicked(int buttonIndex)
 void Calculator::progScreenChanged()
 {
   _lcdDisplay->drawScreen(_progScreen.currentScreen());
+}
+
+void Calculator::screenModeChanged(ScreenMode)
+{
+  switch (_calcState.screenMode())
+  {
+  case ScreenMode_Normal:
+    switch (_calcState.sysMode())
+    {
+    case SysMode_RUN:
+      _lcdDisplay->drawScreen(_runScreen.currentScreen());
+      _runScreen.restartBlink();
+      break;
+    case SysMode_WRT:
+    case SysMode_PCL:
+      _lcdDisplay->drawScreen(_progScreen.currentScreen());
+      _progScreen.restartBlink();
+      break;
+    default:;
+    }
+    break;
+  case ScreenMode_Resume:
+    _lcdDisplay->drawScreen(getResumeScreen());
+    break;
+  case ScreenMode_Editor:
+    switch (_calcState.sysMode())
+    {
+    case SysMode_WRT:
+      _lcdDisplay->drawScreen(_progEditScreen.currentScreen());
+      _progEditScreen.restartBlink();
+      break;
+    default:;
+    }
+  default:;
+  }
 }

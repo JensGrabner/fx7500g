@@ -1,5 +1,3 @@
-#include <math.h>
-
 #include "expression_computer.h"
 
 ExpressionToken::ExpressionToken(TokenType tokenType) : _tokenType(tokenType), _value(0.0), _command(0)
@@ -159,10 +157,33 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression)
   QString sortie;
   double n = _numberStack.top();
   if (fabs(n) < 0.01)
-    sortie = QString::number(_numberStack.top(), 'E', 10);
+    sortie = QString::number(_numberStack.top(), 'E', 9);
   else
     sortie = QString::number(_numberStack.top(), 'G', 10);
-  qDebug(qPrintable(sortie));
+
+  if (sortie.indexOf('.') < 0)
+    sortie.append('.');
+  // Remove all 0
+  int p;
+  while ((p = sortie.indexOf("0E")) >= 0)
+    sortie.remove(p, 1);
+  while ((p = sortie.indexOf('0')) == sortie.length() - 1)
+    sortie.remove(p, 1);
+
+  // Convert to a QList<int>
+  foreach (const QChar &c, sortie)
+  {
+    const char ch = c.toLatin1();
+
+    if (ch >= '0' && ch <= '9')
+      result << LCDChar_0 + ch - '0';
+    else if (ch == '.')
+      result << LCDChar_Dot;
+    else if (ch == '-')
+      result << LCDChar_MinusPrefix;
+    else if (ch == 'E')
+      result << LCDChar_Exponent;
+  }
 
   return result;
 }

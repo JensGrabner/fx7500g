@@ -15,16 +15,6 @@ public:
   // Display the resume screen
   void init();
 
-  enum ScreenMode {
-    ScreenMode_Normal,      // Normal screen when sysMode is RUN and sysMode is WRT
-    ScreenMode_Resume,      // Resume screen
-    ScreenMode_Graphical,   // Graphical screen
-    ScreenMode_Editor       // Editor screen when sysMode is WRT
-  };
-
-  ScreenMode screenMode() const { return _screenMode; }
-  void setScreenMode(ScreenMode value);
-
   CalculatorState &calcState() { return _calcState; }
 
   void setAngleMode(AngleMode value);
@@ -44,7 +34,6 @@ public:
 
 private:
   CalculatorState _calcState;
-  ScreenMode _screenMode;
   RunScreen _runScreen;
   ProgScreen _progScreen;
   ProgEditScreen _progEditScreen;
@@ -53,6 +42,8 @@ private:
   QList<LCDString> getResumeScreen() const;
 
 private slots:
+  void screenModeChanged(ScreenMode oldMode);
+
   void runChangeChar(int col, int line, LCDChar c);
   void runScreenChanged();
 
