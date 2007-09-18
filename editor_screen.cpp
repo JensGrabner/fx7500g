@@ -390,7 +390,7 @@ void EditorScreen::buttonClicked(int button)
 
   if (entity >= 0) // Printable entity
     writeEntity(entity);
-  else
+  else if (cursorVisible())
     switch (button)
     {
     case Button_Up: moveUp(); break;

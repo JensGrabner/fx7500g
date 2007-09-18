@@ -12,7 +12,10 @@ public:
   void buttonClicked(int button);
 
 private:
+  QList<TextLine> _lastProgram;
+
   void validate();
+  void displayLastProgram(bool cursorOnTop = false); // Empty <_lines> and paste <_lastProgram> inside
 };
 
 #endif
