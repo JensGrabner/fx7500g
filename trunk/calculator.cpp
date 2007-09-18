@@ -133,7 +133,8 @@ void Calculator::applyKey(int key)
   case Qt::Key_Up: buttonClicked(Button_Up); break;
   case Qt::Key_Down: buttonClicked(Button_Down); break;
   case Qt::Key_Delete: buttonClicked(Button_Del); break;
-  case Qt::Key_Return: buttonClicked(Button_Exe); break;
+  case Qt::Key_Return:
+  case Qt::Key_Enter: buttonClicked(Button_Exe); break;
   case Qt::Key_0: buttonClicked(Button_0); break;
   case Qt::Key_1: buttonClicked(Button_1); break;
   case Qt::Key_2: buttonClicked(Button_2); break;
