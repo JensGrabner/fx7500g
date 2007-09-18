@@ -302,9 +302,27 @@ void EditorScreen::moveCursor(int newLineIndex, int newOffset, bool *scrolled)
   int col = 0;
 
   // Must scroll up?
-  if (newLineIndex < _topLineIndex || (newLineIndex == _topLineIndex && newOffset / 16 < _topLineSubIndex))
+//   if (newLineIndex < _topLineIndex || (newLineIndex == _topLineIndex && newOffset / 16 < _topLineSubIndex))
+//   {
+//     if (scrollUp())
+//     {
+//       feedScreen();
+//       emit screenChanged();
+//       if (scrolled)
+//         *scrolled = true;
+//     }
+//   }
+  bool done = false;
+  while (newLineIndex < _topLineIndex || (newLineIndex == _topLineIndex && newOffset / 16 < _topLineSubIndex))
+    if (scrollUp())
+      done = true;
+    else
+      break;
+
+  if (done)
   {
-    scrollUp();
+    feedScreen();
+    emit screenChanged();
     if (scrolled)
       *scrolled = true;
   }
@@ -325,12 +343,20 @@ void EditorScreen::moveCursor(int newLineIndex, int newOffset, bool *scrolled)
   col = newOffset % 16;
 
   // Must scroll down?
-  if (line > 7)
+  done = false;
+  for (int i = 0; i < line - 7; i++)
+    if (scrollDown())
+      done = true;
+    else
+      break;
+
+  if (done)
   {
-    scrollDown();
     line = 7;
     if (scrolled)
       *scrolled = true;
+    feedScreen();
+    emit screenChanged();
   }
 
   TextScreen::moveCursor(col, line);
@@ -339,28 +365,22 @@ void EditorScreen::moveCursor(int newLineIndex, int newOffset, bool *scrolled)
   _cursorOffset = newOffset;
 }
 
-void EditorScreen::scrollUp()
+bool EditorScreen::scrollUp()
 {
-  bool done = true;
-
   if (_topLineSubIndex)
     _topLineSubIndex--;
   else if (_topLineIndex)
     _topLineIndex--;
   else
-    done = false;
+    return false;
 
-  if (done)
-  {
-    feedScreen();
-    emit screenChanged();
-  }
+  return true;
 }
 
-void EditorScreen::scrollDown()
+bool EditorScreen::scrollDown()
 {
   if (!_lines.count())
-    return;
+    return false;
 
   // Compute the number of *real* screen lines between <_topLineIndex> and <lastLine>
   int linesCount = 0;
@@ -369,7 +389,7 @@ void EditorScreen::scrollDown()
   linesCount -= _topLineSubIndex;
 
   if (linesCount <= 8)
-    return;
+    return false;
 
   TextLine &topLine = _lines[_topLineIndex];
   if (_topLineSubIndex < topLine.rowCount() - 1)
@@ -379,9 +399,7 @@ void EditorScreen::scrollDown()
     _topLineIndex++;
     _topLineSubIndex = 0;
   }
-
-  feedScreen();
-  emit screenChanged();
+  return true;
 }
 
 void EditorScreen::buttonClicked(int button)
@@ -480,4 +498,13 @@ void EditorScreen::insertClicked()
     _calcState->setKeyMode(KeyMode_Normal);
 
   restartBlink();
+}
+
+void EditorScreen::initTopLineIndex()
+{
+  _topLineIndex = 0;
+  _topLineSubIndex = 0;
+
+  feedScreen();
+  emit screenChanged();
 }
