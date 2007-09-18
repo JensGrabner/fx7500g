@@ -1,4 +1,4 @@
-#include "program.h"
+#include "memory.h"
 
 #include "prog_screen.h"
 
@@ -46,14 +46,15 @@ void ProgScreen::feedScreen()
     assignToScreen(LCDString(QString(" display : %1").arg(_calcState->displayModeString())), 0, 3);
   }
 
-  QString strBytesFree = QString("%1 Bytes Free").arg(Programs::instance().freeSteps());
+  Memory &memory = Memory::instance();
+
+  QString strBytesFree = QString("%1 Bytes Free").arg(memory.freeSteps());
   assignToScreen(LCDString(QString(16 - strBytesFree.length(), ' ') + strBytesFree), 0, 5);
 
   QString str = " Prog 0123456789";
 
-  Programs &programs = Programs::instance();
-  for (int i = 0; i < programs.count(); ++i)
-    if (!programs.at(i).isEmpty())
+  for (int i = 0; i < memory.programsCount; ++i)
+    if (!memory.programAt(i).isEmpty())
       str[6 + i] = '_';
   assignToScreen(LCDString(str), 0, 7);
 }
@@ -85,7 +86,7 @@ void ProgScreen::buttonClicked(int button)
     switch (button)
     {
     case Button_Ac:
-      Programs::instance().clear(currentProgramIndex());
+      Memory::instance().clearProgram(currentProgramIndex());
       feedScreen();
       emit screenChanged();
       break;
@@ -94,7 +95,7 @@ void ProgScreen::buttonClicked(int button)
           _calcState->keyMode() == KeyMode_ShiftMode ||
           _calcState->keyMode() == KeyMode_ShiftHyp)
       {
-        Programs::instance().clearAll();
+        Memory::instance().clearAllPrograms();
         feedScreen();
         emit screenChanged();
       }

@@ -1,4 +1,4 @@
-#include "program.h"
+#include "memory.h"
 
 int Program::size() const
 {
@@ -19,21 +19,21 @@ void Program::clear()
 /////////////////////////////////////////////
 /////////////////////////////////////////////
 
-Programs *Programs::_instance = 0;
+Memory *Memory::_instance = 0;
 
-Programs &Programs::instance()
+Memory &Memory::instance()
 {
   if (!_instance)
-    _instance = new Programs;
+    _instance = new Memory;
 
   return *_instance;
 }
 
-Programs::Programs() :
+Memory::Memory() :
   _freeSteps(_freeStepsMax)
 {
   // Fill with empty programs
-  for (int i = 0; i < 10; ++i)
+  for (int i = 0; i < programsCount; ++i)
   {
     Program program;
     QList<TextLine> steps;
@@ -59,32 +59,32 @@ Programs::Programs() :
   }
 }
 
-Program &Programs::at(int index)
+Program &Memory::programAt(int index)
 {
-  Q_ASSERT_X(index >= 0 && index < 10, "Programs::at()", qPrintable(QString("Invalid <index> (%1)!").arg(index)));
+  Q_ASSERT_X(index >= 0 && index < programsCount, "Memory::at()", qPrintable(QString("Invalid <index> (%1)!").arg(index)));
 
   return _programs[index];
 }
 
-int Programs::freeSteps() const
+int Memory::freeSteps() const
 {
   int steps = _freeStepsMax;
 
-  for (int i = 0; i < 10; ++i)
+  for (int i = 0; i < programsCount; ++i)
     steps -= _programs[i].size();
 
   return steps;
 }
 
-void Programs::clear(int programIndex)
+void Memory::clearProgram(int programIndex)
 {
-  Q_ASSERT_X(programIndex >= 0 && programIndex <= 9, "Programs::clear()", qPrintable(QString("Invalid <programIndex> (%&)").arg(programIndex)));
+  Q_ASSERT_X(programIndex >= 0 && programIndex < programsCount, "Memory::clear()", qPrintable(QString("Invalid <programIndex> (%&)").arg(programIndex)));
 
   _programs[programIndex].clear();
 }
 
-void Programs::clearAll()
+void Memory::clearAllPrograms()
 {
-  for (int i = 0; i < 10; ++i)
+  for (int i = 0; i < programsCount; ++i)
     _programs[i].clear();
 }

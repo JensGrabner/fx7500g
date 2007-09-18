@@ -1,4 +1,4 @@
-#include "program.h"
+#include "memory.h"
 
 #include "editor_screen.h"
 
@@ -20,7 +20,7 @@ void EditorScreen::init(CalculatorState *calcState)
 void EditorScreen::setProgram(int programIndex)
 {
   _lines.clear();
-  Program &program = Programs::instance().at(programIndex);
+  Program &program = Memory::instance().programAt(programIndex);
 
   _lines = program.steps();
   _editZoneTopLineIndex = 0;
