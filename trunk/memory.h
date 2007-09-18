@@ -1,5 +1,5 @@
-#ifndef PROGRAM_H
-#define PROGRAM_H
+#ifndef MEMORY_H
+#define MEMORY_H
 
 #include <QMap>
 
@@ -21,27 +21,28 @@ private:
   QList<TextLine> _steps;
 };
 
-class Programs
+class Memory
 {
 public:
-  static Programs &instance();
+  static const int programsCount = 10;
 
-  int count() const { return _programs.count(); }
-  Program &at(int index);
+  static Memory &instance();
 
-  void clear(int programIndex);
-  void clearAll();
+  Program &programAt(int index);
+
+  void clearProgram(int programIndex = -1);
+  void clearAllPrograms();
 
   int freeSteps() const;
 
 private:
   static const int _freeStepsMax = 4006;
 
-  static Programs *_instance;
+  static Memory *_instance;
   QMap<int,Program> _programs;
   int _freeSteps;
 
-  Programs();
+  Memory();
 };
 
 #endif
