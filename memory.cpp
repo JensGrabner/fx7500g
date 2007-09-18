@@ -33,6 +33,8 @@ Memory::Memory() :
   _extraVarCount(0),
   _freeSteps(_freeStepsMax)
 {
+  clearVariables();
+
   // Fill with empty programs
   for (int i = 0; i < programsCount; ++i)
   {
@@ -130,4 +132,11 @@ double Memory::variable(int index, bool *overflow)
       *overflow = true;
     return 0.0;
   }
+}
+
+void Memory::clearVariables()
+{
+  qDebug("%d", sizeof(_variables) / sizeof(double));
+  for (int i = 0; i < (int) (sizeof(_variables) / sizeof(double)); ++i)
+    _variables[i] = 0.0;
 }
