@@ -30,6 +30,7 @@ public:
 
   Program &programAt(int index);
 
+  void clearVariables();
   void clearProgram(int programIndex = -1);
   void clearAllPrograms();
 
