@@ -35,14 +35,22 @@ public:
 
   int freeSteps() const;
 
+  double variable(int index, bool *overflow = 0); // Return 0 is index > 26 + _extraVarCount
+  int extraVarCount() const { return _extraVarCount; }
+  bool setExtraVarCount(int value); // Returns false is value is invalid
+
 private:
   static const int _freeStepsMax = 4006;
 
   static Memory *_instance;
   QMap<int,Program> _programs;
+  int _extraVarCount;
+  double _variables[526]; // Memory
   int _freeSteps;
 
   Memory();
+
+  int totalProgramsSize() const;
 };
 
 #endif

@@ -30,6 +30,7 @@ Memory &Memory::instance()
 }
 
 Memory::Memory() :
+  _extraVarCount(0),
   _freeSteps(_freeStepsMax)
 {
   // Fill with empty programs
@@ -87,4 +88,46 @@ void Memory::clearAllPrograms()
 {
   for (int i = 0; i < programsCount; ++i)
     _programs[i].clear();
+}
+
+bool Memory::setExtraVarCount(int value)
+{
+  Q_ASSERT_X(value >= 0 && value <= 500, "Memory::setExtraVarCount()", qPrintable(QString("Invalid <value> (%1)").arg(value)));
+
+  // Compute the free memory
+  int canBeAllocated = (_freeStepsMax - totalProgramsSize()) / 8;
+  if (value >= 0 && value <= canBeAllocated)
+  {
+    int oldCount = _extraVarCount;
+    _extraVarCount = value;
+    // Reset the new allocated variables
+    for (int i = oldCount; i < _extraVarCount; ++i)
+      _variables[26 + i] = 0.0;
+  }
+  else
+    return false;
+  return true;
+}
+
+int Memory::totalProgramsSize() const
+{
+  int size = 0;
+  for (int i = 0; i < programsCount; ++i)
+    size += _programs[i].size();
+  return size;
+}
+
+double Memory::variable(int index, bool *overflow)
+{
+  if (index < 26 + _extraVarCount)
+  {
+    if (overflow)
+      *overflow = false;
+    return _variables[index];
+  } else
+  {
+    if (overflow)
+      *overflow = true;
+    return 0.0;
+  }
 }
