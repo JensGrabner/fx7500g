@@ -48,15 +48,18 @@ void RunScreen::validate()
 {
   QList<int> result;
 
-  // Save last program bloc
-  _lastProgram.clear();
-  for (int lineIndex = _editZoneTopLineIndex; lineIndex < _lines.count(); ++lineIndex)
-    _lastProgram << _lines[lineIndex];
+  if (cursorVisible())
+  {
+    // Save last program bloc
+    _lastProgram.clear();
+    for (int lineIndex = _editZoneTopLineIndex; lineIndex < _lines.count(); ++lineIndex)
+      _lastProgram << _lines[lineIndex];
+  } 
 
   // Compute the program
-  if (_lines.count())
+  if (_lastProgram.count())
   {
-    TextLine &textLine = _lines[_lines.count() - 1];
+    TextLine &textLine = _lastProgram[_lastProgram.count() - 1];
     ExpressionComputer::Error error;
     result = ExpressionComputer::compute(textLine, error);
   }
@@ -78,12 +81,13 @@ void RunScreen::displayLastProgram(bool cursorOnTop)
 {
   _lines = _lastProgram;
   _editZoneTopLineIndex = 0;
-  feedScreen();
-  emit screenChanged();
+  initTopLineIndex();
   setCursorVisible(true);
   if (cursorOnTop || !_lines.count())
     moveCursor(0, 0);
   else
     moveCursor(_lines.count() - 1, _lines[_lines.count() - 1].charLength());
+  feedScreen();
+  emit screenChanged();
   restartBlink();
 }

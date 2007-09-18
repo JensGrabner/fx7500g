@@ -30,6 +30,7 @@ protected:
   void feedScreen(); // <_screen> of Shell ancestor is filled with <_lines> and <_promptLine>
   void carriageReturn();
   void moveCursor(int newLineIndex, int newOffset, bool *scrolled = 0); // Move cursor can invoke scrollUp() or scrollDown() if cursor is out of the screen
+  void initTopLineIndex();
 
 private:
   int _topLineIndex; // Absolute index of the top line (the most top visible line at screen) in <_lines>
@@ -37,8 +38,8 @@ private:
   int _cursorLineIndex; // Absolute index of the line where cursor is
   int _cursorOffset; // Offset in the line
 
-  void scrollUp(); // Scroll up the screen if it's possible
-  void scrollDown(); // Scroll down the screen if it's possible
+  bool scrollUp(); // Scroll up the screen if it's possible, returns false if not
+  bool scrollDown(); // Scroll down the screen if it's possible, returns false if not
   void insertClicked();
 
   void writeEntity(int entity);
