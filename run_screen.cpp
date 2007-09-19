@@ -6,14 +6,15 @@ void RunScreen::buttonClicked(int button)
 {
   int entity = _calcState->printableEntityByButton(button);
 
-  if (entity >= 0 && _waitingMode)
+  if (entity >= 0 && _waitingMode && !_errorMode)
   {
     _lines << TextLine();
     setWaitingMode(false);
     moveCursor(_editZoneTopLineIndex, 0);
   }
 
-  EditorScreen::buttonClicked(button);
+  if (!_errorMode)
+    EditorScreen::buttonClicked(button);
 
   if (entity >= 0) // Printable entity
   {
@@ -28,6 +29,8 @@ void RunScreen::buttonClicked(int button)
   switch (button)
   {
   case Button_Exe:
+    if (_errorMode)
+      break;
     switch (_calcState->keyMode())
     {
     case KeyMode_Shift:
@@ -44,7 +47,7 @@ void RunScreen::buttonClicked(int button)
 
 void RunScreen::validate()
 {
-  QList<int> result;
+  QList<TextLine> result;
 
   if (!_waitingMode)
   {
@@ -59,19 +62,21 @@ void RunScreen::validate()
   {
     TextLine &textLine = _lastProgram[_lastProgram.count() - 1];
     ExpressionComputer::Error error;
-    result = ExpressionComputer::compute(textLine, error);
+    int errorStep;
+    QList<int> res = ExpressionComputer::compute(textLine, error, errorStep);
+    _errorMode = true;
+    _lastErrorLine = 0;
+    _lastErrorStep = errorStep;
     switch (error)
     {
-    case ExpressionComputer::Error_Syntax: qDebug("Syntax error"); break;
-    case ExpressionComputer::Error_Stack: qDebug("Stack error"); break;
+    case ExpressionComputer::Error_No: _lines << TextLine(res, true); _errorMode = false; break;
+    case ExpressionComputer::Error_Syntax: _lines << syntaxError(errorStep); break;
+    case ExpressionComputer::Error_Stack: _lines << stackError(errorStep); break;
     default:;
     }
   }
 
-  // Display it
-  TextLine line("", true);
-  line << result;
-  _lines << line;
+  // Move the cursor for the waiting mode
   moveCursor(_lines.count() - 1, 0);
 
   _editZoneTopLineIndex = _lines.count();
@@ -87,13 +92,16 @@ void RunScreen::displayLastProgram(bool cursorOnTop)
   _editZoneTopLineIndex = 0;
   initTopLineIndex();
   setWaitingMode(false);
-  if (cursorOnTop || !_lines.count())
+  if (_errorMode) // Move to the last error
+    moveCursor(_lastErrorLine, _lastErrorStep);
+  else if (cursorOnTop || !_lines.count())
     moveCursor(0, 0);
   else
     moveCursor(_lines.count() - 1, _lines[_lines.count() - 1].charLength());
   feedScreen();
   emit screenChanged();
   restartBlink();
+  _errorMode = false;
 }
 
 void RunScreen::setWaitingMode(bool value)
@@ -104,4 +112,20 @@ void RunScreen::setWaitingMode(bool value)
   _waitingMode = value;
 
   setCursorVisible(!value);
+}
+
+QList<TextLine> RunScreen::syntaxError(int step) const
+{
+  QList<TextLine> result;
+  result << TextLine("  Syn ERROR");
+  result << TextLine(QString("   Step    %1").arg(step));
+  return result;
+}
+
+QList<TextLine> RunScreen::stackError(int step) const
+{
+  QList<TextLine> result;
+  result << TextLine("  Stk ERROR");
+  result << TextLine(QString("   Step    %1").arg(step));
+  return result;
 }

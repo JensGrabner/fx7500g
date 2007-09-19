@@ -1,6 +1,10 @@
 #include "expression_computer.h"
 
-ExpressionToken::ExpressionToken(TokenType tokenType) : _tokenType(tokenType), _value(0.0), _command(0)
+ExpressionToken::ExpressionToken(TokenType tokenType, int step) :
+  _tokenType(tokenType),
+  _value(0.0),
+  _command(0),
+  _step(step)
 {
   switch (tokenType)
   {
@@ -50,21 +54,23 @@ QString ExpressionToken::toString(int command)
 /////////////////////////////////////
 /////////////////////////////////////
 
-QList<int> ExpressionComputer::compute(const QList<int> &expression, Error &error)
+QList<int> ExpressionComputer::compute(const QList<int> &expression, Error &error, int &errorStep)
 {
   ExpressionComputer computer;
   QList<int> returned;
   try
   {
     returned = computer.computeExpression(expression);
-  } catch (Error err)
+    error = Error_No;
+  } catch (Exception exception)
   {
-    error = err;
+    error = exception.error;
+    errorStep = exception.step;
   }
   return returned;
 }
 
-QList<int> ExpressionComputer::computeExpression(const QList<int> &expression) throw (Error)
+QList<int> ExpressionComputer::computeExpression(const QList<int> &expression) throw (Exception)
 {
   QList<int> result;
   _numberStack.clear();
@@ -72,13 +78,15 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression) t
   _offset = 0;
   _expression = expression;
 
-  ExpressionToken token;
+  ExpressionToken token, previousToken;
   while ((token = readToken()).tokenType() != ExpressionToken::TokenType_EOL)
   {
+    analyzeForSyntaxError(token, previousToken);
+
     switch (token.tokenType())
     {
     case ExpressionToken::TokenType_Number: // Ex: 1.6546
-      pushNumber(token.value());
+      pushToken(token);
       break;
     case ExpressionToken::TokenType_Operator: // +, -, *, /
       if (!_commandStack.isEmpty())
@@ -90,10 +98,10 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression) t
         }
       }
 
-      pushCommand(token.command());
+      pushToken(token);
       break;
     case ExpressionToken::TokenType_PreFunc: // log, ln, cos, sin, ...
-      pushCommand(token.command());
+      pushToken(token);
       break;
     case ExpressionToken::TokenType_PostFunc: // !, ², ...
       if (!_commandStack.isEmpty())
@@ -110,7 +118,7 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression) t
       performOperation(token.command());
       break;
     case ExpressionToken::TokenType_OpenParen: // (
-      pushCommand(token.command());
+      pushToken(token);
       break;
     case ExpressionToken::TokenType_CloseParen: // )
       // Consume all operators
@@ -123,7 +131,11 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression) t
       break;
     default:;
     }
+
+    previousToken = token;
   }
+
+  analyzeForSyntaxError(token, previousToken);
 
   // Consume all resting operators
   performStackOperations(true);
@@ -318,82 +330,69 @@ void ExpressionComputer::performOperation(int entity)
   }
 }
 
-ExpressionToken ExpressionComputer::readToken() throw (Error)
+ExpressionToken ExpressionComputer::readToken() throw (Exception)
 {
   if (_offset >= _expression.count())
-    return ExpressionToken();
+    return ExpressionToken(ExpressionToken::TokenType_EOL, _expression.count());
 
-  if (isOperator(_expression[_offset]))
+  int entity = _expression[_offset];
+  switch (entity)
   {
-    ExpressionToken token(ExpressionToken::TokenType_Operator);
-    token.setCommand(_expression[_offset]);
-    _offset++;
-    return token;
-  } else if (isPreFunc(_expression[_offset]))
-  {
-    ExpressionToken token(ExpressionToken::TokenType_PreFunc);
-    token.setCommand(_expression[_offset]);
-    _offset++;
-    return token;
-  } else if (isPostFunc(_expression[_offset]))
-  {
-    ExpressionToken token(ExpressionToken::TokenType_PostFunc);
-    token.setCommand(_expression[_offset]);
-    _offset++;
-    return token;
-  } else
-    switch (_expression[_offset])
+  case LCDChar_OpenParen: return ExpressionToken(ExpressionToken::TokenType_OpenParen, _offset++);
+  case LCDChar_CloseParen: return ExpressionToken(ExpressionToken::TokenType_CloseParen, _offset++);
+  default:
+    if (isOperator(entity))
     {
-    case LCDChar_OpenParen:
+      ExpressionToken token(ExpressionToken::TokenType_Operator, _offset);
+      token.setCommand(entity);
+      _offset++;
+      return token;
+    } else if (isPreFunc(entity))
+    {
+      ExpressionToken token(ExpressionToken::TokenType_PreFunc, _offset);
+      token.setCommand(entity);
+      _offset++;
+      return token;
+    } else if (isPostFunc(entity))
+    {
+      ExpressionToken token(ExpressionToken::TokenType_PostFunc, _offset);
+      token.setCommand(_expression[_offset]);
+      _offset++;
+      return token;
+    } else if (isCipher(entity) || entity == LCDChar_Dot)
+    {
+      int firstOffset = _offset;
+      QString numberStr;
+      numberStr.append(toChar(entity));
+      _offset++;
+      while (_offset < _expression.count() && (isCipher(_expression[_offset]) || _expression[_offset] == LCDChar_Dot))
       {
-        ExpressionToken token(ExpressionToken::TokenType_OpenParen);
+        // Continue the number
+        if (isCipher(_expression[_offset]))
+          numberStr.append(toChar(_expression[_offset]));
+        else if (numberStr.indexOf('.') < 0)
+          numberStr.append('.');
+        else
+          throw Exception(Error_Syntax);
         _offset++;
-        return token;
       }
-    case LCDChar_CloseParen:
-      {
-        ExpressionToken token(ExpressionToken::TokenType_CloseParen);
-        _offset++;
-        return token;
-      }
-    default:
-      if (isCipher(_expression[_offset]) || _expression[_offset] == LCDChar_Dot)
-      {
-        QString numberStr;
-        numberStr.append(toChar(_expression[_offset]));
-        _offset++;
-        while (_offset < _expression.count() && (isCipher(_expression[_offset]) || _expression[_offset] == LCDChar_Dot))
-        {
-          // Continue the number
-          if (isCipher(_expression[_offset]))
-            numberStr.append(toChar(_expression[_offset]));
-          else if (numberStr.indexOf('.') < 0)
-            numberStr.append('.');
-          else
-            throw Error_Syntax;
-          _offset++;
-        }
-        return ExpressionToken(numberStr.toDouble());
-      } else
-        throw Error_Syntax;
-    }
+      return ExpressionToken(numberStr.toDouble(), firstOffset);
+    } else
+      throw Exception(Error_Syntax);
+  }
   return ExpressionToken();
 }
 
-void ExpressionComputer::pushNumber(double value) throw (Error)
+void ExpressionComputer::pushToken(const ExpressionToken &token) throw (Exception)
 {
-  if (_numberStack.count() == _numberStackLimit)
-    throw Error_Stack;
+  if (token.tokenType() == ExpressionToken::TokenType_Number &&
+      _numberStack.count() < _numberStackLimit)
+    _numberStack.push(token.value());
+  else if (token.tokenType() != ExpressionToken::TokenType_Number &&
+           _commandStack.count() < _commandStackLimit)
+    _commandStack.push(token.command());
   else
-    _numberStack.push(value);
-}
-
-void ExpressionComputer::pushCommand(int command) throw (Error)
-{
-  if (_commandStack.count() == _commandStackLimit)
-    throw Error_Stack;
-  else
-    _commandStack.push(command);
+    throw Exception(Error_Stack, token.step());
 }
 
 void ExpressionComputer::displayCommandStack() const
@@ -416,4 +415,29 @@ double ExpressionComputer::factorial(double value) const
     result *= (double) i;
 
   return result;
+}
+
+void ExpressionComputer::analyzeForSyntaxError(ExpressionToken token, ExpressionToken previousToken) throw (Exception)
+{
+  // Previous token constistancy
+  switch (previousToken.tokenType())
+  {
+  case ExpressionToken::TokenType_Operator:
+  case ExpressionToken::TokenType_PreFunc:
+  case ExpressionToken::TokenType_OpenParen:
+    // No operator or PostFunc or Close paren
+    if (token.tokenType() == ExpressionToken::TokenType_Operator ||
+        token.tokenType() == ExpressionToken::TokenType_PostFunc ||
+        token.tokenType() == ExpressionToken::TokenType_CloseParen ||
+        token.tokenType() == ExpressionToken::TokenType_EOL)
+      throw Exception(Error_Syntax, token.step());
+    break;
+  case ExpressionToken::TokenType_PostFunc:
+  case ExpressionToken::TokenType_CloseParen:
+    // No number
+    if (token.tokenType() == ExpressionToken::TokenType_Number)
+      throw Exception(Error_Syntax, token.step());
+    break;
+  default:;
+  }
 }
