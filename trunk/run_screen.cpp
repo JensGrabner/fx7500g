@@ -60,6 +60,12 @@ void RunScreen::validate()
     TextLine &textLine = _lastProgram[_lastProgram.count() - 1];
     ExpressionComputer::Error error;
     result = ExpressionComputer::compute(textLine, error);
+    switch (error)
+    {
+    case ExpressionComputer::Error_Syntax: qDebug("Syntax error"); break;
+    case ExpressionComputer::Error_Stack: qDebug("Stack error"); break;
+    default:;
+    }
   }
 
   // Display it
