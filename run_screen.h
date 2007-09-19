@@ -7,15 +7,17 @@ class RunScreen : public EditorScreen
 {
   Q_OBJECT
 public:
-  RunScreen() : EditorScreen() {}
+  RunScreen() : EditorScreen(), _waitingMode(false) {}
 
   void buttonClicked(int button);
 
 private:
   QList<TextLine> _lastProgram;
+  bool _waitingMode;
 
   void validate();
   void displayLastProgram(bool cursorOnTop = false); // Empty <_lines> and paste <_lastProgram> inside
+  void setWaitingMode(bool value);
 };
 
 #endif

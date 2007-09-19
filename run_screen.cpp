@@ -6,10 +6,10 @@ void RunScreen::buttonClicked(int button)
 {
   int entity = _calcState->printableEntityByButton(button);
 
-  if (entity >= 0 && !cursorVisible())
+  if (entity >= 0 && _waitingMode)
   {
     _lines << TextLine();
-    setCursorVisible(true);
+    setWaitingMode(false);
     moveCursor(_editZoneTopLineIndex, 0);
   }
 
@@ -32,14 +32,12 @@ void RunScreen::buttonClicked(int button)
     {
     case KeyMode_Shift:
     case KeyMode_ShiftMode:
-    case KeyMode_ShiftHyp:
-      carriageReturn(); break;
-    default:
-      validate(); break;
+    case KeyMode_ShiftHyp: carriageReturn(); break;
+    default: validate(); break;
     }
     break;
-  case Button_Left: if (!cursorVisible()) displayLastProgram(); break;
-  case Button_Right: if (!cursorVisible()) displayLastProgram(true); break;
+  case Button_Left: if (_waitingMode) displayLastProgram(); break;
+  case Button_Right: if (_waitingMode) displayLastProgram(true); break;
   default:;
   }
 }
@@ -48,13 +46,13 @@ void RunScreen::validate()
 {
   QList<int> result;
 
-  if (cursorVisible())
+  if (!_waitingMode)
   {
     // Save last program bloc
     _lastProgram.clear();
     for (int lineIndex = _editZoneTopLineIndex; lineIndex < _lines.count(); ++lineIndex)
       _lastProgram << _lines[lineIndex];
-  } 
+  }
 
   // Compute the program
   if (_lastProgram.count())
@@ -71,7 +69,7 @@ void RunScreen::validate()
   moveCursor(_lines.count() - 1, 0);
 
   _editZoneTopLineIndex = _lines.count();
-  setCursorVisible(false);
+  setWaitingMode(true);
 
   feedScreen();
   emit screenChanged();
@@ -82,7 +80,7 @@ void RunScreen::displayLastProgram(bool cursorOnTop)
   _lines = _lastProgram;
   _editZoneTopLineIndex = 0;
   initTopLineIndex();
-  setCursorVisible(true);
+  setWaitingMode(false);
   if (cursorOnTop || !_lines.count())
     moveCursor(0, 0);
   else
@@ -90,4 +88,14 @@ void RunScreen::displayLastProgram(bool cursorOnTop)
   feedScreen();
   emit screenChanged();
   restartBlink();
+}
+
+void RunScreen::setWaitingMode(bool value)
+{
+  if (value == _waitingMode)
+    return;
+
+  _waitingMode = value;
+
+  setCursorVisible(!value);
 }
