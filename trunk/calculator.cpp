@@ -145,11 +145,15 @@ void Calculator::applyKey(int key)
   case Qt::Key_7: buttonClicked(Button_7); break;
   case Qt::Key_8: buttonClicked(Button_8); break;
   case Qt::Key_9: buttonClicked(Button_9); break;
+  case Qt::Key_Period: buttonClicked(Button_Dot); break;
   case Qt::Key_Insert: buttonClicked(Button_Ins); break;
   case Qt::Key_Backspace: buttonClicked(Button_Left); buttonClicked(Button_Del); break;
   case Qt::Key_Plus: buttonClicked(Button_Add); break;
   case Qt::Key_Slash: buttonClicked(Button_Divide); break;
   case Qt::Key_Asterisk: buttonClicked(Button_Multiply); break;
+  case Qt::Key_ParenLeft: buttonClicked(Button_OpenParen); break;
+  case Qt::Key_ParenRight: buttonClicked(Button_CloseParen); break;
+  case Qt::Key_Exclam: buttonClicked(Button_Shift); buttonClicked(Button_MinusOne); break;
   }
 
   if ((key >= Qt::Key_A && key <= Qt::Key_Z) || (key == Qt::Key_Space))

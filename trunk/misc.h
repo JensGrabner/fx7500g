@@ -362,6 +362,7 @@ class TextLine : public QList<int>
 public:
   TextLine(const QString &str = "", bool rightJustified = false);
   TextLine(int entity, bool rightJustified = false);
+  TextLine(QList<int> list, bool rightJustified = false);
 
   bool rightJustified() const { return _rightJustified; }
   void setRightJustified(bool value) { _rightJustified = value; }

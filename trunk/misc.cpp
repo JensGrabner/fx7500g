@@ -793,6 +793,12 @@ TextLine::TextLine(int entity, bool rightJustified) :
   append(entity);
 }
 
+TextLine::TextLine(QList<int> list, bool rightJustified) :
+  _rightJustified(rightJustified)
+{
+  (*this) << list;
+}
+
 void TextLine::assignString(const QString &str)
 {
   clear();

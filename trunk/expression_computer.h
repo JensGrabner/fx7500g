@@ -20,8 +20,11 @@ public:
     TokenType_CloseParen
   };
 
-  ExpressionToken(TokenType tokenType = TokenType_EOL);
-  ExpressionToken(double value) : _tokenType(TokenType_Number), _value(value), _command(0) {}
+  ExpressionToken(TokenType tokenType = TokenType_EOL, int step = 0);
+  ExpressionToken(double value, int step = 0) : _tokenType(TokenType_Number), _value(value), _command(0), _step(step) {}
+
+  int step() const { return _step; } // Return the step of the token into the expression
+  void setStep(int value) { _step = value; }
 
   bool isNumber() const { return _tokenType == TokenType_Number; }
   bool isOperator() const { return _tokenType == TokenType_Operator; }
@@ -46,6 +49,7 @@ private:
   TokenType _tokenType;
   double _value;
   int _command;
+  int _step;
 };
 
 class ExpressionComputer
@@ -57,9 +61,17 @@ public:
     Error_Stack,
   };
 
+  class Exception {
+  public:
+    Exception();
+    Exception(Error err, int st = 0) : error(err), step(st) {}
+    Error error;
+    int step;
+  };
+
   ExpressionComputer() {}
 
-  static QList<int> compute(const QList<int> &expression, Error &error);
+  static QList<int> compute(const QList<int> &expression, Error &error, int &errorStep);
 
 private:
   static const int _numberStackLimit = 9;
@@ -69,9 +81,9 @@ private:
   int _offset;
   QList<int> _expression;
 
-  ExpressionToken readToken() throw (Error);
+  QList<int> computeExpression(const QList<int> &expression) throw (Exception);
 
-  QList<int> computeExpression(const QList<int> &expression) throw (Error);
+  ExpressionToken readToken() throw (Exception);
 
   bool isOperator(int entity) const;
   bool isPreFunc(int entity) const;
@@ -83,8 +95,7 @@ private:
   bool isCipher(int entity) const { return entity >= LCDChar_0 && entity <= LCDChar_9; }
   QChar toChar(int entity) const;
 
-  void pushNumber(double value) throw (Error);
-  void pushCommand(int command) throw (Error);
+  void pushToken(const ExpressionToken &token) throw (Exception);
 
   void displayCommandStack() const;
 
@@ -93,6 +104,8 @@ private:
   double factorial(double value) const;
 
   QList<int> formatDouble(double d) const;
+
+  void analyzeForSyntaxError(ExpressionToken token, ExpressionToken previousToken) throw (Exception);
 };
 
 #endif

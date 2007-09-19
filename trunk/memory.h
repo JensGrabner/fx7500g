@@ -37,6 +37,7 @@ public:
   int freeSteps() const;
 
   double variable(int index, bool *overflow = 0); // Return 0 is index > 26 + _extraVarCount
+  bool setVariable(int index, double value); // Return false if index > 26 + _extraVarCount
   int extraVarCount() const { return _extraVarCount; }
   bool setExtraVarCount(int value); // Returns false is value is invalid
 

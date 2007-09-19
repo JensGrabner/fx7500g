@@ -134,9 +134,17 @@ double Memory::variable(int index, bool *overflow)
   }
 }
 
+bool Memory::setVariable(int index, double value)
+{
+  if (index >= 26 + _extraVarCount)
+    return false;
+
+  _variables[index] = value;
+  return true;
+}
+
 void Memory::clearVariables()
 {
-  qDebug("%d", sizeof(_variables) / sizeof(double));
   for (int i = 0; i < (int) (sizeof(_variables) / sizeof(double)); ++i)
     _variables[i] = 0.0;
 }
