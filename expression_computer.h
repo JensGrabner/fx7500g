@@ -54,8 +54,7 @@ public:
   enum Error {
     Error_No,
     Error_Syntax,
-    Error_NumberStack,
-    Error_CommandStack
+    Error_Stack,
   };
 
   ExpressionComputer() {}
@@ -67,13 +66,12 @@ private:
   static const int _commandStackLimit = 20;
   QStack<double> _numberStack;
   QStack<int> _commandStack;
-  Error _lastError;
   int _offset;
   QList<int> _expression;
 
-  ExpressionToken readToken(bool &syntaxError);
+  ExpressionToken readToken() throw (Error);
 
-  QList<int> computeExpression(const QList<int> &expression);
+  QList<int> computeExpression(const QList<int> &expression) throw (Error);
 
   bool isOperator(int entity) const;
   bool isPreFunc(int entity) const;
@@ -85,14 +83,16 @@ private:
   bool isCipher(int entity) const { return entity >= LCDChar_0 && entity <= LCDChar_9; }
   QChar toChar(int entity) const;
 
-  void pushNumber(double value, bool &stackError);
-  void pushCommand(int command, bool &stackError);
+  void pushNumber(double value) throw (Error);
+  void pushCommand(int command) throw (Error);
 
   void displayCommandStack() const;
 
   double deg2rad(double deg) const { return (deg * M_PI) / 180.0; }
   double rad2deg(double rad) const { return (rad * 180.0) / M_PI; }
   double factorial(double value) const;
+
+  QList<int> formatDouble(double d) const;
 };
 
 #endif

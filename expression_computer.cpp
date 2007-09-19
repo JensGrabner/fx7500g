@@ -53,12 +53,18 @@ QString ExpressionToken::toString(int command)
 QList<int> ExpressionComputer::compute(const QList<int> &expression, Error &error)
 {
   ExpressionComputer computer;
-  QList<int> returned = computer.computeExpression(expression);
-  error = computer._lastError;
+  QList<int> returned;
+  try
+  {
+    returned = computer.computeExpression(expression);
+  } catch (Error err)
+  {
+    error = err;
+  }
   return returned;
 }
 
-QList<int> ExpressionComputer::computeExpression(const QList<int> &expression)
+QList<int> ExpressionComputer::computeExpression(const QList<int> &expression) throw (Error)
 {
   QList<int> result;
   _numberStack.clear();
@@ -66,24 +72,13 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression)
   _offset = 0;
   _expression = expression;
 
-  _lastError = Error_No;
-
   ExpressionToken token;
-  bool syntaxError = false;
-  bool numberStackError = false;
-  bool commandStackError = false;
-  while ((token = readToken(syntaxError)).tokenType() != ExpressionToken::TokenType_EOL)
+  while ((token = readToken()).tokenType() != ExpressionToken::TokenType_EOL)
   {
-    if (syntaxError)
-    {
-      _lastError = Error_Syntax;
-      return result;
-    }
-
     switch (token.tokenType())
     {
     case ExpressionToken::TokenType_Number: // Ex: 1.6546
-      pushNumber(token.value(), numberStackError);
+      pushNumber(token.value());
       break;
     case ExpressionToken::TokenType_Operator: // +, -, *, /
       if (!_commandStack.isEmpty())
@@ -95,10 +90,10 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression)
         }
       }
 
-      pushCommand(token.command(), commandStackError);
+      pushCommand(token.command());
       break;
     case ExpressionToken::TokenType_PreFunc: // log, ln, cos, sin, ...
-      pushCommand(token.command(), commandStackError);
+      pushCommand(token.command());
       break;
     case ExpressionToken::TokenType_PostFunc: // !, ², ...
       if (!_commandStack.isEmpty())
@@ -115,7 +110,7 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression)
       performOperation(token.command());
       break;
     case ExpressionToken::TokenType_OpenParen: // (
-      pushCommand(token.command(), commandStackError);
+      pushCommand(token.command());
       break;
     case ExpressionToken::TokenType_CloseParen: // )
       // Consume all operators
@@ -124,43 +119,30 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression)
       if (!_commandStack.isEmpty() && _commandStack.top() == LCDChar_OpenParen)
         _commandStack.pop();
       else // No corresponding open parenthesis => syntax error
-      {
-        _lastError = Error_Syntax;
-        return result;
-      }
+        throw Error_Syntax;
       break;
     default:;
     }
   }
 
-  if (syntaxError)
-  {
-    _lastError = Error_Syntax;
-    return result;
-  }
-
-  if (numberStackError)
-  {
-    _lastError = Error_NumberStack;
-    return result;
-  }
-
-  if (commandStackError)
-  {
-    _lastError = Error_CommandStack;
-    return result;
-  }
-
   // Consume all resting operators
   performStackOperations(true);
 
-  QString sortie;
-  double n = _numberStack.top();
-  if (fabs(n) < 0.01 || fabs(n) >= 10000000000.0)
-    sortie = QString::number(_numberStack.top(), 'E', 9);
-  else
-    sortie = QString::number(_numberStack.top(), 'G', 10);
+  return formatDouble(_numberStack.top());
+}
 
+QList<int> ExpressionComputer::formatDouble(double d) const
+{
+  QList<int> result;
+
+  QString sortie;
+  // Format the double
+  if (fabs(d) < 0.01 || fabs(d) >= 10000000000.0)
+    sortie = QString::number(d, 'E', 9);
+  else
+    sortie = QString::number(d, 'G', 10);
+
+  // Casio add a '.' at the end of a double if decimal part is 0
   if (sortie.indexOf('.') < 0)
     sortie.append('.');
 
@@ -172,7 +154,7 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression)
     while ((p = sortie.indexOf('0')) == sortie.length() - 1)
       sortie.remove(p, 1);
 
-  // Convert to a QList<int>
+  // Store into the QList<int>
   foreach (const QChar &c, sortie)
   {
     const char ch = c.toLatin1();
@@ -336,9 +318,8 @@ void ExpressionComputer::performOperation(int entity)
   }
 }
 
-ExpressionToken ExpressionComputer::readToken(bool &syntaxError)
+ExpressionToken ExpressionComputer::readToken() throw (Error)
 {
-  syntaxError = false;
   if (_offset >= _expression.count())
     return ExpressionToken();
 
@@ -389,33 +370,29 @@ ExpressionToken ExpressionComputer::readToken(bool &syntaxError)
           else if (numberStr.indexOf('.') < 0)
             numberStr.append('.');
           else
-          {
-            syntaxError = true;
-            return ExpressionToken();
-          }
+            throw Error_Syntax;
           _offset++;
         }
         return ExpressionToken(numberStr.toDouble());
       } else
-      {
-        syntaxError = true;
-        return ExpressionToken();
-      }
+        throw Error_Syntax;
     }
   return ExpressionToken();
 }
 
-void ExpressionComputer::pushNumber(double value, bool &stackError)
+void ExpressionComputer::pushNumber(double value) throw (Error)
 {
-  stackError = _numberStack.count() == _numberStackLimit;
-  if (!stackError)
+  if (_numberStack.count() == _numberStackLimit)
+    throw Error_Stack;
+  else
     _numberStack.push(value);
 }
 
-void ExpressionComputer::pushCommand(int command, bool &stackError)
+void ExpressionComputer::pushCommand(int command) throw (Error)
 {
-  stackError = _commandStack.count() == _commandStackLimit;
-  if (!stackError)
+  if (_commandStack.count() == _commandStackLimit)
+    throw Error_Stack;
+  else
     _commandStack.push(command);
 }
 
