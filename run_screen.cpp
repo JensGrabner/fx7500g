@@ -72,6 +72,7 @@ void RunScreen::validate()
     case ExpressionComputer::Error_No: _lines << TextLine(res, true); _errorMode = false; break;
     case ExpressionComputer::Error_Syntax: _lines << syntaxError(errorStep); break;
     case ExpressionComputer::Error_Stack: _lines << stackError(errorStep); break;
+    case ExpressionComputer::Error_Memory: _lines << memError(errorStep); break;
     default:;
     }
   }
@@ -126,6 +127,14 @@ QList<TextLine> RunScreen::stackError(int step) const
 {
   QList<TextLine> result;
   result << TextLine("  Stk ERROR");
+  result << TextLine(QString("   Step    %1").arg(step));
+  return result;
+}
+
+QList<TextLine> RunScreen::memError(int step) const
+{
+  QList<TextLine> result;
+  result << TextLine("  Mem ERROR");
   result << TextLine(QString("   Step    %1").arg(step));
   return result;
 }

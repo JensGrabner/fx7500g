@@ -12,13 +12,15 @@ class ExpressionToken
 public:
   enum TokenType {
     TokenType_EOL,
-    TokenType_Number,
-    TokenType_Operator,
-    TokenType_PreFunc,
-    TokenType_PostFunc,
-    TokenType_OpenParen,
-    TokenType_CloseParen,
-    TokenType_Variable
+    TokenType_Number,       // 1.3
+    TokenType_Operator,     // +, x, -, /
+    TokenType_PreFunc,      // Cos
+    TokenType_PostFunc,     // !
+    TokenType_OpenParen,    // (
+    TokenType_CloseParen,   // )
+    TokenType_Variable,     // A, B, C, etc
+    TokenType_OpenArrayVar, // A[ => in this case, <_command> contains the letter involved
+    TokenType_CloseBracket  // ]
   };
 
   ExpressionToken(TokenType tokenType = TokenType_EOL, int step = 0);
@@ -35,6 +37,8 @@ public:
   bool isOpenParen() const { return _tokenType == TokenType_OpenParen; }
   bool isCloseParen() const { return _tokenType == TokenType_CloseParen; }
   bool isVariable() const { return _tokenType == TokenType_Variable; }
+  bool isOpenArrayVar() const { return _tokenType == TokenType_OpenArrayVar; }
+  bool isCloseBracket() const { return _tokenType == TokenType_CloseBracket; }
 
   TokenType tokenType() const { return _tokenType; }
 
@@ -61,6 +65,7 @@ public:
     Error_No,
     Error_Syntax,
     Error_Stack,
+    Error_Memory
   };
 
   class Exception {
@@ -79,7 +84,7 @@ private:
   static const int _numberStackLimit = 9;
   static const int _commandStackLimit = 20;
   QStack<double> _numberStack;
-  QStack<int> _commandStack;
+  QStack<ExpressionToken> _commandStack;
   int _offset;
   QList<int> _expression;
 
