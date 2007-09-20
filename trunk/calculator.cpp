@@ -90,6 +90,7 @@ void Calculator::init()
 
   setSysMode(SysMode_RUN);
   _calcState.setScreenMode(ScreenMode_Resume);
+  screenModeChanged(ScreenMode_Resume);
 }
 
 void Calculator::setCalMode(CalMode value)
