@@ -134,6 +134,13 @@ double Memory::variable(int index, bool *overflow)
   }
 }
 
+double Memory::variable(LCDChar c, int index, bool *overflow)
+{
+  Q_ASSERT_X(c >= LCDChar_A && c <= LCDChar_Z, "Memory::variable()", "invalid c");
+  // Compute the absolute index
+  return variable(c - LCDChar_A + index, overflow);
+}
+
 bool Memory::setVariable(int index, double value)
 {
   if (index >= 26 + _extraVarCount)

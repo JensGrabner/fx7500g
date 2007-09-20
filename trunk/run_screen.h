@@ -23,6 +23,7 @@ private:
   void setWaitingMode(bool value);
   QList<TextLine> syntaxError(int step) const;
   QList<TextLine> stackError(int step) const;
+  QList<TextLine> memError(int step) const;
 };
 
 #endif
