@@ -154,6 +154,9 @@ void Calculator::applyKey(int key)
   case Qt::Key_ParenLeft: buttonClicked(Button_OpenParen); break;
   case Qt::Key_ParenRight: buttonClicked(Button_CloseParen); break;
   case Qt::Key_Exclam: buttonClicked(Button_Shift); buttonClicked(Button_MinusOne); break;
+  case Qt::Key_BracketLeft: buttonClicked(Button_Alpha); buttonClicked(Button_Dot); break;
+  case Qt::Key_BracketRight: buttonClicked(Button_Alpha); buttonClicked(Button_Exp); break;
+  case Qt::Key_Colon: buttonClicked(Button_Colon); break;
   }
 
   if ((key >= Qt::Key_A && key <= Qt::Key_Z) || (key == Qt::Key_Space))

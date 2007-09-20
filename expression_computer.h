@@ -17,7 +17,8 @@ public:
     TokenType_PreFunc,
     TokenType_PostFunc,
     TokenType_OpenParen,
-    TokenType_CloseParen
+    TokenType_CloseParen,
+    TokenType_Variable
   };
 
   ExpressionToken(TokenType tokenType = TokenType_EOL, int step = 0);
@@ -26,17 +27,18 @@ public:
   int step() const { return _step; } // Return the step of the token into the expression
   void setStep(int value) { _step = value; }
 
+  bool isEOL() const { return _tokenType == TokenType_EOL; }
   bool isNumber() const { return _tokenType == TokenType_Number; }
   bool isOperator() const { return _tokenType == TokenType_Operator; }
   bool isPreFunc() const { return _tokenType == TokenType_PreFunc; }
   bool isPostFunc() const { return _tokenType == TokenType_PostFunc; }
   bool isOpenParen() const { return _tokenType == TokenType_OpenParen; }
   bool isCloseParen() const { return _tokenType == TokenType_CloseParen; }
-  bool isEOL() const { return _tokenType == TokenType_EOL; }
+  bool isVariable() const { return _tokenType == TokenType_Variable; }
 
   TokenType tokenType() const { return _tokenType; }
 
-  double value() const { return _value; }
+  double value() const;
   void setValue(double value) { _value = value; }
 
   int command() const { return _command; }
@@ -94,6 +96,7 @@ private:
 
   bool isCipher(int entity) const { return entity >= LCDChar_0 && entity <= LCDChar_9; }
   QChar toChar(int entity) const;
+  bool isAlpha(int entity) const { return entity >= LCDChar_A && entity <= LCDChar_Z; }
 
   void pushToken(const ExpressionToken &token) throw (Exception);
 

@@ -1,3 +1,5 @@
+#include "memory.h"
+
 #include "expression_computer.h"
 
 ExpressionToken::ExpressionToken(TokenType tokenType, int step) :
@@ -12,6 +14,14 @@ ExpressionToken::ExpressionToken(TokenType tokenType, int step) :
   case TokenType_CloseParen: _command = LCDChar_CloseParen; break;
   default:;
   }
+}
+
+double ExpressionToken::value() const
+{
+  if (_tokenType == TokenType_Variable)
+    return Memory::instance().variable((int) ((LCDChar) _command - LCDChar_A));
+  else
+    return _value;
 }
 
 QString ExpressionToken::toString() const
@@ -85,7 +95,8 @@ QList<int> ExpressionComputer::computeExpression(const QList<int> &expression) t
 
     switch (token.tokenType())
     {
-    case ExpressionToken::TokenType_Number: // Ex: 1.6546
+    case ExpressionToken::TokenType_Number: // Ex: 1.6546, 5, ...
+    case ExpressionToken::TokenType_Variable: // Ex: A, N, ...
       pushToken(token);
       break;
     case ExpressionToken::TokenType_Operator: // +, -, *, /
@@ -149,7 +160,7 @@ QList<int> ExpressionComputer::formatDouble(double d) const
 
   QString sortie;
   // Format the double
-  if (fabs(d) < 0.01 || fabs(d) >= 10000000000.0)
+  if ((fabs(d) < 0.01 || fabs(d) >= 10000000000.0) && d != 0.0)
     sortie = QString::number(d, 'E', 9);
   else
     sortie = QString::number(d, 'G', 10);
@@ -359,6 +370,17 @@ ExpressionToken ExpressionComputer::readToken() throw (Exception)
       token.setCommand(_expression[_offset]);
       _offset++;
       return token;
+    } else if (isAlpha(entity))
+    {
+      _offset++;
+      if (_offset < _expression.count() && entity == LCDChar_OpenBracket)
+      {
+      } else
+      {
+        ExpressionToken token(ExpressionToken::TokenType_Variable, _offset - 1);
+        token.setCommand(_expression[_offset-1]);
+        return token;
+      }
     } else if (isCipher(entity) || entity == LCDChar_Dot)
     {
       int firstOffset = _offset;
@@ -378,14 +400,14 @@ ExpressionToken ExpressionComputer::readToken() throw (Exception)
       }
       return ExpressionToken(numberStr.toDouble(), firstOffset);
     } else
-      throw Exception(Error_Syntax);
+      throw Exception(Error_Syntax, _offset);
   }
   return ExpressionToken();
 }
 
 void ExpressionComputer::pushToken(const ExpressionToken &token) throw (Exception)
 {
-  if (token.tokenType() == ExpressionToken::TokenType_Number &&
+  if ((token.tokenType() == ExpressionToken::TokenType_Number || token.tokenType() == ExpressionToken::TokenType_Variable) &&
       _numberStack.count() < _numberStackLimit)
     _numberStack.push(token.value());
   else if (token.tokenType() != ExpressionToken::TokenType_Number &&
@@ -434,7 +456,9 @@ void ExpressionComputer::analyzeForSyntaxError(ExpressionToken token, Expression
     break;
   case ExpressionToken::TokenType_PostFunc:
   case ExpressionToken::TokenType_CloseParen:
+  case ExpressionToken::TokenType_Variable:
     // No number
+    qDebug("%d, %d", token.step(), previousToken.step());
     if (token.tokenType() == ExpressionToken::TokenType_Number)
       throw Exception(Error_Syntax, token.step());
     break;
