@@ -335,7 +335,7 @@ void ExpressionComputer::performOperation(int entity)
   case LCDChar_SquareRoot: _numberStack.push(sqrt(_numberStack.pop())); break;
   case LCDOp_CubeSquareRoot: _numberStack.push(cbrt(_numberStack.pop())); break;
   case LCDOp_Log: _numberStack.push(log10(_numberStack.pop())); break;
-  case LCDChar_Ten: _numberStack.push(exp10(_numberStack.pop())); break;
+  case LCDChar_Ten: _numberStack.push(pow(10.0, _numberStack.pop())); break;
   case LCDOp_Ln: _numberStack.push(log(_numberStack.pop())); break;
   case LCDChar_Euler: _numberStack.push(exp(_numberStack.pop())); break;
   case LCDOp_Sin: _numberStack.push(sin(deg2rad(_numberStack.pop()))); break;
