@@ -289,6 +289,17 @@ void ExpressionComputer::performStackOperations(bool manageOpenParen)
       performOperation(_commandStack.pop().command());
     else if (_commandStack.top().command() == LCDChar_OpenParen && manageOpenParen)
       _commandStack.pop();
+    else if (_commandStack.top().tokenType() == ExpressionToken::TokenType_OpenArrayVar && manageOpenParen)
+    {
+      int entity = _commandStack.pop().command();
+
+      // Get the stack value, compute the array index and push it
+      int index = (int) _numberStack.pop();
+      bool overflow;
+      _numberStack.push(Memory::instance().variable((LCDChar) entity, index, &overflow));
+      if (overflow)
+        throw Exception(Error_Memory, 0);
+    }
     else
       break;
   }
@@ -471,14 +482,13 @@ double ExpressionComputer::factorial(double value) const
 
 void ExpressionComputer::analyzeForSyntaxError(ExpressionToken token, ExpressionToken previousToken) throw (Exception)
 {
-  // Previous token constistancy
+  // Previous token constitancy
   switch (previousToken.tokenType())
   {
   case ExpressionToken::TokenType_Operator:
   case ExpressionToken::TokenType_PreFunc:
   case ExpressionToken::TokenType_OpenParen:
   case ExpressionToken::TokenType_OpenArrayVar:
-    // No operator or PostFunc or Close paren
     if (token.tokenType() == ExpressionToken::TokenType_Operator ||
         token.tokenType() == ExpressionToken::TokenType_PostFunc ||
         token.tokenType() == ExpressionToken::TokenType_CloseParen ||
@@ -489,7 +499,6 @@ void ExpressionComputer::analyzeForSyntaxError(ExpressionToken token, Expression
   case ExpressionToken::TokenType_PostFunc:
   case ExpressionToken::TokenType_CloseParen:
   case ExpressionToken::TokenType_Variable:
-    // No number
     if (token.tokenType() == ExpressionToken::TokenType_Number)
       throw Exception(Error_Syntax, token.step());
     break;

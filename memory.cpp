@@ -153,5 +153,5 @@ bool Memory::setVariable(int index, double value)
 void Memory::clearVariables()
 {
   for (int i = 0; i < (int) (sizeof(_variables) / sizeof(double)); ++i)
-    _variables[i] = i;
+    _variables[i] = sizeof(_variables) - i;
 }
