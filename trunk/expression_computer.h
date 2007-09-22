@@ -83,10 +83,10 @@ public:
 private:
   static const int _numberStackLimit = 9;
   static const int _commandStackLimit = 20;
+  QList<int> _expression;
   QStack<double> _numberStack;
   QStack<ExpressionToken> _commandStack;
   int _offset;
-  QList<int> _expression;
 
   QList<int> computeExpression(const QList<int> &expression) throw (Exception);
 

@@ -298,7 +298,7 @@ void ExpressionComputer::performStackOperations(bool manageOpenParen)
       bool overflow;
       _numberStack.push(Memory::instance().variable((LCDChar) entity, index, &overflow));
       if (overflow)
-        throw Exception(Error_Memory, 0);
+        throw Exception(Error_Memory, _expression.count());
     }
     else
       break;
