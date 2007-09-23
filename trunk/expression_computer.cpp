@@ -217,16 +217,6 @@ QList<int> ExpressionComputer::formatDouble(double d) const
   return result;
 }
 
-QChar ExpressionComputer::toChar(int entity) const
-{
-  if (entity >= LCDChar_0 && entity <= LCDChar_9)
-    return QChar('0' + entity - LCDChar_0);
-  else if (entity == LCDChar_Dot)
-    return QChar('.');
-  else
-    return QChar();
-}
-
 bool ExpressionComputer::isOperator(int entity) const
 {
   return entity == LCDChar_Multiply ||
@@ -421,13 +411,13 @@ ExpressionToken ExpressionComputer::readToken() throw (Exception)
     {
       int firstOffset = _offset;
       QString numberStr;
-      numberStr.append(toChar(entity));
+      numberStr.append(toNumChar(entity));
       _offset++;
       while (_offset < _expression.count() && (isCipher(_expression[_offset]) || _expression[_offset] == LCDChar_Dot))
       {
         // Continue the number
         if (isCipher(_expression[_offset]))
-          numberStr.append(toChar(_expression[_offset]));
+          numberStr.append(toNumChar(_expression[_offset]));
         else if (numberStr.indexOf('.') < 0)
           numberStr.append('.');
         else

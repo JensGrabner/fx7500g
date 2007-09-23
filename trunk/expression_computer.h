@@ -70,7 +70,6 @@ public:
 
   class Exception {
   public:
-    Exception();
     Exception(Error err, int st = 0) : error(err), step(st) {}
     Error error;
     int step;
@@ -98,10 +97,6 @@ private:
 
   void performOperation(int entity);
   void performStackOperations(bool manageOpenParen = false);
-
-  bool isCipher(int entity) const { return entity >= LCDChar_0 && entity <= LCDChar_9; }
-  QChar toChar(int entity) const;
-  bool isAlpha(int entity) const { return entity >= LCDChar_A && entity <= LCDChar_Z; }
 
   void pushToken(const ExpressionToken &token) throw (Exception);
 

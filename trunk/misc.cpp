@@ -2,6 +2,26 @@
 
 #include "misc.h"
 
+bool isAlpha(int entity)
+{
+  return entity >= LCDChar_A && entity <= LCDChar_Z;
+}
+
+bool isCipher(int entity)
+{
+  return entity >= LCDChar_0 && entity <= LCDChar_9;
+}
+
+QChar toNumChar(int entity)
+{
+  if (isCipher(entity))
+    return QChar('0' + entity - LCDChar_0);
+  else if (entity == LCDChar_Dot)
+    return QChar('.');
+  else
+    return QChar();
+}
+
 LCDChar charToLCDChar(const QChar &c, bool *found)
 {
   const char ch = c.toLatin1();

@@ -132,7 +132,8 @@ enum LCDChar {
   LCDChar_LittleR,   // Suffix for radian values
   LCDChar_LittleG,   // Suffix for gradian values
   LCDChar_Space,
-  LCDChar_End = LCDChar_Space
+  LCDChar_CR,        // Used to stock carriage return
+  LCDChar_End = LCDChar_CR
 };
 
 LCDChar charToLCDChar(const QChar &c, bool *found = 0);
@@ -197,6 +198,9 @@ enum LCDOperator
   LCDOp_Scl
 };
 
+bool isAlpha(int entity);
+bool isCipher(int entity);
+QChar toNumChar(int entity);
 QList<LCDChar> operatorToChars(LCDOperator op);
 QList<LCDChar> entityToChars(int entity);
 bool isLCDChar(int entity);
