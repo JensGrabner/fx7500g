@@ -301,17 +301,6 @@ void EditorScreen::moveCursor(int newLineIndex, int newOffset, bool *scrolled)
   int line = 0;
   int col = 0;
 
-  // Must scroll up?
-//   if (newLineIndex < _topLineIndex || (newLineIndex == _topLineIndex && newOffset / 16 < _topLineSubIndex))
-//   {
-//     if (scrollUp())
-//     {
-//       feedScreen();
-//       emit screenChanged();
-//       if (scrolled)
-//         *scrolled = true;
-//     }
-//   }
   bool done = false;
   while (newLineIndex < _topLineIndex || (newLineIndex == _topLineIndex && newOffset / 16 < _topLineSubIndex))
     if (scrollUp())
