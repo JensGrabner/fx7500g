@@ -36,6 +36,8 @@ private:
 
   TextLine parseString();
   void parseInput();
+  void parseLabel();
+  void parseGoto();
   // Returns true if (d1 comp d2) is true
   bool computeBoolean(int comp, double d1, double d2);
   void moveOffsetToNextInstruction();

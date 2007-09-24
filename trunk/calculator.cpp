@@ -92,6 +92,13 @@ void Calculator::init()
   _calcState.setScreenMode(ScreenMode_Resume);
   screenModeChanged(ScreenMode_Resume);
 
+  buttonClicked(Button_Shift); buttonClicked(Button_Plot);
+  buttonClicked(Button_4);
+  buttonClicked(Button_Colon);
+  buttonClicked(Button_4);
+  buttonClicked(Button_Colon);
+  buttonClicked(Button_Shift); buttonClicked(Button_Prog);
+  buttonClicked(Button_4);
 /*  buttonClicked(Button_1);
   buttonClicked(Button_2);
   buttonClicked(Button_Arrow);

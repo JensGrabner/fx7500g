@@ -1,5 +1,3 @@
-#include "expression_computer.h"
-
 #include "run_screen.h"
 
 RunScreen::RunScreen() :
@@ -86,6 +84,7 @@ void RunScreen::validate()
         case Error_Stack: _lines << stackError(exception.offset()); break;
         case Error_Memory: _lines << memError(exception.offset()); break;
         case Error_Argument: _lines << argError(exception.offset()); break;
+        case Error_Goto: _lines << gotoError(exception.offset()); break;
         default:;
         }
       }
@@ -158,6 +157,14 @@ QList<TextLine> RunScreen::argError(int step) const
 {
   QList<TextLine> result;
   result << TextLine("  Arg ERROR");
+  result << TextLine(QString("   Step    %1").arg(step));
+  return result;
+}
+
+QList<TextLine> RunScreen::gotoError(int step) const
+{
+  QList<TextLine> result;
+  result << TextLine("  Go  ERROR");
   result << TextLine(QString("   Step    %1").arg(step));
   return result;
 }

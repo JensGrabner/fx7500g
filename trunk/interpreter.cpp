@@ -41,14 +41,8 @@ void Interpreter::execute(const TextLine &textLine)
         readEntity(); // Pass the "?"
         parseInput();
         return;
-      case LCDOp_Lbl: // A label
-        readEntity(); // Pass the "label "
-        if (!isCipher(currentEntity()))
-          throw InterpreterException(Error_Argument, _currentOffset);
-        readEntity(); // Pass the cipher
-        if (!isSeparator(currentEntity()) && currentEntity() != -1)
-          throw InterpreterException(Error_Argument, _currentOffset);
-        break;
+      case LCDOp_Lbl: parseLabel(); break;
+      case LCDOp_Goto: parseGoto(); break;
       default:
         if (ExpressionSolver::isExpressionStartEntity(entity))
         {
@@ -196,4 +190,38 @@ void Interpreter::moveOffsetToNextInstruction()
       break;
     readEntity(); // Pass the current entity
   }
+}
+
+void Interpreter::parseLabel()
+{
+  readEntity(); // Pass the "label "
+  if (!isCipher(currentEntity()))
+    throw InterpreterException(Error_Argument, _currentOffset);
+  readEntity(); // Pass the cipher
+  if (!isSeparator(currentEntity()) && currentEntity() != -1)
+    throw InterpreterException(Error_Argument, _currentOffset);
+}
+
+void Interpreter::parseGoto()
+{
+  readEntity(); // Pass the "goto "
+  if (!isCipher(currentEntity()))
+    throw InterpreterException(Error_Argument, _currentOffset);
+  int cipher = readEntity(); // Pass the cipher
+  if (!isSeparator(currentEntity()) && currentEntity() != -1)
+    throw InterpreterException(Error_Argument, _currentOffset);
+
+  int p = 0;
+  while ((p = _program.indexOf(LCDOp_Lbl, p)) >= 0)
+  {
+    if (p < _program.count() - 1 && _program[p + 1] == cipher &&
+        (p == 0 || isSeparator(_program[p - 1])) &&
+        (p + 1 >= _program.count() - 1 || isSeparator(_program[p + 2])))
+    {
+      _currentOffset = p + 2;
+      return;
+    }
+    p++;
+  }
+  throw InterpreterException(Error_Goto, _currentOffset);
 }
