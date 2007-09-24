@@ -173,6 +173,16 @@ bool isPostFunc(int entity)
          entity == LCDChar_Degree;
 }
 
+bool isComparisonOperator(int entity)
+{
+  return entity == LCDChar_Equal ||
+         entity == LCDChar_Different ||
+         entity == LCDChar_Greater ||
+         entity == LCDChar_Less ||
+         entity == LCDChar_GreaterEqual ||
+         entity == LCDChar_LessEqual;
+}
+
 double deg2rad(double deg)
 {
   return (deg * M_PI) / 180.0;

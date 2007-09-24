@@ -66,6 +66,22 @@ void Interpreter::execute(const TextLine &textLine)
             // Stock it
             if (!Memory::instance().setVariable((LCDChar) varPrefix, index, d))
               throw InterpreterException(Error_Memory, _currentOffset);
+          } else if (isComparisonOperator(currentEntity()))
+          {
+            int comp = readEntity();
+            double d2 = _expressionSolver.solve(_program, _currentOffset);
+
+            // "=>" is expected
+            if (!eatEntity(LCDChar_DoubleArrow))
+              throw InterpreterException(Error_Syntax, _currentOffset);
+
+            // Some non sep char is expected
+            if (isSeparator(currentEntity()) || currentEntity() == -1)
+              throw InterpreterException(Error_Syntax, _currentOffset);
+
+            // compute boolean
+            if (!computeBoolean(comp, d, d2))
+              moveOffsetToNextInstruction();
           }
           TextLine textLine = formatDouble(d);
           textLine.setRightJustified(true);
@@ -145,4 +161,30 @@ void Interpreter::parseInput()
   readEntity(); // Pass the "->"
 
   _waitForDataMode = true; // Waiting for IN...
+}
+
+bool Interpreter::computeBoolean(int comp, double d1, double d2)
+{
+  switch (comp)
+  {
+  case LCDChar_Equal: return d1 == d2;
+  case LCDChar_Different: return d1 != d2;
+  case LCDChar_Greater: return d1 > d2;
+  case LCDChar_Less: return d1 < d2;
+  case LCDChar_GreaterEqual: return d1 >= d2;
+  case LCDChar_LessEqual: return d1 <= d2;
+  default: return false;
+  }
+}
+
+void Interpreter::moveOffsetToNextInstruction()
+{
+  // Get after the next separator
+  int entity;
+  while ((entity = currentEntity()) != -1)
+  {
+    if (isSeparator(entity))
+      break;
+    readEntity(); // Pass the current entity
+  }
 }
