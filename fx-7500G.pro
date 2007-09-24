@@ -17,7 +17,6 @@ HEADERS += main_window.h \
   prog_edit_screen.h \
   memory.h \
   pad.h \
-  expression_computer.h \
   interpreter.h \
   expression_solver.h \
   token.h
@@ -35,7 +34,6 @@ SOURCES += main.cpp \
   prog_edit_screen.cpp \
   memory.cpp \
   pad.cpp \
-  expression_computer.cpp \
   interpreter.cpp \
   expression_solver.cpp \
   token.cpp

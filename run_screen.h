@@ -27,6 +27,7 @@ private:
   QList<TextLine> stackError(int step) const;
   QList<TextLine> memError(int step) const;
   QList<TextLine> argError(int step) const;
+  QList<TextLine> gotoError(int step) const;
 
   void getLineAndStep(const QList<TextLine> &program, int offset, int &line, int &step) const;
 
