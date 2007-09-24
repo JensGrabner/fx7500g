@@ -41,6 +41,14 @@ void Interpreter::execute(const TextLine &textLine)
         readEntity(); // Pass the "?"
         parseInput();
         return;
+      case LCDOp_Lbl: // A label
+        readEntity(); // Pass the "label "
+        if (!isCipher(currentEntity()))
+          throw InterpreterException(Error_Argument, _currentOffset);
+        readEntity(); // Pass the cipher
+        if (!isSeparator(currentEntity()) && currentEntity() != -1)
+          throw InterpreterException(Error_Argument, _currentOffset);
+        break;
       default:
         if (ExpressionSolver::isExpressionStartEntity(entity))
         {
@@ -82,6 +90,7 @@ void Interpreter::execute(const TextLine &textLine)
             // compute boolean
             if (!computeBoolean(comp, d, d2))
               moveOffsetToNextInstruction();
+            continue;
           }
           TextLine textLine = formatDouble(d);
           textLine.setRightJustified(true);

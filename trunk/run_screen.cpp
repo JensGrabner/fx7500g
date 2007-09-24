@@ -187,8 +187,8 @@ void RunScreen::getLineAndStep(const QList<TextLine> &program, int offset, int &
     if (rawTextLine[i] == LCDChar_CR || rawTextLine[i] == LCDChar_RBTriangle)
     {
       line++;
-      index = i;
+      index = i + 1;
     }
 
-  step = offset - index;
+  step = program[line].offsetAt(offset - index);
 }
