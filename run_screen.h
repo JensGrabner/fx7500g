@@ -2,12 +2,13 @@
 #define RUN_SCREEN_H
 
 #include "editor_screen.h"
+#include "interpreter.h"
 
 class RunScreen : public EditorScreen
 {
   Q_OBJECT
 public:
-  RunScreen() : EditorScreen(), _waitingMode(false), _errorMode(false) {}
+  RunScreen();
 
   void buttonClicked(int button);
 
@@ -17,6 +18,7 @@ private:
   bool _errorMode;
   int _lastErrorLine;
   int _lastErrorStep;
+  Interpreter _interpreter;
 
   void validate();
   void displayLastProgram(bool cursorOnTop = false); // Empty <_lines> and paste <_lastProgram> inside
@@ -24,6 +26,12 @@ private:
   QList<TextLine> syntaxError(int step) const;
   QList<TextLine> stackError(int step) const;
   QList<TextLine> memError(int step) const;
+  QList<TextLine> argError(int step) const;
+
+  void getLineAndStep(const QList<TextLine> &program, int offset, int &line, int &step) const;
+
+private slots:
+  void interpreterDisplayLine(const TextLine &textLine);
 };
 
 #endif

@@ -2,6 +2,14 @@
 
 #include "run_screen.h"
 
+RunScreen::RunScreen() :
+  EditorScreen(),
+  _waitingMode(false),
+  _errorMode(false)
+{
+  connect(&_interpreter, SIGNAL(displayLine(const TextLine &)), this, SLOT(interpreterDisplayLine(const TextLine &)));
+}
+
 void RunScreen::buttonClicked(int button)
 {
   int entity = _calcState->printableEntityByButton(button);
@@ -47,33 +55,40 @@ void RunScreen::buttonClicked(int button)
 
 void RunScreen::validate()
 {
-  QList<TextLine> result;
-
-  if (!_waitingMode)
+  if (_interpreter.waitForDataMode())
   {
-    // Save last program bloc
-    _lastProgram.clear();
-    for (int lineIndex = _editZoneTopLineIndex; lineIndex < _lines.count(); ++lineIndex)
-      _lastProgram << _lines[lineIndex];
-  }
-
-  // Compute the program
-  if (_lastProgram.count())
+    _interpreter.execute(_lines[_lines.count() - 1]);
+  } else
   {
-    TextLine &textLine = _lastProgram[_lastProgram.count() - 1];
-    ExpressionComputer::Error error;
-    int errorStep;
-    QList<int> res = ExpressionComputer::compute(textLine, error, errorStep);
-    _errorMode = true;
-    _lastErrorLine = 0;
-    _lastErrorStep = errorStep;
-    switch (error)
+    QList<TextLine> result;
+
+    if (!_waitingMode)
     {
-    case ExpressionComputer::Error_No: _lines << TextLine(res, true); _errorMode = false; break;
-    case ExpressionComputer::Error_Syntax: _lines << syntaxError(errorStep); break;
-    case ExpressionComputer::Error_Stack: _lines << stackError(errorStep); break;
-    case ExpressionComputer::Error_Memory: _lines << memError(errorStep); break;
-    default:;
+      // Save last program bloc
+      _lastProgram.clear();
+      for (int lineIndex = _editZoneTopLineIndex; lineIndex < _lines.count(); ++lineIndex)
+        _lastProgram << _lines[lineIndex];
+    }
+
+    // Compute the program
+    if (_lastProgram.count())
+    {
+      _interpreter.setProgram(_lastProgram);
+      try {
+        _interpreter.execute();
+      } catch (InterpreterException exception)
+      {
+        _errorMode = true;
+        getLineAndStep(_lastProgram, exception.offset(), _lastErrorLine, _lastErrorStep);
+        switch (exception.error())
+        {
+        case Error_Syntax: _lines << syntaxError(exception.offset()); break;
+        case Error_Stack: _lines << stackError(exception.offset()); break;
+        case Error_Memory: _lines << memError(exception.offset()); break;
+        case Error_Argument: _lines << argError(exception.offset()); break;
+        default:;
+        }
+      }
     }
   }
 
@@ -137,4 +152,43 @@ QList<TextLine> RunScreen::memError(int step) const
   result << TextLine("  Mem ERROR");
   result << TextLine(QString("   Step    %1").arg(step));
   return result;
+}
+
+QList<TextLine> RunScreen::argError(int step) const
+{
+  QList<TextLine> result;
+  result << TextLine("  Arg ERROR");
+  result << TextLine(QString("   Step    %1").arg(step));
+  return result;
+}
+
+void RunScreen::interpreterDisplayLine(const TextLine &textLine)
+{
+  _lines << textLine;
+
+  moveCursor(_lines.count() - 1, 0);
+
+  _editZoneTopLineIndex = _lines.count();
+  setWaitingMode(true);
+
+  feedScreen();
+
+  emit screenChanged();
+}
+
+void RunScreen::getLineAndStep(const QList<TextLine> &program, int offset, int &line, int &step) const
+{
+  TextLine rawTextLine;
+  rawTextLine.affect(program);
+  line = 0;
+  step = 0;
+  int index = 0;
+  for (int i = 0; i <= offset && i < rawTextLine.count(); ++i)
+    if (rawTextLine[i] == LCDChar_CR || rawTextLine[i] == LCDChar_RBTriangle)
+    {
+      line++;
+      index = i;
+    }
+
+  step = offset - index;
 }

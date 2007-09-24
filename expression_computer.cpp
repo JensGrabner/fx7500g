@@ -217,59 +217,6 @@ QList<int> ExpressionComputer::formatDouble(double d) const
   return result;
 }
 
-bool ExpressionComputer::isOperator(int entity) const
-{
-  return entity == LCDChar_Multiply ||
-         entity == LCDChar_Divide ||
-         entity == LCDChar_Add ||
-         entity == LCDChar_Substract ||
-         entity == LCDOp_Xy ||
-         entity == LCDOp_xSquareRoot;
-}
-
-bool ExpressionComputer::isPreFunc(int entity) const
-{
-  return entity == LCDChar_SquareRoot ||
-         entity == LCDOp_CubeSquareRoot ||
-         entity == LCDOp_Log ||
-         entity == LCDChar_Ten ||
-         entity == LCDOp_Ln ||
-         entity == LCDChar_Euler ||
-         entity == LCDOp_Sin ||
-         entity == LCDOp_Cos ||
-         entity == LCDOp_Tan ||
-         entity == LCDOp_Sinh ||
-         entity == LCDOp_Cosh ||
-         entity == LCDOp_Tanh ||
-         entity == LCDOp_Sin_1 ||
-         entity == LCDOp_Cos_1 ||
-         entity == LCDOp_Tan_1 ||
-         entity == LCDOp_Sinh_1 ||
-         entity == LCDOp_Cosh_1 ||
-         entity == LCDOp_Tanh_1 ||
-         entity == LCDChar_MinusPrefix ||
-         entity == LCDOp_Abs ||
-         entity == LCDOp_Int ||
-         entity == LCDOp_Frac ||
-         entity == LCDChar_h ||
-         entity == LCDChar_d ||
-         entity == LCDChar_b ||
-         entity == LCDChar_o ||
-         entity == LCDOp_Neg ||
-         entity == LCDOp_Not;
-}
-
-bool ExpressionComputer::isPostFunc(int entity) const
-{
-  return entity == LCDChar_Square ||
-         entity == LCDChar_MinusOneUp ||
-         entity == LCDChar_Exclamation ||
-         entity == LCDChar_LittleO ||
-         entity == LCDChar_LittleR ||
-         entity == LCDChar_LittleG ||
-         entity == LCDChar_Degree;
-}
-
 void ExpressionComputer::performStackOperations(bool manageOpenParen)
 {
   while (!_commandStack.isEmpty())
@@ -452,22 +399,6 @@ void ExpressionComputer::displayCommandStack() const
 {
   foreach (const ExpressionToken &token, _commandStack)
     qDebug(qPrintable(ExpressionToken::toString(token.command())));
-}
-
-double ExpressionComputer::factorial(double value) const
-{
-  long long int f = (long long int) value;
-
-  if (!f)
-    return 1.0;
-  else if (f == 1)
-    return 1.0;
-
-  double result = 1.0;
-  for (int i = 2; i <= f; ++i)
-    result *= (double) i;
-
-  return result;
 }
 
 void ExpressionComputer::analyzeForSyntaxError(ExpressionToken token, ExpressionToken previousToken) throw (Exception)

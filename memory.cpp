@@ -150,6 +150,13 @@ bool Memory::setVariable(int index, double value)
   return true;
 }
 
+bool Memory::setVariable(LCDChar c, int index, double value)
+{
+  Q_ASSERT_X(c >= LCDChar_A && c <= LCDChar_Z, "Memory::setVariable()", "invalid c");
+
+  return setVariable(c - LCDChar_A + index, value);
+}
+
 void Memory::clearVariables()
 {
   for (int i = 0; i < (int) (sizeof(_variables) / sizeof(double)); ++i)

@@ -91,20 +91,12 @@ private:
 
   ExpressionToken readToken() throw (Exception);
 
-  bool isOperator(int entity) const;
-  bool isPreFunc(int entity) const;
-  bool isPostFunc(int entity) const;
-
   void performOperation(int entity);
   void performStackOperations(bool manageOpenParen = false);
 
   void pushToken(const ExpressionToken &token) throw (Exception);
 
   void displayCommandStack() const;
-
-  double deg2rad(double deg) const { return (deg * M_PI) / 180.0; }
-  double rad2deg(double rad) const { return (rad * 180.0) / M_PI; }
-  double factorial(double value) const;
 
   QList<int> formatDouble(double d) const;
 
