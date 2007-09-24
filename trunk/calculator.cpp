@@ -92,7 +92,7 @@ void Calculator::init()
   _calcState.setScreenMode(ScreenMode_Resume);
   screenModeChanged(ScreenMode_Resume);
 
-  buttonClicked(Button_1);
+/*  buttonClicked(Button_1);
   buttonClicked(Button_2);
   buttonClicked(Button_Arrow);
   buttonClicked(Button_Alpha); buttonClicked(Button_MinusOne);
@@ -101,7 +101,7 @@ void Calculator::init()
   buttonClicked(Button_2);
   buttonClicked(Button_3);
   buttonClicked(Button_Alpha); buttonClicked(Button_Exp);
-  buttonClicked(Button_Sin);
+  buttonClicked(Button_Sin);*/
 }
 
 void Calculator::setCalMode(CalMode value)
@@ -171,6 +171,9 @@ void Calculator::applyKey(int key)
   case Qt::Key_Colon: buttonClicked(Button_Colon); break;
   case Qt::Key_QuoteDbl: buttonClicked(Button_Alpha); buttonClicked(Button_Colon); break;
   case Qt::Key_Question: buttonClicked(Button_Question); break;
+  case Qt::Key_Greater: buttonClicked(Button_Shift); buttonClicked(Button_2); break;
+  case Qt::Key_Less: buttonClicked(Button_Shift); buttonClicked(Button_3); break;
+  case Qt::Key_Equal: buttonClicked(Button_Shift); buttonClicked(Button_8); break;
   }
 
   if ((key >= Qt::Key_A && key <= Qt::Key_Z) || (key == Qt::Key_Space))

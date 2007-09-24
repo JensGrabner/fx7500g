@@ -210,6 +210,7 @@ bool isLCDOperator(int entity);
 bool isOperator(int entity);
 bool isPreFunc(int entity);
 bool isPostFunc(int entity);
+bool isComparisonOperator(int entity);
 
 double deg2rad(double deg);
 double rad2deg(double rad);
