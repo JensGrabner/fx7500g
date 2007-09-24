@@ -200,11 +200,20 @@ enum LCDOperator
 
 bool isAlpha(int entity);
 bool isCipher(int entity);
+bool isSeparator(int entity);
 QChar toNumChar(int entity);
 QList<LCDChar> operatorToChars(LCDOperator op);
 QList<LCDChar> entityToChars(int entity);
 bool isLCDChar(int entity);
 bool isLCDOperator(int entity);
+
+bool isOperator(int entity);
+bool isPreFunc(int entity);
+bool isPostFunc(int entity);
+
+double deg2rad(double deg);
+double rad2deg(double rad);
+double factorial(double value);
 
 int getEntityPriority(int entity);
 // Return :
@@ -386,8 +395,33 @@ public:
   int maximumCursorPosition() const;
   int maximumCursorPositionIfTooHigh(int cursorOffset) const;
 
+  void affect(QList<TextLine> lines);
+
 private:
   bool _rightJustified;
+};
+
+TextLine formatDouble(double d);
+
+enum Error {
+  Error_No,
+  Error_Syntax,
+  Error_Stack,
+  Error_Memory,
+  Error_Argument
+};
+
+class InterpreterException
+{
+public:
+  InterpreterException(Error error, int offset = 0) : _error(error), _offset(offset) {}
+
+  Error error() const { return _error; }
+  int offset() const { return _offset; }
+
+private:
+  Error _error;
+  int _offset;
 };
 
 #endif

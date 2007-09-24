@@ -5,7 +5,6 @@ INCLUDEPATH += .
 
 CONFIG += debug
 
-# Input
 HEADERS += main_window.h \
   lcd_display.h \
   calculator.h \
@@ -19,7 +18,9 @@ HEADERS += main_window.h \
   memory.h \
   pad.h \
   expression_computer.h \
-  program_parser.h
+  interpreter.h \
+  expression_solver.h \
+  token.h
 
 SOURCES += main.cpp \
   main_window.cpp \
@@ -35,7 +36,9 @@ SOURCES += main.cpp \
   memory.cpp \
   pad.cpp \
   expression_computer.cpp \
-  program_parser.cpp
+  interpreter.cpp \
+  expression_solver.cpp \
+  token.cpp
 
 FORMS += main_window.ui
 

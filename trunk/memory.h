@@ -39,6 +39,7 @@ public:
   double variable(LCDChar c, int index = 0, bool *overflow = 0); // Return 0 is index > 26 + _extraVarCount
   double variable(int index, bool *overflow = 0); // Return 0 is index > 26 + _extraVarCount
   bool setVariable(int index, double value); // Return false if index > 26 + _extraVarCount
+  bool setVariable(LCDChar c, int index, double value); // Return false if overflow
   int extraVarCount() const { return _extraVarCount; }
   bool setExtraVarCount(int value); // Returns false is value is invalid
 

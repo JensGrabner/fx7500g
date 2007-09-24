@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include <QString>
 
 #include "misc.h"
@@ -10,6 +12,13 @@ bool isAlpha(int entity)
 bool isCipher(int entity)
 {
   return entity >= LCDChar_0 && entity <= LCDChar_9;
+}
+
+bool isSeparator(int entity)
+{
+  return entity == LCDChar_Colon ||
+         entity == LCDChar_RBTriangle ||
+         entity == LCDChar_CR;
 }
 
 QChar toNumChar(int entity)
@@ -109,6 +118,85 @@ bool isLCDChar(int entity)
 bool isLCDOperator(int entity)
 {
   return entity >= 256;
+}
+
+bool isOperator(int entity)
+{
+  return entity == LCDChar_Multiply ||
+         entity == LCDChar_Divide ||
+         entity == LCDChar_Add ||
+         entity == LCDChar_Substract ||
+         entity == LCDOp_Xy ||
+         entity == LCDOp_xSquareRoot;
+}
+
+bool isPreFunc(int entity)
+{
+  return entity == LCDChar_SquareRoot ||
+         entity == LCDOp_CubeSquareRoot ||
+         entity == LCDOp_Log ||
+         entity == LCDChar_Ten ||
+         entity == LCDOp_Ln ||
+         entity == LCDChar_Euler ||
+         entity == LCDOp_Sin ||
+         entity == LCDOp_Cos ||
+         entity == LCDOp_Tan ||
+         entity == LCDOp_Sinh ||
+         entity == LCDOp_Cosh ||
+         entity == LCDOp_Tanh ||
+         entity == LCDOp_Sin_1 ||
+         entity == LCDOp_Cos_1 ||
+         entity == LCDOp_Tan_1 ||
+         entity == LCDOp_Sinh_1 ||
+         entity == LCDOp_Cosh_1 ||
+         entity == LCDOp_Tanh_1 ||
+         entity == LCDChar_MinusPrefix ||
+         entity == LCDOp_Abs ||
+         entity == LCDOp_Int ||
+         entity == LCDOp_Frac ||
+         entity == LCDChar_h ||
+         entity == LCDChar_d ||
+         entity == LCDChar_b ||
+         entity == LCDChar_o ||
+         entity == LCDOp_Neg ||
+         entity == LCDOp_Not;
+}
+
+bool isPostFunc(int entity)
+{
+  return entity == LCDChar_Square ||
+         entity == LCDChar_MinusOneUp ||
+         entity == LCDChar_Exclamation ||
+         entity == LCDChar_LittleO ||
+         entity == LCDChar_LittleR ||
+         entity == LCDChar_LittleG ||
+         entity == LCDChar_Degree;
+}
+
+double deg2rad(double deg)
+{
+  return (deg * M_PI) / 180.0;
+}
+
+double rad2deg(double rad)
+{
+  return (rad * 180.0) / M_PI;
+}
+
+double factorial(double value)
+{
+  long long int f = (long long int) value;
+
+  if (!f)
+    return 1.0;
+  else if (f == 1)
+    return 1.0;
+
+  double result = 1.0;
+  for (int i = 2; i <= f; ++i)
+    result *= (double) i;
+
+  return result;
 }
 
 QList<LCDChar> operatorToChars(LCDOperator op)
@@ -935,4 +1023,58 @@ int TextLine::maximumCursorPosition() const
 int TextLine::maximumCursorPositionIfTooHigh(int cursorOffset) const
 {
   return cursorOffset > maximumCursorPosition() ? maximumCursorPosition() : cursorOffset;
+}
+
+TextLine formatDouble(double d)
+{
+  TextLine result;
+
+  // Format the double
+  QString sortie;
+  if ((fabs(d) < 0.01 || fabs(d) >= 10000000000.0) && d != 0.0)
+    sortie = QString::number(d, 'E', 9);
+  else
+    sortie = QString::number(d, 'G', 10);
+
+  // Casio add a '.' at the end of a double if decimal part is 0
+  if (sortie.indexOf('.') < 0)
+    sortie.append('.');
+
+  // Remove all excessive 0
+  int p;
+  while ((p = sortie.indexOf("0E")) >= 0)
+    sortie.remove(p, 1);
+  if (sortie.indexOf('E') < 0)
+    while ((p = sortie.indexOf('0')) == sortie.length() - 1)
+      sortie.remove(p, 1);
+
+  // Store into the QList<int>
+  foreach (const QChar &c, sortie)
+  {
+    const char ch = c.toLatin1();
+
+    if (ch >= '0' && ch <= '9')
+      result << LCDChar_0 + ch - '0';
+    else if (ch == '.')
+      result << LCDChar_Dot;
+    else if (ch == '-')
+      result << LCDChar_MinusPrefix;
+    else if (ch == '+')
+      result << LCDChar_Add;
+    else if (ch == 'E')
+      result << LCDChar_Exponent;
+  }
+
+  return result;
+}
+
+void TextLine::affect(QList<TextLine> lines)
+{
+  clear();
+  for (int i = 0; i < lines.count(); ++i)
+  {
+    if (count() && !isBreakerEndedLine())
+      append(LCDChar_CR);
+    (*this) << lines[i];
+  }
 }

@@ -1,33 +1,5 @@
 #include "program_parser.h"
 
-Token::Token(TokenType tokenType, const TextLine &rawParsed) :
-  _line(0), _offset(0)
-{
-  setToken(tokenType, rawParsed);
-}
-
-Token::Token(int line, int offset) :
-  _line(line),
-  _offset(offset)
-{
-}
-
-void Token::setToken(TokenType tokenType, const TextLine &rawParsed)
-{
-  _tokenType = tokenType;
-  _rawParsed = rawParsed;
-  feedValues();
-}
-
-void Token::feedValues()
-{
-  // TODO : parse <rawParsed> and feed the values
-}
-
-/////////////////////////////////
-/////////////////////////////////
-/////////////////////////////////
-
 ProgramParser::ProgramParser(const QList<TextLine> &program) :
   _lines(program),
   _currentLine(0), _currentOffset(0)
@@ -103,7 +75,8 @@ Token ProgramParser::readToken()
 
 int ProgramParser::nextEntity(bool *linePassed)
 {
-  linePassed = false;
+  if (linePassed)
+    *linePassed = false;
   if (_currentLine >= _lines.count())
     return -1;
 
