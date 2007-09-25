@@ -15,6 +15,7 @@ Interpreter::Interpreter(const QList<TextLine> &program) :
 
 void Interpreter::run()
 {
+  _error = false;
   try
   {
     execute();
