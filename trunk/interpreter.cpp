@@ -11,6 +11,11 @@ Interpreter::Interpreter(const QList<TextLine> &program) :
   setProgram(program);
 }
 
+void Interpreter::run()
+{
+  execute();
+}
+
 void Interpreter::execute(const TextLine &textLine)
 {
   if (_waitForDataMode)
@@ -22,6 +27,8 @@ void Interpreter::execute(const TextLine &textLine)
     int entity;
     while ((entity = currentEntity()) != -1)
     {
+      msleep(10);
+      _expressionSolver.emptyStacks();
       switch (entity)
       {
       case LCDChar_DoubleQuote: // A string instruction?
@@ -29,7 +36,8 @@ void Interpreter::execute(const TextLine &textLine)
           TextLine textLine = parseString();
           if (currentEntity() == LCDChar_Question)
             textLine << LCDChar_Question;
-          emit displayLine(textLine);
+          storeDisplayLine(textLine);
+          emit displayLine();
           if (eatEntity(LCDChar_Question))
             parseInput();
           if (_waitForDataMode)
@@ -37,7 +45,8 @@ void Interpreter::execute(const TextLine &textLine)
         }
         break;
       case LCDChar_Question: // An affectation?
-        emit displayLine(TextLine() << LCDChar_Question);
+        storeDisplayLine(TextLine() << LCDChar_Question);
+        emit displayLine();
         readEntity(); // Pass the "?"
         parseInput();
         return;
@@ -86,9 +95,6 @@ void Interpreter::execute(const TextLine &textLine)
               moveOffsetToNextInstruction();
             continue;
           }
-          TextLine textLine = formatDouble(d);
-          textLine.setRightJustified(true);
-          emit displayLine(textLine);
         }
       }
       // Separator is mandatory
@@ -100,6 +106,15 @@ void Interpreter::execute(const TextLine &textLine)
   }
 
   // Display the stack value?
+  bool empty;
+  double d = _expressionSolver.numberStackTop(empty);
+  if (!empty)
+  {
+    TextLine textLine = formatDouble(d);
+    textLine.setRightJustified(true);
+    storeDisplayLine(textLine);
+    emit displayLine();
+  }
 }
 
 int Interpreter::readEntity()
@@ -145,7 +160,8 @@ TextLine Interpreter::parseString()
       break;
     else if (entity == LCDChar_CR || entity == LCDChar_RBTriangle)
     {
-      emit displayLine(textLine);
+      storeDisplayLine(textLine);
+      emit displayLine();
       textLine.clear();
     } else
       textLine << entity;
@@ -224,4 +240,21 @@ void Interpreter::parseGoto()
     p++;
   }
   throw InterpreterException(Error_Goto, _currentOffset);
+}
+
+TextLine Interpreter::getNextDisplayLine()
+{
+  QMutexLocker loker(&_displayLineMutex);
+
+  if (_displayLines.count())
+    return _displayLines.dequeue();
+  else
+    return TextLine();
+}
+
+void Interpreter::storeDisplayLine(const TextLine &textLine)
+{
+  QMutexLocker loker(&_displayLineMutex);
+
+  _displayLines.enqueue(textLine);
 }

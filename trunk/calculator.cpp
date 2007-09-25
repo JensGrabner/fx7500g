@@ -92,23 +92,38 @@ void Calculator::init()
   _calcState.setScreenMode(ScreenMode_Resume);
   screenModeChanged(ScreenMode_Resume);
 
+  buttonClicked(Button_1);
+  buttonClicked(Button_0);
+  buttonClicked(Button_Arrow);
+  buttonClicked(Button_Alpha); buttonClicked(Button_MinusOne);
+  buttonClicked(Button_Shift); buttonClicked(Button_Exe);
   buttonClicked(Button_Shift); buttonClicked(Button_Plot);
+  buttonClicked(Button_0);
+  buttonClicked(Button_Colon);
+  buttonClicked(Button_Alpha); buttonClicked(Button_Colon);
+  buttonClicked(Button_Alpha); buttonClicked(Button_OpenParen);
+  buttonClicked(Button_Alpha); buttonClicked(Button_Colon);
+  buttonClicked(Button_Colon);
+  buttonClicked(Button_Alpha); buttonClicked(Button_MinusOne);
+  buttonClicked(Button_Substract);
+  buttonClicked(Button_1);
+  buttonClicked(Button_Arrow);
+  buttonClicked(Button_Alpha); buttonClicked(Button_MinusOne);
+  buttonClicked(Button_Colon);
+  buttonClicked(Button_Alpha); buttonClicked(Button_MinusOne);
+  buttonClicked(Button_Shift); buttonClicked(Button_9);
+  buttonClicked(Button_0);
+  buttonClicked(Button_Shift); buttonClicked(Button_7);
+  buttonClicked(Button_Shift); buttonClicked(Button_Prog);
+  buttonClicked(Button_0);
+
+/*  buttonClicked(Button_Shift); buttonClicked(Button_Plot);
   buttonClicked(Button_4);
   buttonClicked(Button_Colon);
   buttonClicked(Button_4);
   buttonClicked(Button_Colon);
   buttonClicked(Button_Shift); buttonClicked(Button_Prog);
-  buttonClicked(Button_4);
-/*  buttonClicked(Button_1);
-  buttonClicked(Button_2);
-  buttonClicked(Button_Arrow);
-  buttonClicked(Button_Alpha); buttonClicked(Button_MinusOne);
-  buttonClicked(Button_Alpha); buttonClicked(Button_Dot);
-  buttonClicked(Button_1);
-  buttonClicked(Button_2);
-  buttonClicked(Button_3);
-  buttonClicked(Button_Alpha); buttonClicked(Button_Exp);
-  buttonClicked(Button_Sin);*/
+  buttonClicked(Button_4);*/
 }
 
 void Calculator::setCalMode(CalMode value)

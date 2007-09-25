@@ -5,7 +5,10 @@ RunScreen::RunScreen() :
   _waitingMode(false),
   _errorMode(false)
 {
-  connect(&_interpreter, SIGNAL(displayLine(const TextLine &)), this, SLOT(interpreterDisplayLine(const TextLine &)));
+  connect(&_interpreter, SIGNAL(displayLine()), this, SLOT(interpreterDisplayLine()), Qt::QueuedConnection);
+
+  _timerDisplay.setInterval(10);
+  connect(&_timerDisplay, SIGNAL(timeout()), this, SLOT(timerDisplayTimeout()));
 }
 
 void RunScreen::buttonClicked(int button)
@@ -73,7 +76,8 @@ void RunScreen::validate()
     {
       _interpreter.setProgram(_lastProgram);
       try {
-        _interpreter.execute();
+//        _interpreter.execute();
+        _interpreter.start();
       } catch (InterpreterException exception)
       {
         _errorMode = true;
@@ -169,9 +173,9 @@ QList<TextLine> RunScreen::gotoError(int step) const
   return result;
 }
 
-void RunScreen::interpreterDisplayLine(const TextLine &textLine)
+void RunScreen::interpreterDisplayLine()
 {
-  _lines << textLine;
+  _lines << _interpreter.getNextDisplayLine();
 
   moveCursor(_lines.count() - 1, 0);
 
@@ -198,4 +202,8 @@ void RunScreen::getLineAndStep(const QList<TextLine> &program, int offset, int &
     }
 
   step = program[line].offsetAt(offset - index);
+}
+
+void RunScreen::timerDisplayTimeout()
+{
 }
