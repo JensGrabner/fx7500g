@@ -22,15 +22,7 @@ void Interpreter::run()
   {
     _error = true;
     _errorStep = exception.offset();
-    switch (exception.error())
-    {
-    case Error_Syntax: display(syntaxError(_errorStep)); break;
-    case Error_Stack: display(stackError(_errorStep)); break;
-    case Error_Memory: display(memError(_errorStep)); break;
-    case Error_Argument: display(argError(_errorStep)); break;
-    case Error_Goto: display(gotoError(_errorStep)); break;
-    default:;
-    }
+    display(errorLines(exception.error(), _errorStep));
   }
 }
 
@@ -283,42 +275,18 @@ void Interpreter::sendInput(const TextLine &value)
   _inputWaitCondition.wakeAll();
 }
 
-QList<TextLine> Interpreter::syntaxError(int step) const
+QList<TextLine> Interpreter::errorLines(Error error, int step) const
 {
   QList<TextLine> result;
-  result << TextLine("  Syn ERROR");
-  result << TextLine(QString("   Step    %1").arg(step));
-  return result;
-}
-
-QList<TextLine> Interpreter::stackError(int step) const
-{
-  QList<TextLine> result;
-  result << TextLine("  Stk ERROR");
-  result << TextLine(QString("   Step    %1").arg(step));
-  return result;
-}
-
-QList<TextLine> Interpreter::memError(int step) const
-{
-  QList<TextLine> result;
-  result << TextLine("  Mem ERROR");
-  result << TextLine(QString("   Step    %1").arg(step));
-  return result;
-}
-
-QList<TextLine> Interpreter::argError(int step) const
-{
-  QList<TextLine> result;
-  result << TextLine("  Arg ERROR");
-  result << TextLine(QString("   Step    %1").arg(step));
-  return result;
-}
-
-QList<TextLine> Interpreter::gotoError(int step) const
-{
-  QList<TextLine> result;
-  result << TextLine("  Go  ERROR");
+  switch (error)
+  {
+  case Error_Syntax: result << TextLine("  Syn ERROR"); break;
+  case Error_Stack: result << TextLine("  Stk ERROR"); break;
+  case Error_Memory: result << TextLine("  Mem ERROR"); break;
+  case Error_Argument: result << TextLine("  Arg ERROR"); break;
+  case Error_Goto: result << TextLine("  Go  ERROR"); break;
+  default:;
+  }
   result << TextLine(QString("   Step    %1").arg(step));
   return result;
 }

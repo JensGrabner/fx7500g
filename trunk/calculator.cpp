@@ -117,10 +117,6 @@ void Calculator::init()
   buttonClicked(Button_Shift); buttonClicked(Button_Prog);
   buttonClicked(Button_0);*/
 
-  buttonClicked(Button_Question);
-  buttonClicked(Button_Arrow);
-  buttonClicked(Button_Alpha); buttonClicked(Button_MinusOne);
-
 /*  buttonClicked(Button_Shift); buttonClicked(Button_Plot);
   buttonClicked(Button_4);
   buttonClicked(Button_Colon);
