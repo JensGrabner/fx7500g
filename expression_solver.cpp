@@ -293,3 +293,18 @@ bool ExpressionSolver::isExpressionStartEntity(int entity)
          isAlpha(entity) ||
          entity == LCDChar_Dot;
 }
+
+double ExpressionSolver::numberStackTop(bool &empty)
+{
+  empty = !_numberStack.count();
+  if (!empty)
+    return _numberStack.top();
+  else
+    return 0.0;
+}
+
+void ExpressionSolver::emptyStacks()
+{
+  _numberStack.clear();
+  _commandStack.clear();
+}

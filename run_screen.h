@@ -18,6 +18,7 @@ private:
   bool _errorMode;
   int _lastErrorLine;
   int _lastErrorStep;
+  QTimer _timerDisplay;
   Interpreter _interpreter;
 
   void validate();
@@ -32,7 +33,8 @@ private:
   void getLineAndStep(const QList<TextLine> &program, int offset, int &line, int &step) const;
 
 private slots:
-  void interpreterDisplayLine(const TextLine &textLine);
+  void interpreterDisplayLine();
+  void timerDisplayTimeout();
 };
 
 #endif

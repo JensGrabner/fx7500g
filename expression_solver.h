@@ -17,6 +17,9 @@ public:
   // Static methods
   static bool isExpressionStartEntity(int entity);
 
+  void emptyStacks();
+  double numberStackTop(bool &empty); // Return 0.0 is empty
+
 private:
   static const int _numberStackLimit = 9;
   static const int _commandStackLimit = 20;

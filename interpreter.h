@@ -1,13 +1,14 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
-#include <QObject>
-#include <QStack>
+#include <QThread>
+#include <QQueue>
+#include <QMutex>
 
 #include "misc.h"
 #include "expression_solver.h"
 
-class Interpreter : public QObject
+class Interpreter : public QThread
 {
   Q_OBJECT
 
@@ -20,13 +21,19 @@ public:
 
   bool waitForDataMode() const { return _waitForDataMode; }
 
+  void run();
+
+  TextLine getNextDisplayLine();
+
 signals:
-  void displayLine(const TextLine &textLine);
+  void displayLine();
 
 private:
+  QQueue<TextLine> _displayLines;
   TextLine _program;
   int _currentOffset;
   bool _waitForDataMode; // If true, interpreter is waiting for input data
+  QMutex _displayLineMutex;
 
   ExpressionSolver _expressionSolver;
 
@@ -41,6 +48,8 @@ private:
   // Returns true if (d1 comp d2) is true
   bool computeBoolean(int comp, double d1, double d2);
   void moveOffsetToNextInstruction();
+
+  void storeDisplayLine(const TextLine &textLine);
 };
 
 #endif
