@@ -61,11 +61,7 @@ private:
 
   void storeDisplayLine(const TextLine &textLine);
 
-  QList<TextLine> syntaxError(int step) const;
-  QList<TextLine> stackError(int step) const;
-  QList<TextLine> memError(int step) const;
-  QList<TextLine> argError(int step) const;
-  QList<TextLine> gotoError(int step) const;
+  QList<TextLine> errorLines(Error error, int step) const;
 
   void parseVariableAndStore(double d);
 

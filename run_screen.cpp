@@ -58,9 +58,8 @@ void RunScreen::buttonClicked(int button)
 void RunScreen::validate()
 {
   if (_interpreter.waitForInput())
-  {
     _interpreter.sendInput(_lines[_lines.count() - 1]);
-  } else
+  else
   {
     QList<TextLine> result;
 
@@ -72,27 +71,18 @@ void RunScreen::validate()
         _lastProgram << _lines[lineIndex];
     }
 
+    if (!_lastProgram.count() ||
+        (_lastProgram.count() == 1 && !_lastProgram[0].count()))
+    {
+      restartBlink();
+      return;
+    }
+
     // Compute the program
     if (_lastProgram.count())
     {
       _interpreter.setProgram(_lastProgram);
       _interpreter.start();
-/*      try {
-        _interpreter.start();
-      } catch (InterpreterException exception)
-      {
-        _errorMode = true;
-        getLineAndStep(_lastProgram, exception.offset(), _lastErrorLine, _lastErrorStep);
-        switch (exception.error())
-        {
-        case Error_Syntax: _lines << syntaxError(exception.offset()); break;
-        case Error_Stack: _lines << stackError(exception.offset()); break;
-        case Error_Memory: _lines << memError(exception.offset()); break;
-        case Error_Argument: _lines << argError(exception.offset()); break;
-        case Error_Goto: _lines << gotoError(exception.offset()); break;
-        default:;
-        }
-      }*/
     }
   }
 }
