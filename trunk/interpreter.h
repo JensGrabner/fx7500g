@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QQueue>
 #include <QMutex>
+#include <QWaitCondition>
 
 #include "misc.h"
 #include "expression_solver.h"
@@ -17,13 +18,15 @@ public:
 
   void setProgram(const QList<TextLine> &program);
 
-  void execute(const TextLine &textLine = TextLine());
-
-  bool waitForDataMode() const { return _waitForDataMode; }
-
   void run();
 
   TextLine getNextDisplayLine();
+
+  bool waitForInput() const { return _waitForInput; }
+  void sendInput(const TextLine &value);
+
+  bool error() const { return _error; }
+  int errorStep() const { return _errorStep; }
 
 signals:
   void displayLine();
@@ -32,10 +35,16 @@ private:
   QQueue<TextLine> _displayLines;
   TextLine _program;
   int _currentOffset;
-  bool _waitForDataMode; // If true, interpreter is waiting for input data
   QMutex _displayLineMutex;
-
   ExpressionSolver _expressionSolver;
+  bool _error; // If true then the last execution failed
+  int _errorStep; // The last error step
+  TextLine _input;
+  bool _waitForInput;
+  QMutex _inputMutex;
+  QWaitCondition _inputWaitCondition;
+
+  void execute() throw (InterpreterException);
 
   int currentEntity();
   int readEntity(); // Returns -1 if it the end of file
@@ -50,6 +59,14 @@ private:
   void moveOffsetToNextInstruction();
 
   void storeDisplayLine(const TextLine &textLine);
+
+  QList<TextLine> syntaxError(int step) const;
+  QList<TextLine> stackError(int step) const;
+  QList<TextLine> memError(int step) const;
+  QList<TextLine> argError(int step) const;
+  QList<TextLine> gotoError(int step) const;
+
+  void display(const QList<TextLine> &lines);
 };
 
 #endif

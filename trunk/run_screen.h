@@ -24,17 +24,13 @@ private:
   void validate();
   void displayLastProgram(bool cursorOnTop = false); // Empty <_lines> and paste <_lastProgram> inside
   void setWaitingMode(bool value);
-  QList<TextLine> syntaxError(int step) const;
-  QList<TextLine> stackError(int step) const;
-  QList<TextLine> memError(int step) const;
-  QList<TextLine> argError(int step) const;
-  QList<TextLine> gotoError(int step) const;
 
   void getLineAndStep(const QList<TextLine> &program, int offset, int &line, int &step) const;
 
 private slots:
   void interpreterDisplayLine();
   void timerDisplayTimeout();
+  void interpreterFinished();
 };
 
 #endif

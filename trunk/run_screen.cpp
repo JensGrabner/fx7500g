@@ -6,6 +6,7 @@ RunScreen::RunScreen() :
   _errorMode(false)
 {
   connect(&_interpreter, SIGNAL(displayLine()), this, SLOT(interpreterDisplayLine()), Qt::QueuedConnection);
+  connect(&_interpreter, SIGNAL(finished()), this, SLOT(interpreterFinished()));
 
   _timerDisplay.setInterval(10);
   connect(&_timerDisplay, SIGNAL(timeout()), this, SLOT(timerDisplayTimeout()));
@@ -56,9 +57,9 @@ void RunScreen::buttonClicked(int button)
 
 void RunScreen::validate()
 {
-  if (_interpreter.waitForDataMode())
+  if (_interpreter.waitForInput())
   {
-    _interpreter.execute(_lines[_lines.count() - 1]);
+    _interpreter.sendInput(_lines[_lines.count() - 1]);
   } else
   {
     QList<TextLine> result;
@@ -75,8 +76,8 @@ void RunScreen::validate()
     if (_lastProgram.count())
     {
       _interpreter.setProgram(_lastProgram);
-      try {
-//        _interpreter.execute();
+      _interpreter.start();
+/*      try {
         _interpreter.start();
       } catch (InterpreterException exception)
       {
@@ -91,18 +92,9 @@ void RunScreen::validate()
         case Error_Goto: _lines << gotoError(exception.offset()); break;
         default:;
         }
-      }
+      }*/
     }
   }
-
-  // Move the cursor for the waiting mode
-  moveCursor(_lines.count() - 1, 0);
-
-  _editZoneTopLineIndex = _lines.count();
-  setWaitingMode(true);
-
-  feedScreen();
-  emit screenChanged();
 }
 
 void RunScreen::displayLastProgram(bool cursorOnTop)
@@ -131,46 +123,6 @@ void RunScreen::setWaitingMode(bool value)
   _waitingMode = value;
 
   setCursorVisible(!value);
-}
-
-QList<TextLine> RunScreen::syntaxError(int step) const
-{
-  QList<TextLine> result;
-  result << TextLine("  Syn ERROR");
-  result << TextLine(QString("   Step    %1").arg(step));
-  return result;
-}
-
-QList<TextLine> RunScreen::stackError(int step) const
-{
-  QList<TextLine> result;
-  result << TextLine("  Stk ERROR");
-  result << TextLine(QString("   Step    %1").arg(step));
-  return result;
-}
-
-QList<TextLine> RunScreen::memError(int step) const
-{
-  QList<TextLine> result;
-  result << TextLine("  Mem ERROR");
-  result << TextLine(QString("   Step    %1").arg(step));
-  return result;
-}
-
-QList<TextLine> RunScreen::argError(int step) const
-{
-  QList<TextLine> result;
-  result << TextLine("  Arg ERROR");
-  result << TextLine(QString("   Step    %1").arg(step));
-  return result;
-}
-
-QList<TextLine> RunScreen::gotoError(int step) const
-{
-  QList<TextLine> result;
-  result << TextLine("  Go  ERROR");
-  result << TextLine(QString("   Step    %1").arg(step));
-  return result;
 }
 
 void RunScreen::interpreterDisplayLine()
@@ -206,4 +158,22 @@ void RunScreen::getLineAndStep(const QList<TextLine> &program, int offset, int &
 
 void RunScreen::timerDisplayTimeout()
 {
+}
+
+void RunScreen::interpreterFinished()
+{
+  if (_interpreter.error())
+  {
+    _errorMode = true;
+    getLineAndStep(_lastProgram, _interpreter.errorStep(), _lastErrorLine, _lastErrorStep);
+  }
+
+  // Move the cursor for the waiting mode
+  moveCursor(_lines.count() - 1, 0);
+
+  _editZoneTopLineIndex = _lines.count();
+  setWaitingMode(true);
+
+  feedScreen();
+  emit screenChanged();
 }

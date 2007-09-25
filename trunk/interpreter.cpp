@@ -6,103 +6,125 @@
 
 Interpreter::Interpreter(const QList<TextLine> &program) :
   _currentOffset(0),
-  _waitForDataMode(false)
+  _error(false),
+  _errorStep(0),
+  _waitForInput(false)
 {
   setProgram(program);
 }
 
 void Interpreter::run()
 {
-  execute();
+  try
+  {
+    execute();
+  } catch (InterpreterException exception)
+  {
+    _error = true;
+    _errorStep = exception.offset();
+    switch (exception.error())
+    {
+    case Error_Syntax: display(syntaxError(_errorStep)); break;
+    case Error_Stack: display(stackError(_errorStep)); break;
+    case Error_Memory: display(memError(_errorStep)); break;
+    case Error_Argument: display(argError(_errorStep)); break;
+    case Error_Goto: display(gotoError(_errorStep)); break;
+    default:;
+    }
+  }
 }
 
-void Interpreter::execute(const TextLine &textLine)
+void Interpreter::execute() throw (InterpreterException)
 {
-  if (_waitForDataMode)
+  int entity;
+  while ((entity = currentEntity()) != -1)
   {
-    // _currentOffset is valid
-    qDebug("Affectation !");
-  } else
-  {
-    int entity;
-    while ((entity = currentEntity()) != -1)
+    msleep(10);
+    _expressionSolver.emptyStacks();
+    switch (entity)
     {
-      msleep(10);
-      _expressionSolver.emptyStacks();
-      switch (entity)
+    case LCDChar_DoubleQuote: // A string instruction?
       {
-      case LCDChar_DoubleQuote: // A string instruction?
-        {
-          TextLine textLine = parseString();
-          if (currentEntity() == LCDChar_Question)
-            textLine << LCDChar_Question;
-          storeDisplayLine(textLine);
-          emit displayLine();
-          if (eatEntity(LCDChar_Question))
-            parseInput();
-          if (_waitForDataMode)
-            return;
-        }
-        break;
-      case LCDChar_Question: // An affectation?
+        TextLine textLine = parseString();
+        if (currentEntity() == LCDChar_Question)
+          textLine << LCDChar_Question;
+        storeDisplayLine(textLine);
+        emit displayLine();
+        if (eatEntity(LCDChar_Question))
+          parseInput();
+      }
+      break;
+    case LCDChar_Question: // An input affectation?
+      {
         storeDisplayLine(TextLine() << LCDChar_Question);
         emit displayLine();
         readEntity(); // Pass the "?"
-        parseInput();
-        return;
-      case LCDOp_Lbl: parseLabel(); break;
-      case LCDOp_Goto: parseGoto(); break;
-      default:
-        if (ExpressionSolver::isExpressionStartEntity(entity))
+        if (!eatEntity(LCDChar_Arrow)) // Pass the "->"
+          throw InterpreterException(Error_Syntax, _currentOffset);
+        // Wait for user data
+        _waitForInput = true;
+        _inputMutex.lock();
+        _inputWaitCondition.wait(&_inputMutex);
+
+        int offset = 0;
+        double d = _expressionSolver.solve(_input, offset);
+
+        // Compute the destination
+        
+      }
+    case LCDOp_Lbl: parseLabel(); break;
+    case LCDOp_Goto: parseGoto(); break;
+    default:
+//      qDebug("POUET");
+      if (ExpressionSolver::isExpressionStartEntity(entity))
+      {
+        double d = _expressionSolver.solve(_program, _currentOffset);
+        if (eatEntity(LCDChar_Arrow)) // Affectation?
         {
-          double d = _expressionSolver.solve(_program, _currentOffset);
-          if (eatEntity(LCDChar_Arrow)) // Affectation?
+          // Parse a variable or a array var
+          int varPrefix = currentEntity();
+          if (!isAlpha(varPrefix))
+            throw InterpreterException(Error_Syntax, _currentOffset);
+          readEntity();
+          int index = 0;
+          if (eatEntity(LCDChar_OpenBracket)) // Array var
           {
-            // Parse a variable or a array var
-            int varPrefix = currentEntity();
-            if (!isAlpha(varPrefix))
+            index = (int) _expressionSolver.solve(_program, _currentOffset);
+            if (!eatEntity(LCDChar_CloseBracket))
               throw InterpreterException(Error_Syntax, _currentOffset);
-            readEntity();
-            int index = 0;
-            if (eatEntity(LCDChar_OpenBracket)) // Array var
-            {
-              index = (int) _expressionSolver.solve(_program, _currentOffset);
-              if (!eatEntity(LCDChar_CloseBracket))
-                throw InterpreterException(Error_Syntax, _currentOffset);
-            }
-            // Next entity is separator or end
-            if (!isSeparator(currentEntity()) && currentEntity() != -1)
-              throw InterpreterException(Error_Syntax, _currentOffset);
-
-            // Stock it
-            if (!Memory::instance().setVariable((LCDChar) varPrefix, index, d))
-              throw InterpreterException(Error_Memory, _currentOffset);
-          } else if (isComparisonOperator(currentEntity()))
-          {
-            int comp = readEntity();
-            double d2 = _expressionSolver.solve(_program, _currentOffset);
-
-            // "=>" is expected
-            if (!eatEntity(LCDChar_DoubleArrow))
-              throw InterpreterException(Error_Syntax, _currentOffset);
-
-            // Some non sep char is expected
-            if (isSeparator(currentEntity()) || currentEntity() == -1)
-              throw InterpreterException(Error_Syntax, _currentOffset);
-
-            // compute boolean
-            if (!computeBoolean(comp, d, d2))
-              moveOffsetToNextInstruction();
-            continue;
           }
+          // Next entity is separator or end
+          if (!isSeparator(currentEntity()) && currentEntity() != -1)
+            throw InterpreterException(Error_Syntax, _currentOffset);
+
+          // Stock it
+          if (!Memory::instance().setVariable((LCDChar) varPrefix, index, d))
+            throw InterpreterException(Error_Memory, _currentOffset);
+        } else if (isComparisonOperator(currentEntity()))
+        {
+          int comp = readEntity();
+          double d2 = _expressionSolver.solve(_program, _currentOffset);
+
+          // "=>" is expected
+          if (!eatEntity(LCDChar_DoubleArrow))
+            throw InterpreterException(Error_Syntax, _currentOffset);
+
+          // Some non sep char is expected
+          if (isSeparator(currentEntity()) || currentEntity() == -1)
+            throw InterpreterException(Error_Syntax, _currentOffset);
+
+          // compute boolean
+          if (!computeBoolean(comp, d, d2))
+            moveOffsetToNextInstruction();
+          continue;
         }
       }
-      // Separator is mandatory
-      if (isSeparator(currentEntity()) || currentEntity() == -1)
-        readEntity();
-      else
-        throw InterpreterException(Error_Syntax, _currentOffset);
     }
+    // Separator is mandatory
+    if (isSeparator(currentEntity()) || currentEntity() == -1)
+      readEntity();
+    else
+      throw InterpreterException(Error_Syntax, _currentOffset);
   }
 
   // Display the stack value?
@@ -178,8 +200,6 @@ void Interpreter::parseInput()
     throw InterpreterException(Error_Syntax, 0); // TODO: good line & offset
 
   readEntity(); // Pass the "->"
-
-  _waitForDataMode = true; // Waiting for IN...
 }
 
 bool Interpreter::computeBoolean(int comp, double d1, double d2)
@@ -257,4 +277,63 @@ void Interpreter::storeDisplayLine(const TextLine &textLine)
   QMutexLocker loker(&_displayLineMutex);
 
   _displayLines.enqueue(textLine);
+}
+
+void Interpreter::sendInput(const TextLine &value)
+{
+  if (!_waitForInput)
+    return;
+
+  _input = value;
+  _waitForInput = false;
+  _inputWaitCondition.wakeAll();
+}
+
+QList<TextLine> Interpreter::syntaxError(int step) const
+{
+  QList<TextLine> result;
+  result << TextLine("  Syn ERROR");
+  result << TextLine(QString("   Step    %1").arg(step));
+  return result;
+}
+
+QList<TextLine> Interpreter::stackError(int step) const
+{
+  QList<TextLine> result;
+  result << TextLine("  Stk ERROR");
+  result << TextLine(QString("   Step    %1").arg(step));
+  return result;
+}
+
+QList<TextLine> Interpreter::memError(int step) const
+{
+  QList<TextLine> result;
+  result << TextLine("  Mem ERROR");
+  result << TextLine(QString("   Step    %1").arg(step));
+  return result;
+}
+
+QList<TextLine> Interpreter::argError(int step) const
+{
+  QList<TextLine> result;
+  result << TextLine("  Arg ERROR");
+  result << TextLine(QString("   Step    %1").arg(step));
+  return result;
+}
+
+QList<TextLine> Interpreter::gotoError(int step) const
+{
+  QList<TextLine> result;
+  result << TextLine("  Go  ERROR");
+  result << TextLine(QString("   Step    %1").arg(step));
+  return result;
+}
+
+void Interpreter::display(const QList<TextLine> &lines)
+{
+  foreach (const TextLine &textLine, lines)
+  {
+    storeDisplayLine(textLine);
+    emit displayLine();
+  }
 }

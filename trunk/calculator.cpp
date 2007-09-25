@@ -92,7 +92,7 @@ void Calculator::init()
   _calcState.setScreenMode(ScreenMode_Resume);
   screenModeChanged(ScreenMode_Resume);
 
-  buttonClicked(Button_1);
+/*  buttonClicked(Button_1);
   buttonClicked(Button_0);
   buttonClicked(Button_Arrow);
   buttonClicked(Button_Alpha); buttonClicked(Button_MinusOne);
@@ -115,7 +115,11 @@ void Calculator::init()
   buttonClicked(Button_0);
   buttonClicked(Button_Shift); buttonClicked(Button_7);
   buttonClicked(Button_Shift); buttonClicked(Button_Prog);
-  buttonClicked(Button_0);
+  buttonClicked(Button_0);*/
+
+  buttonClicked(Button_Question);
+  buttonClicked(Button_Arrow);
+  buttonClicked(Button_Alpha); buttonClicked(Button_MinusOne);
 
 /*  buttonClicked(Button_Shift); buttonClicked(Button_Plot);
   buttonClicked(Button_4);
