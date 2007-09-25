@@ -37,10 +37,12 @@ void Interpreter::run()
 void Interpreter::execute() throw (InterpreterException)
 {
   int entity;
+  double lastResult = 0.0;
+  bool lastResultExists = false;
   while ((entity = currentEntity()) != -1)
   {
     msleep(10);
-    _expressionSolver.emptyStacks();
+    lastResultExists = false;
     switch (entity)
     {
     case LCDChar_DoubleQuote: // A string instruction?
@@ -68,6 +70,8 @@ void Interpreter::execute() throw (InterpreterException)
 
         int offset = 0;
         double d = _expressionSolver.solve(_input, offset);
+        lastResultExists = true;
+        lastResult = d;
 
         // Compute the destination
         parseVariableAndStore(d);
@@ -79,12 +83,15 @@ void Interpreter::execute() throw (InterpreterException)
       if (ExpressionSolver::isExpressionStartEntity(entity))
       {
         double d = _expressionSolver.solve(_program, _currentOffset);
+        lastResultExists = true;
+        lastResult = d;
         if (eatEntity(LCDChar_Arrow)) // Affectation?
           parseVariableAndStore(d);
         else if (isComparisonOperator(currentEntity()))
         {
           int comp = readEntity();
           double d2 = _expressionSolver.solve(_program, _currentOffset);
+          lastResult = d2;
 
           // "=>" is expected
           if (!eatEntity(LCDChar_DoubleArrow))
@@ -109,11 +116,9 @@ void Interpreter::execute() throw (InterpreterException)
   }
 
   // Display the stack value?
-  bool empty;
-  double d = _expressionSolver.numberStackTop(empty);
-  if (!empty)
+  if (lastResultExists)
   {
-    TextLine textLine = formatDouble(d);
+    TextLine textLine = formatDouble(lastResult);
     textLine.setRightJustified(true);
     storeDisplayLine(textLine);
     emit displayLine();

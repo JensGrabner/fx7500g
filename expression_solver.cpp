@@ -66,7 +66,7 @@ double ExpressionSolver::solve(const TextLine &expression, int &offset) throw (I
     } else if (token.isEntity(LCDChar_CloseBracket))
     {
       // Consume all operators
-      performStackOperations();
+      performStackOperations(true, false);
       if (!_commandStack.isEmpty() && _commandStack.top().tokenType() == Token::Type_OpenArrayVar)
       {
         int entity = _commandStack.pop().entity();
@@ -83,8 +83,6 @@ double ExpressionSolver::solve(const TextLine &expression, int &offset) throw (I
         token = Token();
         break;
       }
-/*      else
-        throw InterpreterException(Error_Syntax, token.offset());*/
     }
 
     previousToken = token;
@@ -93,7 +91,7 @@ double ExpressionSolver::solve(const TextLine &expression, int &offset) throw (I
   analyzeForSyntaxError(token, previousToken);
 
   // Consume all resting operators
-  performStackOperations(true);
+  performStackOperations(true, true);
 
   // Update offset
   offset = _currentOffset;
@@ -168,7 +166,7 @@ void ExpressionSolver::performOperation(int entity) throw (InterpreterException)
   }
 }
 
-void ExpressionSolver::performStackOperations(bool endPhase) throw (InterpreterException)
+void ExpressionSolver::performStackOperations(bool treatOpenParens, bool treatOpenBracket) throw (InterpreterException)
 {
   while (!_commandStack.isEmpty())
   {
@@ -176,9 +174,9 @@ void ExpressionSolver::performStackOperations(bool endPhase) throw (InterpreterE
         _commandStack.top().isPreFuncToken() ||
         _commandStack.top().isPostFuncToken())
       performOperation(_commandStack.pop().entity());
-    else if (_commandStack.top().isEntity(LCDChar_OpenParen) && endPhase)
+    else if (_commandStack.top().isEntity(LCDChar_OpenParen) && treatOpenParens)
       _commandStack.pop();
-    else if (_commandStack.top().tokenType() == Token::Type_OpenArrayVar && endPhase)
+    else if (_commandStack.top().tokenType() == Token::Type_OpenArrayVar && treatOpenBracket)
     {
       int entity = _commandStack.pop().entity();
 

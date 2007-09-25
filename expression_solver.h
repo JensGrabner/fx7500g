@@ -34,7 +34,7 @@ private:
 
   void pushToken(const Token &token) throw (InterpreterException);
 
-  void performStackOperations(bool endPhase = false) throw (InterpreterException);
+  void performStackOperations(bool treatOpenParens = false, bool treatOpenBracket = false) throw (InterpreterException);
   void performOperation(int entity) throw (InterpreterException);
 
   void analyzeForSyntaxError(Token token, Token previousToken) throw (InterpreterException);
