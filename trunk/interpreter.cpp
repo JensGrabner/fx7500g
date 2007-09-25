@@ -70,37 +70,18 @@ void Interpreter::execute() throw (InterpreterException)
         double d = _expressionSolver.solve(_input, offset);
 
         // Compute the destination
-        
+        parseVariableAndStore(d);
       }
+      break;
     case LCDOp_Lbl: parseLabel(); break;
     case LCDOp_Goto: parseGoto(); break;
     default:
-//      qDebug("POUET");
       if (ExpressionSolver::isExpressionStartEntity(entity))
       {
         double d = _expressionSolver.solve(_program, _currentOffset);
         if (eatEntity(LCDChar_Arrow)) // Affectation?
-        {
-          // Parse a variable or a array var
-          int varPrefix = currentEntity();
-          if (!isAlpha(varPrefix))
-            throw InterpreterException(Error_Syntax, _currentOffset);
-          readEntity();
-          int index = 0;
-          if (eatEntity(LCDChar_OpenBracket)) // Array var
-          {
-            index = (int) _expressionSolver.solve(_program, _currentOffset);
-            if (!eatEntity(LCDChar_CloseBracket))
-              throw InterpreterException(Error_Syntax, _currentOffset);
-          }
-          // Next entity is separator or end
-          if (!isSeparator(currentEntity()) && currentEntity() != -1)
-            throw InterpreterException(Error_Syntax, _currentOffset);
-
-          // Stock it
-          if (!Memory::instance().setVariable((LCDChar) varPrefix, index, d))
-            throw InterpreterException(Error_Memory, _currentOffset);
-        } else if (isComparisonOperator(currentEntity()))
+          parseVariableAndStore(d);
+        else if (isComparisonOperator(currentEntity()))
         {
           int comp = readEntity();
           double d2 = _expressionSolver.solve(_program, _currentOffset);
@@ -163,6 +144,14 @@ bool Interpreter::eatEntity(int entity)
     return true;
   } else
     return false;
+}
+
+int Interpreter::readAlpha() throw(InterpreterException)
+{
+  if (isAlpha(currentEntity()))
+    return readEntity();
+  else
+    throw InterpreterException(Error_Syntax, _currentOffset);
 }
 
 void Interpreter::setProgram(const QList<TextLine> &program)
@@ -336,4 +325,25 @@ void Interpreter::display(const QList<TextLine> &lines)
     storeDisplayLine(textLine);
     emit displayLine();
   }
+}
+
+void Interpreter::parseVariableAndStore(double d)
+{
+  // Parse a variable or a array var
+  int varPrefix = readAlpha();
+
+  int index = 0;
+  if (eatEntity(LCDChar_OpenBracket)) // Array var
+  {
+    index = (int) _expressionSolver.solve(_program, _currentOffset);
+    if (!eatEntity(LCDChar_CloseBracket))
+      throw InterpreterException(Error_Syntax, _currentOffset);
+  }
+  // Next entity is separator or end
+  if (!isSeparator(currentEntity()) && currentEntity() != -1)
+    throw InterpreterException(Error_Syntax, _currentOffset);
+
+  // Stock it
+  if (!Memory::instance().setVariable((LCDChar) varPrefix, index, d))
+    throw InterpreterException(Error_Memory, _currentOffset);
 }

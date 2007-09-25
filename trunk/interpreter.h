@@ -49,6 +49,7 @@ private:
   int currentEntity();
   int readEntity(); // Returns -1 if it the end of file
   bool eatEntity(int entity); // Returns true if entity is eaten
+  int readAlpha() throw(InterpreterException); // Returns an alpha
 
   TextLine parseString();
   void parseInput();
@@ -65,6 +66,8 @@ private:
   QList<TextLine> memError(int step) const;
   QList<TextLine> argError(int step) const;
   QList<TextLine> gotoError(int step) const;
+
+  void parseVariableAndStore(double d);
 
   void display(const QList<TextLine> &lines);
 };
