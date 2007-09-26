@@ -31,6 +31,7 @@ protected:
   void carriageReturn();
   void moveCursor(int newLineIndex, int newOffset, bool *scrolled = 0); // Move cursor can invoke scrollUp() or scrollDown() if cursor is out of the screen
   void initTopLineIndex();
+  void clearLines(); // Clear the screen
 
 private:
   int _topLineIndex; // Absolute index of the top line (the most top visible line at screen) in <_lines>
