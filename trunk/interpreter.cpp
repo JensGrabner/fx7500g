@@ -72,6 +72,9 @@ void Interpreter::execute() throw (InterpreterException)
       break;
     case LCDOp_Lbl: parseLabel(); break;
     case LCDOp_Goto: parseGoto(); break;
+    case LCDOp_Deg: CalculatorState::instance().setAngleMode(Deg); readEntity(); break;
+    case LCDOp_Rad: CalculatorState::instance().setAngleMode(Rad); readEntity(); break;
+    case LCDOp_Gra: CalculatorState::instance().setAngleMode(Grad); readEntity(); break;
     default:
       if (ExpressionSolver::isExpressionStartEntity(entity))
       {

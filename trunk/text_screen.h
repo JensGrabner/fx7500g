@@ -44,7 +44,7 @@ public:
 
   TextScreen();
 
-  virtual void init(CalculatorState *calcState);
+  virtual void init();
 
   void clear();
 
@@ -61,7 +61,6 @@ signals:
 
 protected:
   LCDChar _screen[16][8];
-  CalculatorState *_calcState;
   int _cursorLine, _cursorCol;
   CursorMode _cursorMode;
   bool _insertMode;

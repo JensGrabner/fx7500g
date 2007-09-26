@@ -213,7 +213,14 @@ bool isPostFunc(int entity);
 bool isComparisonOperator(int entity);
 
 double deg2rad(double deg);
+double deg2grad(double deg);
+
 double rad2deg(double rad);
+double rad2grad(double rad);
+
+double grad2rad(double grad);
+double grad2deg(double grad);
+
 double factorial(double value);
 
 int getEntityPriority(int entity);
@@ -319,7 +326,7 @@ class CalculatorState : public QObject
 {
   Q_OBJECT
 public:
-  CalculatorState();
+  static CalculatorState &instance();
 
   ScreenMode screenMode() const { return _screenMode; }
   void setScreenMode(ScreenMode value);
@@ -359,6 +366,7 @@ signals:
   void keyModeChanged(KeyMode oldMode);
 
 private:
+  static CalculatorState *_instance;
   ScreenMode _screenMode;
   SysMode _sysMode;
   AngleMode _angleMode;
@@ -366,6 +374,8 @@ private:
   BaseMode _baseMode;
   DisplayMode _displayMode;
   KeyMode _keyMode;
+
+  CalculatorState();
 
   int printableEntityByButtonInPad1(int button) const;
   int printableEntityByButtonInPad2(int button) const;

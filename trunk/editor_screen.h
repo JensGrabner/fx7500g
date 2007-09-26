@@ -9,7 +9,7 @@ class EditorScreen : public TextScreen
 public:
   EditorScreen();
 
-  void init(CalculatorState *calcState);
+  void init();
 
   void setProgram(int programIndex);
 

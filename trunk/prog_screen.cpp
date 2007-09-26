@@ -7,10 +7,10 @@ ProgScreen::ProgScreen() : TextScreen()
   setCursorMode(CursorMode_Space);
 }
 
-void ProgScreen::init(CalculatorState *calcState)
+void ProgScreen::init()
 {
-  TextScreen::init(calcState);
-  connect(calcState, SIGNAL(sysModeChanged(SysMode)), this, SLOT(sysModeChanged(SysMode)));
+  TextScreen::init();
+  connect(&CalculatorState::instance(), SIGNAL(sysModeChanged(SysMode)), this, SLOT(sysModeChanged(SysMode)));
 }
 
 void ProgScreen::moveLeft()
@@ -33,17 +33,18 @@ void ProgScreen::feedScreen()
 {
   clear();
 
-  assignToScreen(LCDString(QString("sys mode : %1").arg(_calcState->sysModeString())), 0, 0);
+  CalculatorState &calcState = CalculatorState::instance();
+  assignToScreen(LCDString(QString("sys mode : %1").arg(calcState.sysModeString())), 0, 0);
 
-  if (_calcState->calMode() == CalMode_BASE_N)
+  if (calcState.calMode() == CalMode_BASE_N)
   {
     assignToScreen(LCDString("cal mode :BASE-N"), 0, 1);
-    assignToScreen(LCDString(QString("            %1").arg(_calcState->baseModeString())), 0, 2);
+    assignToScreen(LCDString(QString("            %1").arg(calcState.baseModeString())), 0, 2);
   } else
   {
-    assignToScreen(LCDString(QString("cal mode : %1").arg(_calcState->calModeString())), 0, 1);
-    assignToScreen(LCDString(QString("   angle : %1").arg(_calcState->angleModeString())), 0, 2);
-    assignToScreen(LCDString(QString(" display : %1").arg(_calcState->displayModeString())), 0, 3);
+    assignToScreen(LCDString(QString("cal mode : %1").arg(calcState.calModeString())), 0, 1);
+    assignToScreen(LCDString(QString("   angle : %1").arg(calcState.angleModeString())), 0, 2);
+    assignToScreen(LCDString(QString(" display : %1").arg(calcState.displayModeString())), 0, 3);
   }
 
   Memory &memory = Memory::instance();
@@ -73,7 +74,9 @@ void ProgScreen::sysModeChanged(SysMode oldMode)
 
 void ProgScreen::buttonClicked(int button)
 {
-  switch (_calcState->sysMode())
+  CalculatorState &calcState = CalculatorState::instance();
+
+  switch (calcState.sysMode())
   {
   case SysMode_WRT:
     switch (button)
@@ -91,9 +94,9 @@ void ProgScreen::buttonClicked(int button)
       emit screenChanged();
       break;
     case Button_Del:
-      if (_calcState->keyMode() == KeyMode_Shift ||
-          _calcState->keyMode() == KeyMode_ShiftMode ||
-          _calcState->keyMode() == KeyMode_ShiftHyp)
+      if (calcState.keyMode() == KeyMode_Shift ||
+          calcState.keyMode() == KeyMode_ShiftMode ||
+          calcState.keyMode() == KeyMode_ShiftHyp)
       {
         Memory::instance().clearAllPrograms();
         feedScreen();

@@ -4,10 +4,6 @@
 
 #include "expression_solver.h"
 
-ExpressionSolver::ExpressionSolver()
-{
-}
-
 double ExpressionSolver::solve(const TextLine &expression, int &offset) throw (InterpreterException)
 {
   QList<int> result;
@@ -136,9 +132,9 @@ void ExpressionSolver::performOperation(int entity) throw (InterpreterException)
   case LCDChar_Ten: _numberStack.push(pow(10.0, _numberStack.pop())); break;
   case LCDOp_Ln: _numberStack.push(log(_numberStack.pop())); break;
   case LCDChar_Euler: _numberStack.push(exp(_numberStack.pop())); break;
-  case LCDOp_Sin: _numberStack.push(sin(deg2rad(_numberStack.pop()))); break;
-  case LCDOp_Cos: _numberStack.push(cos(deg2rad(_numberStack.pop()))); break;
-  case LCDOp_Tan: _numberStack.push(tan(deg2rad(_numberStack.pop()))); break;
+  case LCDOp_Sin: _numberStack.push(sin(native2rad(_numberStack.pop()))); break;
+  case LCDOp_Cos: _numberStack.push(cos(native2rad(_numberStack.pop()))); break;
+  case LCDOp_Tan: _numberStack.push(tan(native2rad(_numberStack.pop()))); break;
   case LCDOp_Sinh: _numberStack.push(sinh(_numberStack.pop())); break;
   case LCDOp_Cosh: _numberStack.push(cosh(_numberStack.pop())); break;
   case LCDOp_Tanh: _numberStack.push(tanh(_numberStack.pop())); break;
@@ -162,9 +158,9 @@ void ExpressionSolver::performOperation(int entity) throw (InterpreterException)
   case LCDChar_Square: { double n = _numberStack.pop(); _numberStack.push(n * n); } break;
   case LCDChar_MinusOneUp: _numberStack.push(1.0 / _numberStack.pop()); break;
   case LCDChar_Exclamation: _numberStack.push(factorial(_numberStack.pop())); break;
-  case LCDChar_LittleO: break;
-  case LCDChar_LittleR: break;
-  case LCDChar_LittleG: break;
+  case LCDChar_LittleO: _numberStack.push(deg2native(_numberStack.pop())); break;
+  case LCDChar_LittleR: _numberStack.push(rad2native(_numberStack.pop())); break;
+  case LCDChar_LittleG: _numberStack.push(grad2native(_numberStack.pop())); break;
   case LCDChar_Degree: break;
   default:;
   }
@@ -312,4 +308,44 @@ void ExpressionSolver::emptyStacks()
 {
   _numberStack.clear();
   _commandStack.clear();
+}
+
+double ExpressionSolver::native2rad(double native) const
+{
+  switch (CalculatorState::instance().angleMode())
+  {
+  case Deg: return deg2rad(native);
+  case Rad: return native;
+  default: return grad2rad(native); // Grad
+  }
+}
+
+double ExpressionSolver::rad2native(double rad) const
+{
+  switch (CalculatorState::instance().angleMode())
+  {
+  case Deg: return rad2deg(rad);
+  case Rad: return rad;
+  default: return rad2grad(rad); // Grad
+  }
+}
+
+double ExpressionSolver::deg2native(double deg) const
+{
+  switch (CalculatorState::instance().angleMode())
+  {
+  case Deg: return deg;
+  case Rad: return deg2rad(deg);
+  default: return deg2grad(deg); // Grad
+  }
+}
+
+double ExpressionSolver::grad2native(double grad) const
+{
+  switch (CalculatorState::instance().angleMode())
+  {
+  case Deg: return grad2deg(grad);
+  case Rad: return grad2rad(grad);
+  default: return grad; // Grad
+  }
 }

@@ -11,10 +11,10 @@ EditorScreen::EditorScreen() :
 {
 }
 
-void EditorScreen::init(CalculatorState *calcState)
+void EditorScreen::init()
 {
-  TextScreen::init(calcState);
-  connect(calcState, SIGNAL(keyModeChanged(KeyMode)), this, SLOT(keyModeChanged(KeyMode)));
+  TextScreen::init();
+  connect(&CalculatorState::instance(), SIGNAL(keyModeChanged(KeyMode)), this, SLOT(keyModeChanged(KeyMode)));
 }
 
 void EditorScreen::setProgram(int programIndex)
@@ -393,7 +393,7 @@ bool EditorScreen::scrollDown()
 
 void EditorScreen::buttonClicked(int button)
 {
-  int entity = _calcState->printableEntityByButton(button);
+  int entity = CalculatorState::instance().printableEntityByButton(button);
 
   if (entity >= 0) // Printable entity
     writeEntity(entity);
@@ -483,8 +483,8 @@ void EditorScreen::insertClicked()
   }
 
   // Annihilate all key mode BUT ShiftAlpha
-  if (_calcState->keyMode() != KeyMode_ShiftAlpha)
-    _calcState->setKeyMode(KeyMode_Normal);
+  if (CalculatorState::instance().keyMode() != KeyMode_ShiftAlpha)
+    CalculatorState::instance().setKeyMode(KeyMode_Normal);
 
   restartBlink();
 }
