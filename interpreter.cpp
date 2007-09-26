@@ -286,6 +286,8 @@ QList<TextLine> Interpreter::errorLines(Error error, int step) const
   case Error_Memory: result << TextLine("  Mem ERROR"); break;
   case Error_Argument: result << TextLine("  Arg ERROR"); break;
   case Error_Goto: result << TextLine("  Go  ERROR"); break;
+  case Error_Math: result << TextLine("  Ma  Error"); break;
+  case Error_Ne: result << TextLine("  Ne  Error"); break;
   default:;
   }
   result << TextLine(QString("   Step    %1").arg(step));
