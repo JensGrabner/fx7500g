@@ -188,9 +188,29 @@ double deg2rad(double deg)
   return (deg * M_PI) / 180.0;
 }
 
+double deg2grad(double deg)
+{
+  return (deg * 100.0) / 90.0;
+}
+
 double rad2deg(double rad)
 {
   return (rad * 180.0) / M_PI;
+}
+
+double rad2grad(double rad)
+{
+  return (rad * 200.0) / M_PI;
+}
+
+double grad2deg(double grad)
+{
+  return (grad * 90.0) / 100.0;
+}
+
+double grad2rad(double grad)
+{
+  return (grad * M_PI) / 200.0;
 }
 
 double factorial(double value)
@@ -378,6 +398,16 @@ void LCDString::assignByOperator(LCDOperator op)
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
+
+CalculatorState *CalculatorState::_instance = 0;
+
+CalculatorState &CalculatorState::instance()
+{
+  if (!_instance)
+    _instance = new CalculatorState;
+
+  return *_instance;
+}
 
 CalculatorState::CalculatorState() :
   _sysMode(SysMode_RUN),

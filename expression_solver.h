@@ -9,7 +9,7 @@
 class ExpressionSolver
 {
 public:
-  ExpressionSolver();
+  ExpressionSolver() {}
 
   // <offset> is the start offset in <expression> and will be written with the next offset to be read after the expression
   double solve(const TextLine &expression, int &offset) throw (InterpreterException);
@@ -39,6 +39,11 @@ private:
   void performOperation(int entity) throw (InterpreterException);
 
   void analyzeForSyntaxError(Token token, Token previousToken) throw (InterpreterException);
+
+  double native2rad(double native) const;
+  double rad2native(double rad) const;
+  double deg2native(double deg) const;
+  double grad2native(double grad) const;
 };
 
 #endif

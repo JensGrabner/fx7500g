@@ -15,9 +15,6 @@ public:
   // Display the resume screen
   void init();
 
-  CalculatorState &calcState() { return _calcState; }
-
-  void setAngleMode(AngleMode value);
   void setSysMode(SysMode value);
   void setCalMode(CalMode value);
   void setBaseMode(BaseMode value);
@@ -33,7 +30,6 @@ public:
   void buttonClicked(int buttonIndex);
 
 private:
-  CalculatorState _calcState;
   RunScreen _runScreen;
   ProgScreen _progScreen;
   ProgEditScreen _progEditScreen;

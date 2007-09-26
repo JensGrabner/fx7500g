@@ -14,7 +14,7 @@ RunScreen::RunScreen() :
 
 void RunScreen::buttonClicked(int button)
 {
-  int entity = _calcState->printableEntityByButton(button);
+  int entity = CalculatorState::instance().printableEntityByButton(button);
 
   if (entity >= 0 && _waitingMode && !_errorMode)
   {
@@ -29,9 +29,9 @@ void RunScreen::buttonClicked(int button)
   if (entity >= 0) // Printable entity
   {
     // Wake up the cursor if needed
-    if (_calcState->screenMode() != ScreenMode_Normal)
+    if (CalculatorState::instance().screenMode() != ScreenMode_Normal)
     {
-      _calcState->setScreenMode(ScreenMode_Normal);
+      CalculatorState::instance().setScreenMode(ScreenMode_Normal);
       restartBlink();
     }
   }
@@ -41,7 +41,7 @@ void RunScreen::buttonClicked(int button)
   case Button_Exe:
     if (_errorMode)
       break;
-    switch (_calcState->keyMode())
+    switch (CalculatorState::instance().keyMode())
     {
     case KeyMode_Shift:
     case KeyMode_ShiftMode:

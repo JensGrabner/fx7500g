@@ -93,7 +93,6 @@ int ShellLine::rowCount() const
 //////////////////////////////////////////////////////
 
 TextScreen::TextScreen() :
-  _calcState(0),
   _cursorLine(0),
   _cursorCol(0),
   _cursorMode(CursorMode_Normal),
@@ -108,9 +107,8 @@ TextScreen::TextScreen() :
   _blinkTimer.start();
 }
 
-void TextScreen::init(CalculatorState *calcState)
+void TextScreen::init()
 {
-  _calcState = calcState;
   feedScreen();
 }
 
@@ -220,7 +218,7 @@ void TextScreen::assignToScreen(const LCDString &str, int col, int line)
 TextScreen::CursorMode TextScreen::getCursorMode() const
 {
   if (_insertMode)
-    switch (_calcState->keyMode())
+    switch (CalculatorState::instance().keyMode())
     {
     case KeyMode_Normal: return CursorMode_Insert;
     case KeyMode_Shift: return CursorMode_InsertShift;
@@ -233,7 +231,7 @@ TextScreen::CursorMode TextScreen::getCursorMode() const
     default: return CursorMode_Normal;
     }
   else
-    switch (_calcState->keyMode())
+    switch (CalculatorState::instance().keyMode())
     {
     case KeyMode_Normal: return CursorMode_Normal;
     case KeyMode_Shift: return CursorMode_Shift;
