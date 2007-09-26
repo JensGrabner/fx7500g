@@ -410,7 +410,9 @@ enum Error {
   Error_Stack,
   Error_Memory,
   Error_Argument,
-  Error_Goto
+  Error_Goto,
+  Error_Math,
+  Error_Ne
 };
 
 class InterpreterException

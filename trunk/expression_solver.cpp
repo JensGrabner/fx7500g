@@ -116,7 +116,11 @@ void ExpressionSolver::performOperation(int entity) throw (InterpreterException)
       switch (entity)
       {
       case LCDChar_Multiply: _numberStack.push(d1 * d2); break;
-      case LCDChar_Divide: _numberStack.push(d1 / d2); break;
+      case LCDChar_Divide:
+        if (d2 == 0.0)
+          throw InterpreterException(Error_Math, _currentToken.offset());
+        _numberStack.push(d1 / d2);
+        break;
       case LCDChar_Add: _numberStack.push(d1 + d2); break;
       case LCDChar_Substract: _numberStack.push(d1 - d2); break;
       case LCDOp_Xy: _numberStack.push(pow(d1, d2)); break;
@@ -195,17 +199,20 @@ void ExpressionSolver::performStackOperations(bool treatOpenParens, bool treatOp
 Token ExpressionSolver::readToken() throw (InterpreterException)
 {
   if (_currentOffset >= _expression.count())
-    return Token(Token::Type_EOF, _expression.count()); // WARNING
+  {
+    _currentToken = Token(Token::Type_EOF, _expression.count());
+    return _currentToken;
+  }
 
   int entity = _expression[_currentOffset];
   switch (entity)
   {
   case LCDChar_OpenParen:
   case LCDChar_CloseParen:
-  case LCDChar_CloseBracket: return Token(entity, _currentOffset++);
+  case LCDChar_CloseBracket: _currentToken = Token(entity, _currentOffset++); break;
   default:
     if (isOperator(entity) || isPreFunc(entity) || isPostFunc(entity))
-      return Token(entity, _currentOffset++);
+      _currentToken = Token(entity, _currentOffset++);
     else if (isAlpha(entity))
     {
       _currentOffset++;
@@ -213,9 +220,9 @@ Token ExpressionSolver::readToken() throw (InterpreterException)
       {
         Token token(Token::Type_OpenArrayVar, _currentOffset - 1);
         token.setEntity(_expression[_currentOffset++ - 1]);
-        return token;
+        _currentToken = token;
       } else
-        return Token(_expression[_currentOffset - 1], _currentOffset - 1);
+        _currentToken = Token(_expression[_currentOffset - 1], _currentOffset - 1);
     } else if (isCipher(entity) || entity == LCDChar_Dot)
     {
       int firstOffset = _currentOffset;
@@ -234,12 +241,12 @@ Token ExpressionSolver::readToken() throw (InterpreterException)
           throw InterpreterException(Error_Syntax);
         _currentOffset++;
       }
-      Token token(Token::Type_Number, firstOffset);
-      token.setValue(numberStr.toDouble());
-      return token;
-    }
+      _currentToken = Token(Token::Type_Number, firstOffset);
+      _currentToken.setValue(numberStr.toDouble());
+    } else
+      _currentToken = Token();
   }
-  return Token();
+  return _currentToken;
 }
 
 void ExpressionSolver::pushToken(const Token &token) throw (InterpreterException)

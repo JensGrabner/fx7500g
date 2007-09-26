@@ -28,6 +28,7 @@ private:
   QStack<Token> _commandStack;
   int _startOffset;
   int _currentOffset;
+  Token _currentToken;
 
   // Returns a token of type Type_EOF if the token is not usable in expression (expression overflow, separator, unknown token
   Token readToken() throw (InterpreterException);
