@@ -51,6 +51,7 @@ void RunScreen::buttonClicked(int button)
     break;
   case Button_Left: if (_waitingMode) displayLastProgram(); break;
   case Button_Right: if (_waitingMode) displayLastProgram(true); break;
+  case Button_Ac: resetScreen(); break;
   default:;
   }
 }
@@ -166,4 +167,11 @@ void RunScreen::interpreterFinished()
 
   feedScreen();
   emit screenChanged();
+}
+
+void RunScreen::resetScreen()
+{
+  clearLines();
+  _waitingMode = false;
+  _errorMode = false;
 }

@@ -491,9 +491,17 @@ void EditorScreen::insertClicked()
 
 void EditorScreen::initTopLineIndex()
 {
+  _editZoneTopLineIndex = 0;
   _topLineIndex = 0;
   _topLineSubIndex = 0;
 
   feedScreen();
   emit screenChanged();
+}
+
+void EditorScreen::clearLines()
+{
+  _lines.clear();
+  initTopLineIndex();
+  moveCursor(0, 0);
 }

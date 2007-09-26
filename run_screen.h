@@ -27,6 +27,8 @@ private:
 
   void getLineAndStep(const QList<TextLine> &program, int offset, int &line, int &step) const;
 
+  void resetScreen();
+
 private slots:
   void interpreterDisplayLine();
   void timerDisplayTimeout();
