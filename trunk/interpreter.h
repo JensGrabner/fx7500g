@@ -28,6 +28,8 @@ public:
   bool error() const { return _error; }
   int errorStep() const { return _errorStep; }
 
+  double lastResult() const { return _lastResult; }
+
 signals:
   void displayLine();
 
@@ -39,6 +41,8 @@ private:
   ExpressionSolver _expressionSolver;
   bool _error; // If true then the last execution failed
   int _errorStep; // The last error step
+  double _lastResult;
+  bool _lastResultExists;
   TextLine _input;
   bool _waitForInput;
   QMutex _inputMutex;
@@ -66,6 +70,8 @@ private:
   void parseVariableAndStore(double d);
 
   void display(const QList<TextLine> &lines);
+
+  void changeAngleMode(int entity);
 };
 
 #endif

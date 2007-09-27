@@ -26,6 +26,8 @@ Calculator::Calculator() :
   // Connect to <_calcState>
   connect(&CalculatorState::instance(), SIGNAL(screenModeChanged(ScreenMode)),
           this, SLOT(screenModeChanged(ScreenMode)));
+  connect(&CalculatorState::instance(), SIGNAL(sysModeChanged(SysMode)),
+          this, SLOT(sysModeChanged(SysMode)));
 }
 
 void Calculator::runChangeChar(int col, int line, LCDChar c)
@@ -77,9 +79,11 @@ void Calculator::init()
 {
   Q_ASSERT_X(_lcdDisplay, "Calculator::init()", "<_lcdDisplay> is 0!");
 
-  setSysMode(SysMode_RUN);
-  CalculatorState::instance().setScreenMode(ScreenMode_Resume);
-  screenModeChanged(ScreenMode_Resume);
+  CalculatorState::instance().setSysMode(SysMode_RUN, true); // Force the RUN sysmode
+
+  _runScreen.init();
+  _progScreen.init();
+  _progEditScreen.init();
 
 /*  buttonClicked(Button_1);
   buttonClicked(Button_0);
@@ -123,25 +127,6 @@ void Calculator::setCalMode(CalMode value)
 void Calculator::setBaseMode(BaseMode value)
 {
   CalculatorState::instance().setBaseMode(value);
-}
-
-void Calculator::setSysMode(SysMode value)
-{
-  CalculatorState::instance().setSysMode(value);
-
-  switch (CalculatorState::instance().sysMode())
-  {
-  case SysMode_RUN:
-    _lcdDisplay->drawScreen(_runScreen.currentScreen());
-    _runScreen.restartBlink();
-    break;
-  case SysMode_WRT:
-  case SysMode_PCL:
-    _lcdDisplay->drawScreen(_progScreen.currentScreen());
-    _progScreen.restartBlink();
-    break;
-  default:;
-  }
 }
 
 void Calculator::applyKey(int key)
@@ -249,44 +234,51 @@ void Calculator::buttonClicked(int buttonIndex)
   // Shift, Mode, Alpha stuffs
   calcState.changeKeyModeByButton(buttonIndex, noSpecialButton);
 
+  bool transmit = true;
+
   // Switch mode?
   if (calcState.keyMode() == KeyMode_Mode || calcState.keyMode() == KeyMode_ShiftMode)
   {
     switch (buttonIndex)
     {
     case Button_1:
-      setSysMode(SysMode_RUN);
-      calcState.setScreenMode(ScreenMode_Normal);
+      calcState.setSysMode(SysMode_RUN, true); // Force to get the re-initialization
       calcState.setKeyMode(KeyMode_Normal);
+      transmit = false;
       break;
     case Button_2:
-      setSysMode(SysMode_WRT);
+      calcState.setSysMode(SysMode_WRT);
       calcState.setScreenMode(ScreenMode_Normal);
       calcState.setKeyMode(KeyMode_Normal);
+      transmit = false;
       break;
     case Button_3:
-      setSysMode(SysMode_PCL);
+      calcState.setSysMode(SysMode_PCL);
       calcState.setScreenMode(ScreenMode_Normal);
       calcState.setKeyMode(KeyMode_Normal);
+      transmit = false;
       break;
     default:;
     }
   }
 
   // Dispatch button clicks
-  switch (calcState.sysMode())
+  if (transmit)
   {
-  case SysMode_RUN:
-    _runScreen.buttonClicked(buttonIndex);
-    break;
-  case SysMode_WRT:
-  case SysMode_PCL:
-    if (calcState.screenMode() == ScreenMode_Normal)
-      _progScreen.buttonClicked(buttonIndex);
-    else if (calcState.screenMode() == ScreenMode_Editor)
-      _progEditScreen.buttonClicked(buttonIndex);
-    break;
-  default:;
+    switch (calcState.sysMode())
+    {
+    case SysMode_RUN:
+      _runScreen.buttonClicked(buttonIndex);
+      break;
+    case SysMode_WRT:
+    case SysMode_PCL:
+      if (calcState.screenMode() == ScreenMode_Normal)
+        _progScreen.buttonClicked(buttonIndex);
+      else if (calcState.screenMode() == ScreenMode_Editor)
+        _progEditScreen.buttonClicked(buttonIndex);
+      break;
+    default:;
+    }
   }
 
   // Restore key normal mode?
@@ -341,6 +333,21 @@ void Calculator::screenModeChanged(ScreenMode)
       break;
     default:;
     }
+  default:;
+  }
+}
+
+void Calculator::sysModeChanged(SysMode)
+{
+  switch (CalculatorState::instance().sysMode())
+  {
+  case SysMode_RUN:
+    CalculatorState::instance().setScreenMode(ScreenMode_Resume); break;
+  case SysMode_WRT:
+  case SysMode_PCL:
+    _lcdDisplay->drawScreen(_progScreen.currentScreen());
+    _progScreen.restartBlink();
+    break;
   default:;
   }
 }

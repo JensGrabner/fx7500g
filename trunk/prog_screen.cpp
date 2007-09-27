@@ -63,6 +63,7 @@ void ProgScreen::feedScreen()
 void ProgScreen::sysModeChanged(SysMode oldMode)
 {
   feedScreen();
+  emit screenChanged();
 
   if (oldMode != SysMode_WRT && oldMode != SysMode_PCL)
   {

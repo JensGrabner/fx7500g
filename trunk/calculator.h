@@ -15,7 +15,6 @@ public:
   // Display the resume screen
   void init();
 
-  void setSysMode(SysMode value);
   void setCalMode(CalMode value);
   void setBaseMode(BaseMode value);
   void setDisplayMode(DisplayMode value);
@@ -39,6 +38,7 @@ private:
 
 private slots:
   void screenModeChanged(ScreenMode oldMode);
+  void sysModeChanged(SysMode oldMode);
 
   void runChangeChar(int col, int line, LCDChar c);
   void runScreenChanged();

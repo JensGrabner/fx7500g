@@ -478,9 +478,9 @@ QString CalculatorState::calModeString() const
   }
 }
 
-void CalculatorState::setSysMode(SysMode value)
+void CalculatorState::setSysMode(SysMode value, bool forceAffectation)
 {
-  if (_sysMode == value)
+  if (_sysMode == value && !forceAffectation)
     return;
 
   SysMode oldMode = _sysMode;
