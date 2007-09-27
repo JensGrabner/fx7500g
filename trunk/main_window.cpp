@@ -1,5 +1,6 @@
 #include <QGraphicsScene>
 #include <QKeyEvent>
+#include <QPushButton>
 
 #include "main_window.h"
 

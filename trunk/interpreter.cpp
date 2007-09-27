@@ -42,33 +42,17 @@ void Interpreter::execute() throw (InterpreterException)
       {
         TextLine textLine = parseString();
         if (currentEntity() == LCDChar_Question)
-          textLine << LCDChar_Question;
-        storeDisplayLine(textLine);
-        emit displayLine();
-        if (eatEntity(LCDChar_Question))
-          parseInput();
-        _lastResultExists = false;
+          parseInput(textLine);
+        else
+        {
+          storeDisplayLine(textLine);
+          emit displayLine();
+          _lastResultExists = false;
+        }
       }
       break;
     case LCDChar_Question: // An input affectation?
-      {
-        storeDisplayLine(TextLine() << LCDChar_Question);
-        emit displayLine();
-        readEntity(); // Pass the "?"
-        if (!eatEntity(LCDChar_Arrow)) // Pass the "->"
-          throw InterpreterException(Error_Syntax, _currentOffset);
-        // Wait for user data
-        _waitForInput = true;
-        _inputMutex.lock();
-        _inputWaitCondition.wait(&_inputMutex);
-
-        int offset = 0;
-        double d = _expressionSolver.solve(_input, offset);
-        _lastResult = d;
-
-        // Compute the destination
-        parseVariableAndStore(d);
-      }
+      parseInput();
       break;
     case LCDOp_Lbl: parseLabel(); break;
     case LCDOp_Goto: parseGoto(); break;
@@ -179,14 +163,6 @@ TextLine Interpreter::parseString()
   if (entity == -1)
     throw InterpreterException(Error_Syntax, 0); // TODO: good line & offset
   return textLine;
-}
-
-void Interpreter::parseInput()
-{
-  if (currentEntity() != LCDChar_Arrow)
-    throw InterpreterException(Error_Syntax, 0); // TODO: good line & offset
-
-  readEntity(); // Pass the "->"
 }
 
 bool Interpreter::computeBoolean(int comp, double d1, double d2)
@@ -334,4 +310,30 @@ void Interpreter::changeAngleMode(int entity)
   default:;
   }
   readEntity();
+}
+
+void Interpreter::parseInput(const TextLine &prefix)
+{
+  if (!eatEntity(LCDChar_Question))
+    throw InterpreterException(Error_Syntax, _currentOffset);
+
+  TextLine toDisplay = prefix;
+  toDisplay << LCDChar_Question;
+
+  storeDisplayLine(toDisplay);
+  emit displayLine();
+  if (!eatEntity(LCDChar_Arrow)) // Pass the "->"
+    throw InterpreterException(Error_Syntax, _currentOffset);
+  // Wait for user data
+  _waitForInput = true;
+  _inputMutex.lock();
+  _inputWaitCondition.wait(&_inputMutex);
+  _inputMutex.unlock();
+
+  int offset = 0;
+  double d = _expressionSolver.solve(_input, offset);
+  _lastResult = d;
+
+  // Compute the destination
+  parseVariableAndStore(d);
 }

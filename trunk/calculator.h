@@ -48,7 +48,7 @@ private slots:
   void progScreenChanged();
 
   void editorChangeChar(int col, int line, LCDChar c);
-  void editorScreenChanged();
+  void progEditScreenChanged();
 };
 
 #endif

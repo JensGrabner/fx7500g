@@ -53,10 +53,9 @@ private:
   int currentEntity();
   int readEntity(); // Returns -1 if it the end of file
   bool eatEntity(int entity); // Returns true if entity is eaten
-  int readAlpha() throw(InterpreterException); // Returns an alpha
+  int readAlpha() throw (InterpreterException); // Returns an alpha
 
   TextLine parseString();
-  void parseInput();
   void parseLabel();
   void parseGoto();
   // Returns true if (d1 comp d2) is true
@@ -68,6 +67,7 @@ private:
   QList<TextLine> errorLines(Error error, int step) const;
 
   void parseVariableAndStore(double d);
+  void parseInput(const TextLine &prefix = TextLine());
 
   void display(const QList<TextLine> &lines);
 
