@@ -3,7 +3,8 @@
 RunScreen::RunScreen() :
   EditorScreen(),
   _waitingMode(false),
-  _errorMode(false)
+  _errorMode(false),
+  _lastResult(0.0)
 {
   connect(&_interpreter, SIGNAL(displayLine()), this, SLOT(interpreterDisplayLine()), Qt::QueuedConnection);
   connect(&_interpreter, SIGNAL(finished()), this, SLOT(interpreterFinished()));
@@ -18,23 +19,42 @@ void RunScreen::buttonClicked(int button)
 
   if (entity >= 0 && _waitingMode && !_errorMode)
   {
-    _lines << TextLine();
     setWaitingMode(false);
-    moveCursor(_editZoneTopLineIndex, 0);
+
+    TextLine textLine;
+    // Use <_lastResult> with some operator
+    if (isOperator(entity))
+    {
+      textLine << formatDouble(_lastResult);
+    }
+    _lines << textLine;
+
+    moveCursor(_editZoneTopLineIndex, textLine.count());
+  }
+
+  if (entity >= 0) // Printable entity
+  {
+    // Remove the resume mode
+    if (CalculatorState::instance().screenMode() != ScreenMode_Normal)
+    {
+      CalculatorState::instance().setScreenMode(ScreenMode_Normal);
+
+      // If there was something in lines, pass a new line
+      if (_lines.count())
+      {
+        _lines << TextLine();
+        _editZoneTopLineIndex = _lines.count() - 1;
+        moveCursor(_editZoneTopLineIndex, 0);
+        feedScreen();
+        emit screenChanged();
+      }
+
+      restartBlink();
+    }
   }
 
   if (!_errorMode)
     EditorScreen::buttonClicked(button);
-
-  if (entity >= 0) // Printable entity
-  {
-    // Wake up the cursor if needed
-    if (CalculatorState::instance().screenMode() != ScreenMode_Normal)
-    {
-      CalculatorState::instance().setScreenMode(ScreenMode_Normal);
-      restartBlink();
-    }
-  }
 
   switch (button)
   {
@@ -157,7 +177,8 @@ void RunScreen::interpreterFinished()
   {
     _errorMode = true;
     getLineAndStep(_lastProgram, _interpreter.errorStep(), _lastErrorLine, _lastErrorStep);
-  }
+  } else
+    _lastResult = _interpreter.lastResult();
 
   // Move the cursor for the waiting mode
   moveCursor(_lines.count() - 1, 0);
@@ -174,4 +195,5 @@ void RunScreen::resetScreen()
   clearLines();
   _waitingMode = false;
   _errorMode = false;
+  setCursorVisible(true);
 }

@@ -8,6 +8,8 @@ Interpreter::Interpreter(const QList<TextLine> &program) :
   _currentOffset(0),
   _error(false),
   _errorStep(0),
+  _lastResult(0.0),
+  _lastResultExists(true),
   _waitForInput(false)
 {
   setProgram(program);
@@ -30,12 +32,10 @@ void Interpreter::run()
 void Interpreter::execute() throw (InterpreterException)
 {
   int entity;
-  double lastResult = 0.0;
-  bool lastResultExists = false;
   while ((entity = currentEntity()) != -1)
   {
     msleep(10);
-    lastResultExists = false;
+    _lastResultExists = true;
     switch (entity)
     {
     case LCDChar_DoubleQuote: // A string instruction?
@@ -47,6 +47,7 @@ void Interpreter::execute() throw (InterpreterException)
         emit displayLine();
         if (eatEntity(LCDChar_Question))
           parseInput();
+        _lastResultExists = false;
       }
       break;
     case LCDChar_Question: // An input affectation?
@@ -63,8 +64,7 @@ void Interpreter::execute() throw (InterpreterException)
 
         int offset = 0;
         double d = _expressionSolver.solve(_input, offset);
-        lastResultExists = true;
-        lastResult = d;
+        _lastResult = d;
 
         // Compute the destination
         parseVariableAndStore(d);
@@ -72,22 +72,19 @@ void Interpreter::execute() throw (InterpreterException)
       break;
     case LCDOp_Lbl: parseLabel(); break;
     case LCDOp_Goto: parseGoto(); break;
-    case LCDOp_Deg: CalculatorState::instance().setAngleMode(Deg); readEntity(); break;
-    case LCDOp_Rad: CalculatorState::instance().setAngleMode(Rad); readEntity(); break;
-    case LCDOp_Gra: CalculatorState::instance().setAngleMode(Grad); readEntity(); break;
+    case LCDOp_Deg: case LCDOp_Rad: case LCDOp_Gra: changeAngleMode(entity); break;
     default:
       if (ExpressionSolver::isExpressionStartEntity(entity))
       {
         double d = _expressionSolver.solve(_program, _currentOffset);
-        lastResultExists = true;
-        lastResult = d;
+        _lastResult = d;
         if (eatEntity(LCDChar_Arrow)) // Affectation?
           parseVariableAndStore(d);
         else if (isComparisonOperator(currentEntity()))
         {
           int comp = readEntity();
           double d2 = _expressionSolver.solve(_program, _currentOffset);
-          lastResult = d2;
+          _lastResult = d2;
 
           // "=>" is expected
           if (!eatEntity(LCDChar_DoubleArrow))
@@ -112,9 +109,9 @@ void Interpreter::execute() throw (InterpreterException)
   }
 
   // Display the stack value?
-  if (lastResultExists)
+  if (_lastResultExists)
   {
-    TextLine textLine = formatDouble(lastResult);
+    TextLine textLine = formatDouble(_lastResult);
     textLine.setRightJustified(true);
     storeDisplayLine(textLine);
     emit displayLine();
@@ -325,4 +322,16 @@ void Interpreter::parseVariableAndStore(double d)
   // Stock it
   if (!Memory::instance().setVariable((LCDChar) varPrefix, index, d))
     throw InterpreterException(Error_Memory, _currentOffset);
+}
+
+void Interpreter::changeAngleMode(int entity)
+{
+  switch (entity)
+  {
+  case LCDOp_Deg: CalculatorState::instance().setAngleMode(Deg); break;
+  case LCDOp_Rad: CalculatorState::instance().setAngleMode(Rad); break;
+  case LCDOp_Gra: CalculatorState::instance().setAngleMode(Grad); break;
+  default:;
+  }
+  readEntity();
 }

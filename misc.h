@@ -332,7 +332,7 @@ public:
   void setScreenMode(ScreenMode value);
 
   SysMode sysMode() const { return _sysMode; }
-  void setSysMode(SysMode value);
+  void setSysMode(SysMode value, bool forceAffectation = false);
 
   AngleMode angleMode() const { return _angleMode; }
   void setAngleMode(AngleMode value) { _angleMode = value; }

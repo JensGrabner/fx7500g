@@ -20,6 +20,7 @@ private:
   int _lastErrorStep;
   QTimer _timerDisplay;
   Interpreter _interpreter;
+  double _lastResult;
 
   void validate();
   void displayLastProgram(bool cursorOnTop = false); // Empty <_lines> and paste <_lastProgram> inside
