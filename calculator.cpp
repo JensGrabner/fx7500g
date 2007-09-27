@@ -21,7 +21,7 @@ Calculator::Calculator() :
   connect(&_progEditScreen, SIGNAL(changeChar(int, int, LCDChar)),
           this, SLOT(editorChangeChar(int, int, LCDChar)));
   connect(&_progEditScreen, SIGNAL(screenChanged()),
-          this, SLOT(editorScreenChanged()));
+          this, SLOT(progEditScreenChanged()));
 
   // Connect to <_calcState>
   connect(&CalculatorState::instance(), SIGNAL(screenModeChanged(ScreenMode)),
@@ -46,7 +46,8 @@ void Calculator::progChangeChar(int col, int line, LCDChar c)
 
 void Calculator::runScreenChanged()
 {
-  _lcdDisplay->drawScreen(_runScreen.currentScreen());
+  if (CalculatorState::instance().sysMode() == SysMode_RUN)
+    _lcdDisplay->drawScreen(_runScreen.currentScreen());
 }
 
 QList<LCDString> Calculator::getResumeScreen() const
@@ -221,9 +222,10 @@ void Calculator::progEditProgram(int programIndex)
   CalculatorState::instance().setScreenMode(ScreenMode_Editor);
 }
 
-void Calculator::editorScreenChanged()
+void Calculator::progEditScreenChanged()
 {
-  _lcdDisplay->drawScreen(_progEditScreen.currentScreen());
+  if (CalculatorState::instance().sysMode() == SysMode_WRT)
+    _lcdDisplay->drawScreen(_progEditScreen.currentScreen());
 }
 
 void Calculator::buttonClicked(int buttonIndex)
@@ -298,7 +300,9 @@ void Calculator::buttonClicked(int buttonIndex)
 
 void Calculator::progScreenChanged()
 {
-  _lcdDisplay->drawScreen(_progScreen.currentScreen());
+  if (CalculatorState::instance().sysMode() == SysMode_WRT ||
+      CalculatorState::instance().sysMode() == SysMode_PCL)
+    _lcdDisplay->drawScreen(_progScreen.currentScreen());
 }
 
 void Calculator::screenModeChanged(ScreenMode)
