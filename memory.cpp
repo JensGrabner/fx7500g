@@ -42,19 +42,14 @@ Memory::Memory() :
     QList<TextLine> steps;
     if (i == 0)
     {
-      steps << TextLine("SALUT LES COPAIN");
       TextLine textLine;
-      textLine << (int) LCDOp_Log << (int) LCDChar_LessEqual;
+      textLine << LCDChar_DoubleQuote << LCDChar_Z << LCDChar_0 <<
+        LCDChar_Equal << LCDChar_DoubleQuote << LCDChar_Question << LCDChar_Arrow << LCDChar_Y << LCDChar_Colon;
       steps << textLine;
-      for (int i = 0; i < 5; ++i)
-      {
-        TextLine textLine1;
-        textLine1 << (int) LCDOp_Log << (int) LCDChar_LessEqual;
-        steps << textLine1;
-        TextLine textLine2;
-        textLine2 << (int) LCDOp_Ln << (int) LCDOp_Ln << (int) LCDOp_Ln << (int) LCDChar_LessEqual;
-        steps << textLine2;
-      }
+      textLine.clear();
+      textLine << LCDChar_DoubleQuote << LCDChar_Z << LCDChar_1 <<
+        LCDChar_Equal << LCDChar_DoubleQuote << LCDChar_Question << LCDChar_Arrow << LCDChar_Z << LCDChar_Colon;
+      steps << textLine;
     }
     program.setSteps(steps);
 
