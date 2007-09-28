@@ -23,7 +23,9 @@ public:
   TextLine getNextDisplayLine();
 
   bool waitForInput() const { return _waitForInput; }
+  bool waitForValidation() const { return _waitForValidation; }
   void sendInput(const TextLine &value);
+  void sendValidation();
 
   bool error() const { return _error; }
   int errorStep() const { return _errorStep; }
@@ -32,10 +34,22 @@ public:
 
 signals:
   void displayLine();
+  void askForValidation();
 
 private:
+  class ProgramIndex // Search for a better name
+  {
+  public:
+    ProgramIndex() {}
+    ProgramIndex(int p, int s) : program(p), step(s) {}
+
+    int program; // 0 -> 9
+    int step;
+  };
+
   QQueue<TextLine> _displayLines;
   TextLine _program;
+  int _currentProgramIndex; // -1 => use _program, else use Memory::instance()
   int _currentOffset;
   QMutex _displayLineMutex;
   ExpressionSolver _expressionSolver;
@@ -45,19 +59,21 @@ private:
   bool _lastResultExists;
   TextLine _input;
   bool _waitForInput;
+  bool _waitForValidation;
   QMutex _inputMutex;
   QWaitCondition _inputWaitCondition;
+  QStack<ProgramIndex> _callStack;
 
   void execute() throw (InterpreterException);
 
-  int currentEntity();
+  int currentEntity() const;
   int readEntity(); // Returns -1 if it the end of file
   bool eatEntity(int entity); // Returns true if entity is eaten
   int readAlpha() throw (InterpreterException); // Returns an alpha
+  int indexOfEntity(int entity, int from) const;
+  int entityAt(int index) const;
+  const TextLine &program() const;
 
-  TextLine parseString();
-  void parseLabel();
-  void parseGoto();
   // Returns true if (d1 comp d2) is true
   bool computeBoolean(int comp, double d1, double d2);
   void moveOffsetToNextInstruction();
@@ -66,6 +82,10 @@ private:
 
   QList<TextLine> errorLines(Error error, int step) const;
 
+  TextLine parseString();
+  void parseLabel();
+  void parseGoto();
+  bool parseProg();
   void parseVariableAndStore(double d);
   void parseInput(const TextLine &prefix = TextLine());
 

@@ -21,6 +21,7 @@ private:
   QTimer _timerDisplay;
   Interpreter _interpreter;
   double _lastResult;
+  bool _replaceLastLine;
 
   void validate();
   void displayLastProgram(bool cursorOnTop = false); // Empty <_lines> and paste <_lastProgram> inside
@@ -34,6 +35,7 @@ private slots:
   void interpreterDisplayLine();
   void timerDisplayTimeout();
   void interpreterFinished();
+  void interpreterAskForValidation();
 };
 
 #endif

@@ -4,10 +4,12 @@ RunScreen::RunScreen() :
   EditorScreen(),
   _waitingMode(false),
   _errorMode(false),
-  _lastResult(0.0)
+  _lastResult(0.0),
+  _replaceLastLine(false)
 {
   connect(&_interpreter, SIGNAL(displayLine()), this, SLOT(interpreterDisplayLine()), Qt::QueuedConnection);
   connect(&_interpreter, SIGNAL(finished()), this, SLOT(interpreterFinished()));
+  connect(&_interpreter, SIGNAL(askForValidation()), this, SLOT(interpreterAskForValidation()));
 
   _timerDisplay.setInterval(10);
   connect(&_timerDisplay, SIGNAL(timeout()), this, SLOT(timerDisplayTimeout()));
@@ -16,6 +18,16 @@ RunScreen::RunScreen() :
 void RunScreen::buttonClicked(int button)
 {
   int entity = CalculatorState::instance().printableEntityByButton(button);
+
+  if (_interpreter.isRunning() && !_interpreter.waitForInput() && !_interpreter.waitForValidation())
+    return;
+
+  if (_interpreter.waitForValidation())
+  {
+    if (button == Button_Exe)
+      validate();
+    return;
+  }
 
   if (entity >= 0 && _waitingMode && !_errorMode)
   {
@@ -78,8 +90,11 @@ void RunScreen::buttonClicked(int button)
 
 void RunScreen::validate()
 {
+  setCursorVisible(false);
   if (_interpreter.waitForInput())
     _interpreter.sendInput(_lines[_lines.count() - 1]);
+  else if (_interpreter.waitForValidation())
+    _interpreter.sendValidation();
   else
   {
     QList<TextLine> result;
@@ -138,7 +153,14 @@ void RunScreen::setWaitingMode(bool value)
 
 void RunScreen::interpreterDisplayLine()
 {
-  _lines << _interpreter.getNextDisplayLine();
+  TextLine textLine = _interpreter.getNextDisplayLine();
+
+  if (_replaceLastLine)
+  {
+    _replaceLastLine = false;
+    _lines[_lines.count() - 1] = textLine;
+  } else
+    _lines << textLine;
 
   moveCursor(_lines.count() - 1, 0);
 
@@ -196,4 +218,18 @@ void RunScreen::resetScreen()
   _waitingMode = false;
   _errorMode = false;
   setCursorVisible(true);
+}
+
+void RunScreen::interpreterAskForValidation()
+{
+
+  TextLine textLine;
+  textLine << LCDChar_Substract << LCDChar_Space << LCDChar_D << LCDChar_i
+           << LCDChar_s << LCDChar_p << LCDChar_Space << LCDChar_Substract;
+  textLine.setRightJustified(true);
+  _lines << textLine;
+  feedScreen();
+  emit screenChanged();
+  _replaceLastLine = true;
+  moveCursor(_lines.count() - 1, 0); // To scroll
 }

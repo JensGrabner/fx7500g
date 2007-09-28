@@ -5,12 +5,14 @@
 #include "interpreter.h"
 
 Interpreter::Interpreter(const QList<TextLine> &program) :
+  _currentProgramIndex(-1),
   _currentOffset(0),
   _error(false),
   _errorStep(0),
   _lastResult(0.0),
   _lastResultExists(true),
-  _waitForInput(false)
+  _waitForInput(false),
+  _waitForValidation(false)
 {
   setProgram(program);
 }
@@ -57,17 +59,18 @@ void Interpreter::execute() throw (InterpreterException)
     case LCDOp_Lbl: parseLabel(); break;
     case LCDOp_Goto: parseGoto(); break;
     case LCDOp_Deg: case LCDOp_Rad: case LCDOp_Gra: changeAngleMode(entity); break;
+    case LCDOp_Prog: if (parseProg()) continue; else break;
     default:
       if (ExpressionSolver::isExpressionStartEntity(entity))
       {
-        double d = _expressionSolver.solve(_program, _currentOffset);
+        double d = _expressionSolver.solve(program(), _currentOffset);
         _lastResult = d;
         if (eatEntity(LCDChar_Arrow)) // Affectation?
           parseVariableAndStore(d);
         else if (isComparisonOperator(currentEntity()))
         {
           int comp = readEntity();
-          double d2 = _expressionSolver.solve(_program, _currentOffset);
+          double d2 = _expressionSolver.solve(program(), _currentOffset);
           _lastResult = d2;
 
           // "=>" is expected
@@ -87,8 +90,35 @@ void Interpreter::execute() throw (InterpreterException)
     }
     // Separator is mandatory
     if (isSeparator(currentEntity()) || currentEntity() == -1)
-      readEntity();
-    else
+    {
+      int sep = readEntity();
+
+      if (sep == LCDChar_RBTriangle)
+      {
+        if (_lastResultExists)
+        {
+          TextLine textLine = formatDouble(_lastResult);
+          textLine.setRightJustified(true);
+          storeDisplayLine(textLine);
+          emit displayLine();
+        }
+
+        // Wait for user data
+        _waitForValidation = true;
+        _inputMutex.lock();
+        emit askForValidation();
+        _inputWaitCondition.wait(&_inputMutex);
+        _inputMutex.unlock();
+      }
+
+      // Is there any program in callstack?
+      if (currentEntity() == -1 && _callStack.count())
+      {
+        ProgramIndex progIndex = _callStack.pop();
+        _currentProgramIndex = progIndex.program;
+        _currentOffset = progIndex.step;
+      }
+    } else
       throw InterpreterException(Error_Syntax, _currentOffset);
   }
 
@@ -104,18 +134,56 @@ void Interpreter::execute() throw (InterpreterException)
 
 int Interpreter::readEntity()
 {
+  if (_currentProgramIndex >= 0)
+  {
+    Program *program = Memory::instance().programAt(_currentProgramIndex);
+    if (_currentOffset >= program->count())
+      return -1;
+    else
+      return program->entityAt(_currentOffset++);
+  }
+
+  // Internal program
   if (_currentOffset >= _program.count())
     return -1;
 
   return _program[_currentOffset++];
 }
 
-int Interpreter::currentEntity()
+int Interpreter::currentEntity() const
 {
+  if (_currentProgramIndex >= 0)
+  {
+    Program *program = Memory::instance().programAt(_currentProgramIndex);
+    if (_currentOffset >= program->count())
+      return -1;
+    else
+      return program->entityAt(_currentOffset);
+  }
+
+  // Internal program
   if (_currentOffset >= _program.count())
     return -1;
 
   return _program[_currentOffset];
+}
+
+int Interpreter::entityAt(int index) const
+{
+  if (_currentProgramIndex >= 0)
+  {
+    Program *program = Memory::instance().programAt(_currentProgramIndex);
+    if (index >= program->count())
+      return -1;
+    else
+      return program->entityAt(index);
+  }
+
+  // Internal program
+  if (index < 0 || index >= _program.count())
+    return -1;
+
+  return _program[index];
 }
 
 bool Interpreter::eatEntity(int entity)
@@ -136,10 +204,27 @@ int Interpreter::readAlpha() throw(InterpreterException)
     throw InterpreterException(Error_Syntax, _currentOffset);
 }
 
+int Interpreter::indexOfEntity(int entity, int from) const
+{
+  if (_currentProgramIndex >= 0)
+    return Memory::instance().programAt(_currentProgramIndex)->indexOf(entity, from);
+  else
+    return _program.indexOf(entity, from);
+}
+
+const TextLine &Interpreter::program() const
+{
+  if (_currentProgramIndex >= 0)
+    return Memory::instance().programAt(_currentProgramIndex)->rawSteps();
+  else
+    return _program;
+}
+
 void Interpreter::setProgram(const QList<TextLine> &program)
 {
   _program.affect(program);
   _currentOffset = 0;
+  _callStack.clear();
 }
 
 TextLine Interpreter::parseString()
@@ -211,11 +296,11 @@ void Interpreter::parseGoto()
     throw InterpreterException(Error_Argument, _currentOffset);
 
   int p = 0;
-  while ((p = _program.indexOf(LCDOp_Lbl, p)) >= 0)
+  while ((p = indexOfEntity(LCDOp_Lbl, p)) >= 0)
   {
-    if (p < _program.count() - 1 && _program[p + 1] == cipher &&
-        (p == 0 || isSeparator(_program[p - 1])) &&
-        (p + 1 >= _program.count() - 1 || isSeparator(_program[p + 2])))
+    if (entityAt(p + 1) == cipher &&
+        (p == 0 || isSeparator(entityAt(p - 1))) &&
+        (entityAt(p + 1) == -1 || isSeparator(entityAt(p + 2))))
     {
       _currentOffset = p + 2;
       return;
@@ -249,6 +334,15 @@ void Interpreter::sendInput(const TextLine &value)
 
   _input = value;
   _waitForInput = false;
+  _inputWaitCondition.wakeAll();
+}
+
+void Interpreter::sendValidation()
+{
+  if (!_waitForValidation)
+    return;
+
+  _waitForValidation = false;
   _inputWaitCondition.wakeAll();
 }
 
@@ -287,7 +381,7 @@ void Interpreter::parseVariableAndStore(double d)
   int index = 0;
   if (eatEntity(LCDChar_OpenBracket)) // Array var
   {
-    index = (int) _expressionSolver.solve(_program, _currentOffset);
+    index = (int) _expressionSolver.solve(program(), _currentOffset);
     if (!eatEntity(LCDChar_CloseBracket))
       throw InterpreterException(Error_Syntax, _currentOffset);
   }
@@ -336,4 +430,25 @@ void Interpreter::parseInput(const TextLine &prefix)
 
   // Compute the destination
   parseVariableAndStore(d);
+}
+
+bool Interpreter::parseProg()
+{
+  readEntity(); // Pass the "prog "
+  if (!isCipher(currentEntity()))
+    throw InterpreterException(Error_Argument, _currentOffset);
+  int cipher = readEntity(); // Pass the cipher
+  if (!isSeparator(currentEntity()) && currentEntity() != -1)
+    throw InterpreterException(Error_Argument, _currentOffset);
+
+  // Change the program
+  Program *program = Memory::instance().programAt(cipher);
+  if (program->count())
+  {
+    _callStack.push(ProgramIndex(_currentProgramIndex, _currentOffset));
+    _currentProgramIndex = cipher;
+    _currentOffset = 0;
+    return true;
+  }
+  return false;
 }

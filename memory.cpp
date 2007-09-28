@@ -2,17 +2,30 @@
 
 int Program::size() const
 {
-  return _steps.count();
+  return _rawSteps.count();
 }
 
-void Program::setSteps(QList<TextLine> value)
+void Program::setSteps(const QList<TextLine> &value)
 {
   _steps = value;
+  _rawSteps.affect(value);
 }
 
 void Program::clear()
 {
   _steps.clear();
+}
+
+int Program::entityAt(int step)
+{
+  if (step < 0 || step >= _rawSteps.count())
+    return -1;
+  return _rawSteps[step];
+}
+
+int Program::indexOf(int entity, int from)
+{
+  return _rawSteps.indexOf(entity, from);
 }
 
 /////////////////////////////////////////////
@@ -35,33 +48,37 @@ Memory::Memory() :
 {
   clearVariables();
 
-  // Fill with empty programs
-  for (int i = 0; i < programsCount; ++i)
-  {
-    Program program;
-    QList<TextLine> steps;
-    if (i == 0)
-    {
-      TextLine textLine;
-      textLine << LCDChar_DoubleQuote << LCDChar_Z << LCDChar_0 <<
-        LCDChar_Equal << LCDChar_DoubleQuote << LCDChar_Question << LCDChar_Arrow << LCDChar_Y << LCDChar_Colon;
-      steps << textLine;
-      textLine.clear();
-      textLine << LCDChar_DoubleQuote << LCDChar_Z << LCDChar_1 <<
-        LCDChar_Equal << LCDChar_DoubleQuote << LCDChar_Question << LCDChar_Arrow << LCDChar_Z << LCDChar_Colon;
-      steps << textLine;
-    }
-    program.setSteps(steps);
+  QList<TextLine> steps;
+  steps << (TextLine() << LCDChar_DoubleQuote << LCDChar_Z << LCDChar_0 <<
+    LCDChar_Equal << LCDChar_DoubleQuote << LCDChar_Question << LCDChar_Arrow << LCDChar_Y);
+  steps << (TextLine() << LCDChar_DoubleQuote << LCDChar_Z << LCDChar_1 <<
+    LCDChar_Equal << LCDChar_DoubleQuote << LCDChar_Question << LCDChar_Arrow << LCDChar_Z);
+  steps << (TextLine() << LCDChar_SquareRoot << LCDChar_OpenParen << LCDChar_1 <<
+    LCDChar_Substract << LCDChar_Z << LCDChar_Divide << LCDChar_Y << LCDChar_CloseParen << LCDChar_Arrow <<
+    LCDChar_A);
+  steps << (TextLine() << LCDChar_Y << LCDChar_Multiply << LCDChar_A << LCDChar_Arrow << LCDChar_R <<
+    LCDChar_Colon << LCDChar_Z << LCDChar_Divide << LCDChar_A << LCDChar_Arrow << LCDChar_S << LCDChar_Colon <<
+    LCDChar_Y << LCDChar_Divide << LCDChar_Z << LCDChar_Arrow << LCDChar_B << LCDChar_Colon << LCDChar_2 <<
+    LCDChar_0 << LCDChar_Multiply << LCDOp_Log << LCDChar_OpenParen << LCDChar_SquareRoot << LCDChar_B <<
+    LCDChar_Add << LCDChar_SquareRoot << LCDChar_OpenParen << LCDChar_B << LCDChar_Substract << LCDChar_1 <<
+    LCDChar_CloseParen << LCDChar_CloseParen << LCDChar_Arrow << LCDChar_T);
+  steps << (TextLine() << LCDChar_DoubleQuote << LCDChar_R << LCDChar_1 << LCDChar_Equal << LCDChar_DoubleQuote <<
+    LCDChar_RBTriangle);
+  steps << (TextLine() << LCDChar_R << LCDChar_RBTriangle);
+  steps << (TextLine() << LCDChar_DoubleQuote << LCDChar_R << LCDChar_2 << LCDChar_Equal << LCDChar_DoubleQuote <<
+    LCDChar_RBTriangle);
+  steps << (TextLine() << LCDChar_S << LCDChar_RBTriangle);
+  steps << (TextLine() << LCDChar_DoubleQuote << LCDChar_L << LCDChar_M << LCDChar_I << LCDChar_N << LCDChar_Equal <<
+    LCDChar_DoubleQuote << LCDChar_Colon << LCDChar_T);
 
-    _programs.insert(i, program);
-  }
+  _programs[0].setSteps(steps);
 }
 
-Program &Memory::programAt(int index)
+Program *Memory::programAt(int index)
 {
-  Q_ASSERT_X(index >= 0 && index < programsCount, "Memory::at()", qPrintable(QString("Invalid <index> (%1)!").arg(index)));
+  Q_ASSERT_X(index >= 0 && index < programsCount, "Memory::programAt()", qPrintable(QString("Invalid <index> (%1)!").arg(index)));
 
-  return _programs[index];
+  return &_programs[index];
 }
 
 int Memory::freeSteps() const
