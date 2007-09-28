@@ -10,15 +10,23 @@ class Program
 public:
   bool isEmpty() const { return !_steps.count(); }
 
-  QList<TextLine> &steps() { return _steps; }
-  void setSteps(QList<TextLine> value);
+  const QList<TextLine> &steps() const { return _steps; } // Used for screens but not for interpretation
+  void setSteps(const QList<TextLine> &value);
 
-  int size() const;
+  // This function used <_rawSteps> and is used for interpretation
+  // Returns -1 if step is out of bounds
+  int entityAt(int step);
+  int indexOf(int entity, int from);
+  const TextLine &rawSteps() const { return _rawSteps; }
+
+  int size() const; // In steps
+  int count() const { return size(); } // Like size
 
   void clear();
 
 private:
   QList<TextLine> _steps;
+  TextLine _rawSteps;
 };
 
 class Memory
@@ -28,7 +36,7 @@ public:
 
   static Memory &instance();
 
-  Program &programAt(int index);
+  Program *programAt(int index);
 
   void clearVariables();
   void clearProgram(int programIndex = -1);
@@ -47,7 +55,8 @@ private:
   static const int _freeStepsMax = 4006;
 
   static Memory *_instance;
-  QMap<int,Program> _programs;
+  Program _programs[10];
+//  QMap<int,Program> _programs;
   int _extraVarCount;
   double _variables[526]; // Memory
   int _freeSteps;

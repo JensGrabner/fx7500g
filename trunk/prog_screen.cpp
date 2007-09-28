@@ -55,7 +55,7 @@ void ProgScreen::feedScreen()
   QString str = " Prog 0123456789";
 
   for (int i = 0; i < memory.programsCount; ++i)
-    if (!memory.programAt(i).isEmpty())
+    if (!memory.programAt(i)->isEmpty())
       str[6 + i] = '_';
   assignToScreen(LCDString(str), 0, 7);
 }

@@ -126,7 +126,14 @@ void ExpressionSolver::performOperation(int entity) throw (InterpreterException)
       break;
     }
   // Prefixed functions
-  case LCDChar_SquareRoot: _numberStack.push(sqrt(_numberStack.pop())); break;
+  case LCDChar_SquareRoot:
+    {
+      double d = _numberStack.pop();
+      if (d < 0.0)
+        throw InterpreterException(Error_Math, _currentToken.offset());
+      _numberStack.push(sqrt(d));
+    }
+    break;
   case LCDOp_CubeSquareRoot: _numberStack.push(cbrt(_numberStack.pop())); break;
   case LCDOp_Log: _numberStack.push(log10(_numberStack.pop())); break;
   case LCDChar_Ten: _numberStack.push(pow(10.0, _numberStack.pop())); break;

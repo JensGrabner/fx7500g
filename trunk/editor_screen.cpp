@@ -20,9 +20,8 @@ void EditorScreen::init()
 void EditorScreen::setProgram(int programIndex)
 {
   _lines.clear();
-  Program &program = Memory::instance().programAt(programIndex);
 
-  _lines = program.steps();
+  _lines = Memory::instance().programAt(programIndex)->steps();
   _editZoneTopLineIndex = 0;
   _topLineIndex = 0;
   _topLineSubIndex = 0;
