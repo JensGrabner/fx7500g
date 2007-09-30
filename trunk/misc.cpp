@@ -118,13 +118,17 @@ int idToEntity(const QString &id)
   else if (!id.compare("triangle", Qt::CaseInsensitive) ||
            !id.compare("rbtriangle", Qt::CaseInsensitive))
     return LCDChar_RBTriangle;
-  else if (!id.compare("doublearrow", Qt::CaseInsensitive))
+  else if (!id.compare("doublearrow", Qt::CaseInsensitive) ||
+           !id.compare("=>", Qt::CaseInsensitive))
     return LCDChar_DoubleArrow;
-  else if (!id.compare("different", Qt::CaseInsensitive))
+  else if (!id.compare("different", Qt::CaseInsensitive) ||
+           !id.compare("/=", Qt::CaseInsensitive))
     return LCDChar_Different;
-  else if (!id.compare("greaterequal", Qt::CaseInsensitive))
+  else if (!id.compare("greaterequal", Qt::CaseInsensitive) ||
+           !id.compare(">=", Qt::CaseInsensitive))
     return LCDChar_GreaterEqual;
-  else if (!id.compare("lessequal", Qt::CaseInsensitive))
+  else if (!id.compare("lessequal", Qt::CaseInsensitive) ||
+           !id.compare("<=", Qt::CaseInsensitive))
     return LCDChar_LessEqual;
   else if (!id.compare("pi", Qt::CaseInsensitive))
     return LCDChar_Pi;

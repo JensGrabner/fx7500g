@@ -60,6 +60,34 @@ Memory::Memory() :
   steps << TextLine("\"LMIN=\":T");
 
   _programs[0].setSteps(steps);
+
+  steps.clear();
+  steps << TextLine("{lbl}1:\"D{->}Y:1,Y{->}D:2\"?{->}N");
+  steps << TextLine("N=2{=>}{goto}2:N{/=}1{=>}{goto}1");
+  steps << TextLine("\"R1=\"?{->}A");
+  steps << TextLine("\"R2=\"?{->}B");
+  steps << TextLine("\"R3=\"?{->}C");
+  steps << TextLine("A+B+C{->}D");
+  steps << TextLine("\"R4=\"{triangle}");
+  steps << TextLine("A{mul}B/D{triangle}");
+  steps << TextLine("\"R5=\"{triangle}");
+  steps << TextLine("B{mul}C/D{triangle}");
+  steps << TextLine("\"R6=\"{triangle}");
+  steps << TextLine("A{mul}C/D{triangle}");
+  steps << TextLine("{goto}1");
+  steps << TextLine("{lbl}2");
+  steps << TextLine("\"R4=\"?{->}E");
+  steps << TextLine("\"R5=\"?{->}F");
+  steps << TextLine("\"R6=\"?{->}G");
+  steps << TextLine("E{mul}F+F{mul}G+G{mul}E{->}H");
+  steps << TextLine("\"R1=\"{triangle}");
+  steps << TextLine("H/F{triangle}");
+  steps << TextLine("\"R2=\"{triangle}");
+  steps << TextLine("H/G{triangle}");
+  steps << TextLine("\"R3=\"{triangle}");
+  steps << TextLine("H/E{triangle}");
+  steps << TextLine("{goto}1");
+  _programs[1].setSteps(steps);
 }
 
 Program *Memory::programAt(int index)
