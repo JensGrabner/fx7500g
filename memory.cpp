@@ -49,27 +49,15 @@ Memory::Memory() :
   clearVariables();
 
   QList<TextLine> steps;
-  steps << (TextLine() << LCDChar_DoubleQuote << LCDChar_Z << LCDChar_0 <<
-    LCDChar_Equal << LCDChar_DoubleQuote << LCDChar_Question << LCDChar_Arrow << LCDChar_Y);
-  steps << (TextLine() << LCDChar_DoubleQuote << LCDChar_Z << LCDChar_1 <<
-    LCDChar_Equal << LCDChar_DoubleQuote << LCDChar_Question << LCDChar_Arrow << LCDChar_Z);
-  steps << (TextLine() << LCDChar_SquareRoot << LCDChar_OpenParen << LCDChar_1 <<
-    LCDChar_Substract << LCDChar_Z << LCDChar_Divide << LCDChar_Y << LCDChar_CloseParen << LCDChar_Arrow <<
-    LCDChar_A);
-  steps << (TextLine() << LCDChar_Y << LCDChar_Multiply << LCDChar_A << LCDChar_Arrow << LCDChar_R <<
-    LCDChar_Colon << LCDChar_Z << LCDChar_Divide << LCDChar_A << LCDChar_Arrow << LCDChar_S << LCDChar_Colon <<
-    LCDChar_Y << LCDChar_Divide << LCDChar_Z << LCDChar_Arrow << LCDChar_B << LCDChar_Colon << LCDChar_2 <<
-    LCDChar_0 << LCDChar_Multiply << LCDOp_Log << LCDChar_OpenParen << LCDChar_SquareRoot << LCDChar_B <<
-    LCDChar_Add << LCDChar_SquareRoot << LCDChar_OpenParen << LCDChar_B << LCDChar_Substract << LCDChar_1 <<
-    LCDChar_CloseParen << LCDChar_CloseParen << LCDChar_Arrow << LCDChar_T);
-  steps << (TextLine() << LCDChar_DoubleQuote << LCDChar_R << LCDChar_1 << LCDChar_Equal << LCDChar_DoubleQuote <<
-    LCDChar_RBTriangle);
-  steps << (TextLine() << LCDChar_R << LCDChar_RBTriangle);
-  steps << (TextLine() << LCDChar_DoubleQuote << LCDChar_R << LCDChar_2 << LCDChar_Equal << LCDChar_DoubleQuote <<
-    LCDChar_RBTriangle);
-  steps << (TextLine() << LCDChar_S << LCDChar_RBTriangle);
-  steps << (TextLine() << LCDChar_DoubleQuote << LCDChar_L << LCDChar_M << LCDChar_I << LCDChar_N << LCDChar_Equal <<
-    LCDChar_DoubleQuote << LCDChar_Colon << LCDChar_T);
+  steps << TextLine("\"Z0=\"?{->}Y");
+  steps << TextLine("\"Z1=\"?{->}Z");
+  steps << TextLine("{root}(1-Z/Y){->}A");
+  steps << TextLine("Y{mul}A{->}R:Z/A{->}S:Y/Z{->}B:20{mul}{log}({root}B+{root}(B-1)){->}T");
+  steps << TextLine("\"R1=\"{triangle}");
+  steps << TextLine("R{triangle}");
+  steps << TextLine("\"R2=\"{triangle}");
+  steps << TextLine("S{triangle}");
+  steps << TextLine("\"LMIN=\":T");
 
   _programs[0].setSteps(steps);
 }
