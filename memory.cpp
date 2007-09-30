@@ -88,6 +88,18 @@ Memory::Memory() :
   steps << TextLine("H/E{triangle}");
   steps << TextLine("{goto}1");
   _programs[1].setSteps(steps);
+
+  steps.clear();
+  steps << TextLine("{lbl}1:\"A\"?{->}A:\"B\"?{->}B");
+  steps << TextLine("{abs}A{->}A:{abs}B{->}B");
+  steps << TextLine("B<A{=>}{goto}2");
+  steps << TextLine("A{->}C:B{->}A:C{->}B");
+  steps << TextLine("{lbl}2:{-}({int}(A/B){mul}B-A){->}C");
+  steps << TextLine("C=0{=>}{goto}3");
+  steps << TextLine("B{->}A:C{->}B:{goto}2");
+  steps << TextLine("{lbl}3:B{triangle}");
+  steps << TextLine("{goto}1");
+  _programs[2].setSteps(steps);
 }
 
 Program *Memory::programAt(int index)

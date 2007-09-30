@@ -113,7 +113,8 @@ int idToEntity(const QString &id)
   else if (!id.compare("arrow", Qt::CaseInsensitive) ||
            !id.compare("->"))
     return LCDChar_Arrow;
-  else if (!id.compare("MinusPrefix", Qt::CaseInsensitive))
+  else if (!id.compare("MinusPrefix", Qt::CaseInsensitive) ||
+           !id.compare("-"))
     return LCDChar_MinusPrefix;
   else if (!id.compare("triangle", Qt::CaseInsensitive) ||
            !id.compare("rbtriangle", Qt::CaseInsensitive))
