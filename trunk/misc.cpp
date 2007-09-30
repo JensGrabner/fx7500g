@@ -94,6 +94,159 @@ LCDChar charToLCDChar(const QChar &c, bool *found)
   }
 }
 
+int idToEntity(const QString &id)
+{
+  if (!id.compare("root", Qt::CaseInsensitive))
+    return LCDChar_SquareRoot;
+  else if (!id.compare("mul", Qt::CaseInsensitive))
+    return LCDChar_Multiply;
+  else if (!id.compare("square", Qt::CaseInsensitive))
+    return LCDChar_Square;
+  else if (!id.compare("minusoneup", Qt::CaseInsensitive))
+    return LCDChar_MinusOneUp;
+  else if (!id.compare("degree", Qt::CaseInsensitive))
+    return LCDChar_Degree;
+  else if (!id.compare("ten", Qt::CaseInsensitive))
+    return LCDChar_Ten;
+  else if (!id.compare("euler", Qt::CaseInsensitive))
+    return LCDChar_Euler;
+  else if (!id.compare("arrow", Qt::CaseInsensitive) ||
+           !id.compare("->"))
+    return LCDChar_Arrow;
+  else if (!id.compare("MinusPrefix", Qt::CaseInsensitive))
+    return LCDChar_MinusPrefix;
+  else if (!id.compare("triangle", Qt::CaseInsensitive) ||
+           !id.compare("rbtriangle", Qt::CaseInsensitive))
+    return LCDChar_RBTriangle;
+  else if (!id.compare("doublearrow", Qt::CaseInsensitive))
+    return LCDChar_DoubleArrow;
+  else if (!id.compare("different", Qt::CaseInsensitive))
+    return LCDChar_Different;
+  else if (!id.compare("greaterequal", Qt::CaseInsensitive))
+    return LCDChar_GreaterEqual;
+  else if (!id.compare("lessequal", Qt::CaseInsensitive))
+    return LCDChar_LessEqual;
+  else if (!id.compare("pi", Qt::CaseInsensitive))
+    return LCDChar_Pi;
+  else if (!id.compare("degsuffix", Qt::CaseInsensitive))
+    return LCDChar_DegSuffix;
+  else if (!id.compare("radsuffix", Qt::CaseInsensitive))
+    return LCDChar_RadSuffix;
+  else if (!id.compare("gradsuffix", Qt::CaseInsensitive))
+    return LCDChar_GradSuffix;
+  else if (!id.compare("int", Qt::CaseInsensitive))
+    return LCDOp_Int;
+  else if (!id.compare("frac", Qt::CaseInsensitive))
+    return LCDOp_Frac;
+  else if (!id.compare("log", Qt::CaseInsensitive))
+    return LCDOp_Log;
+  else if (!id.compare("ln", Qt::CaseInsensitive))
+    return LCDOp_Ln;
+  else if (!id.compare("sin", Qt::CaseInsensitive))
+    return LCDOp_Sin;
+  else if (!id.compare("cos", Qt::CaseInsensitive))
+    return LCDOp_Cos;
+  else if (!id.compare("tan", Qt::CaseInsensitive))
+    return LCDOp_Tan;
+  else if (!id.compare("sinh", Qt::CaseInsensitive))
+    return LCDOp_Sinh;
+  else if (!id.compare("cosh", Qt::CaseInsensitive))
+    return LCDOp_Cosh;
+  else if (!id.compare("tanh", Qt::CaseInsensitive))
+    return LCDOp_Tanh;
+  else if (!id.compare("sin_1", Qt::CaseInsensitive))
+    return LCDOp_Sin;
+  else if (!id.compare("cos_1", Qt::CaseInsensitive))
+    return LCDOp_Cos;
+  else if (!id.compare("tan_1", Qt::CaseInsensitive))
+    return LCDOp_Tan;
+  else if (!id.compare("sinh_1", Qt::CaseInsensitive))
+    return LCDOp_Sinh;
+  else if (!id.compare("cosh_1", Qt::CaseInsensitive))
+    return LCDOp_Cosh;
+  else if (!id.compare("tanh_1", Qt::CaseInsensitive))
+    return LCDOp_Tanh;
+  else if (!id.compare("not", Qt::CaseInsensitive))
+    return LCDOp_Not;
+  else if (!id.compare("xor", Qt::CaseInsensitive))
+    return LCDOp_Xor;
+  else if (!id.compare("xy", Qt::CaseInsensitive))
+    return LCDOp_Xy;
+  else if (!id.compare("xroot", Qt::CaseInsensitive))
+    return LCDOp_xSquareRoot;
+  else if (!id.compare("Neg", Qt::CaseInsensitive))
+    return LCDOp_Neg;
+  else if (!id.compare("And", Qt::CaseInsensitive))
+    return LCDOp_And;
+  else if (!id.compare("Or", Qt::CaseInsensitive))
+    return LCDOp_Or;
+  else if (!id.compare("Abs", Qt::CaseInsensitive))
+    return LCDOp_Abs;
+  else if (!id.compare("cuberoot", Qt::CaseInsensitive))
+    return LCDOp_CubeSquareRoot;
+  else if (!id.compare("Ans", Qt::CaseInsensitive))
+    return LCDOp_Ans;
+  else if (!id.compare("Cls", Qt::CaseInsensitive))
+    return LCDOp_Cls;
+  else if (!id.compare("Prog", Qt::CaseInsensitive))
+    return LCDOp_Prog;
+  else if (!id.compare("Graph", Qt::CaseInsensitive))
+    return LCDOp_Graph;
+  else if (!id.compare("Range", Qt::CaseInsensitive))
+    return LCDOp_Range;
+  else if (!id.compare("Plot", Qt::CaseInsensitive))
+    return LCDOp_Plot;
+  else if (!id.compare("Factor", Qt::CaseInsensitive))
+    return LCDOp_Factor;
+  else if (!id.compare("Deg", Qt::CaseInsensitive))
+    return LCDOp_Deg;
+  else if (!id.compare("Rad", Qt::CaseInsensitive))
+    return LCDOp_Rad;
+  else if (!id.compare("Grad", Qt::CaseInsensitive) ||
+           !id.compare("Gra", Qt::CaseInsensitive))
+    return LCDOp_Gra;
+  else if (!id.compare("Fix", Qt::CaseInsensitive))
+    return LCDOp_Fix;
+  else if (!id.compare("Sci", Qt::CaseInsensitive))
+    return LCDOp_Sci;
+  else if (!id.compare("Norm", Qt::CaseInsensitive))
+    return LCDOp_Norm;
+  else if (!id.compare("Defm", Qt::CaseInsensitive))
+    return LCDOp_Defm;
+  else if (!id.compare("Rnd", Qt::CaseInsensitive))
+    return LCDOp_Rnd;
+  else if (!id.compare("RanSharp", Qt::CaseInsensitive))
+    return LCDOp_RanSharp;
+  else if (!id.compare("Line", Qt::CaseInsensitive))
+    return LCDOp_Line;
+  else if (!id.compare("Goto", Qt::CaseInsensitive))
+    return LCDOp_Goto;
+  else if (!id.compare("Lbl", Qt::CaseInsensitive))
+    return LCDOp_Lbl;
+  else if (!id.compare("Dsz", Qt::CaseInsensitive))
+    return LCDOp_Dsz;
+  else if (!id.compare("Isz", Qt::CaseInsensitive))
+    return LCDOp_Isz;
+  else if (!id.compare("Yon", Qt::CaseInsensitive))
+    return LCDOp_Yon;
+  else if (!id.compare("YonMinusOne", Qt::CaseInsensitive))
+    return LCDOp_YonMinusOne;
+  else if (!id.compare("Xon", Qt::CaseInsensitive))
+    return LCDOp_Xon;
+  else if (!id.compare("XonMinusOne", Qt::CaseInsensitive))
+    return LCDOp_XonMinusOne;
+  else if (!id.compare("Pol", Qt::CaseInsensitive))
+    return LCDOp_Pol;
+  else if (!id.compare("Rec", Qt::CaseInsensitive))
+    return LCDOp_Rec;
+  else if (!id.compare("Mcl", Qt::CaseInsensitive))
+    return LCDOp_Mcl;
+  else if (!id.compare("Scl", Qt::CaseInsensitive))
+    return LCDOp_Scl;
+  else
+    return -1;
+}
+
 QList<LCDChar> stringToChars(const QString &str)
 {
   QList<LCDChar> list;
@@ -167,9 +320,9 @@ bool isPostFunc(int entity)
   return entity == LCDChar_Square ||
          entity == LCDChar_MinusOneUp ||
          entity == LCDChar_Exclamation ||
-         entity == LCDChar_LittleO ||
-         entity == LCDChar_LittleR ||
-         entity == LCDChar_LittleG ||
+         entity == LCDChar_DegSuffix ||
+         entity == LCDChar_RadSuffix ||
+         entity == LCDChar_GradSuffix ||
          entity == LCDChar_Degree;
 }
 
@@ -678,17 +831,17 @@ int CalculatorState::printableEntityByButtonInPad1(int button) const
       case Button_Prog: return LCDOp_Prog;
       case Button_4:
         if (_keyMode == KeyMode_ShiftMode)
-          return LCDChar_LittleO;
+          return LCDChar_DegSuffix;
         else
           return LCDOp_Deg;
       case Button_5:
         if (_keyMode == KeyMode_ShiftMode)
-          return LCDChar_LittleR;
+          return LCDChar_RadSuffix;
         else
           return LCDOp_Rad;
       case Button_6:
         if (_keyMode == KeyMode_ShiftMode)
-          return LCDChar_LittleG;
+          return LCDChar_GradSuffix;
         else
           return LCDOp_Gra;
       case Button_Graph: return LCDOp_Graph;
@@ -834,9 +987,9 @@ int getEntityPriority(int entity)
   case LCDChar_Square:
   case LCDChar_MinusOneUp:
   case LCDChar_Exclamation:
-  case LCDChar_LittleO:
-  case LCDChar_LittleR:
-  case LCDChar_LittleG:
+  case LCDChar_DegSuffix:
+  case LCDChar_RadSuffix:
+  case LCDChar_GradSuffix:
   case LCDChar_Degree:
     return 2;
 
@@ -951,14 +1104,40 @@ void TextLine::assignString(const QString &str)
 {
   clear();
 
-  bool found;
+  int offset = 0;
+  while (offset < str.length())
+  {
+    if (str[offset] == '{') // Id?
+    {
+      offset++;
+      QString id;
+      while (offset < str.length() && str[offset] != '}')
+        id.append(str[offset++]);
+      if (offset < str.length()) // Id found
+      {
+        int entity = idToEntity(id);
+        offset++;
+        if (entity >= 0)
+          append(entity);
+      } else
+        break;
+    } else
+    {
+      bool found;
+      LCDChar lcdChar = charToLCDChar(str[offset++], &found);
+      if (found)
+        append(lcdChar);
+    }
+  }
+
+/*  bool found;
   LCDChar lcdChar;
   foreach (const QChar &c, str)
   {
     lcdChar = charToLCDChar(c, &found);
     if (found)
       append(lcdChar);
-  }
+  }*/
 }
 
 LCDChar TextLine::charAt(int offset) const

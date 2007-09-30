@@ -165,9 +165,9 @@ void ExpressionSolver::performOperation(int entity) throw (InterpreterException)
   case LCDChar_Square: { double n = _numberStack.pop(); _numberStack.push(n * n); } break;
   case LCDChar_MinusOneUp: _numberStack.push(1.0 / _numberStack.pop()); break;
   case LCDChar_Exclamation: _numberStack.push(factorial(_numberStack.pop())); break;
-  case LCDChar_LittleO: _numberStack.push(deg2native(_numberStack.pop())); break;
-  case LCDChar_LittleR: _numberStack.push(rad2native(_numberStack.pop())); break;
-  case LCDChar_LittleG: _numberStack.push(grad2native(_numberStack.pop())); break;
+  case LCDChar_DegSuffix: _numberStack.push(deg2native(_numberStack.pop())); break;
+  case LCDChar_RadSuffix: _numberStack.push(rad2native(_numberStack.pop())); break;
+  case LCDChar_GradSuffix: _numberStack.push(grad2native(_numberStack.pop())); break;
   case LCDChar_Degree: break;
   default:;
   }

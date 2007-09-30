@@ -128,9 +128,9 @@ enum LCDChar {
   LCDChar_InsertShiftCursor,
   LCDChar_MinusOne,  // -1
   LCDChar_Exponent,  // E
-  LCDChar_LittleO,   // Suffix for degree values
-  LCDChar_LittleR,   // Suffix for radian values
-  LCDChar_LittleG,   // Suffix for gradian values
+  LCDChar_DegSuffix,   // Suffix for degree values
+  LCDChar_RadSuffix,   // Suffix for radian values
+  LCDChar_GradSuffix,   // Suffix for gradian values
   LCDChar_Space,
   LCDChar_CR,        // Used to stock carriage return
   LCDChar_End = LCDChar_CR
@@ -138,6 +138,7 @@ enum LCDChar {
 
 LCDChar charToLCDChar(const QChar &c, bool *found = 0);
 QList<LCDChar> stringToChars(const QString &str);
+int idToEntity(const QString &id);
 
 // 'Log', 'Ln', all atomic entities
 enum LCDOperator
