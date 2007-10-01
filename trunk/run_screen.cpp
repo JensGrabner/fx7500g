@@ -4,8 +4,7 @@ RunScreen::RunScreen() :
   EditorScreen(),
   _waitingMode(false),
   _errorMode(false),
-  _lastResult(0.0),
-  _replaceLastLine(false)
+  _lastResult(0.0)
 {
   connect(&_interpreter, SIGNAL(displayLine()), this, SLOT(interpreterDisplayLine()), Qt::QueuedConnection);
   connect(&_interpreter, SIGNAL(finished()), this, SLOT(interpreterFinished()));
@@ -94,8 +93,13 @@ void RunScreen::validate()
   if (_interpreter.waitForInput())
     _interpreter.sendInput(_lines[_lines.count() - 1]);
   else if (_interpreter.waitForValidation())
+  {
+    // Remove "- Disp -"
+    _lines.removeLast();
+    feedScreen();
+    emit screenChanged();
     _interpreter.sendValidation();
-  else
+  } else
   {
     QList<TextLine> result;
 
@@ -155,12 +159,7 @@ void RunScreen::interpreterDisplayLine()
 {
   TextLine textLine = _interpreter.getNextDisplayLine();
 
-  if (_replaceLastLine)
-  {
-    _replaceLastLine = false;
-    _lines[_lines.count() - 1] = textLine;
-  } else
-    _lines << textLine;
+  _lines << textLine;
 
   moveCursor(_lines.count() - 1, 0);
 
@@ -210,6 +209,8 @@ void RunScreen::interpreterFinished()
 
   feedScreen();
   emit screenChanged();
+  if (_interpreter.displayDefm())
+    emit displayDefm();
 }
 
 void RunScreen::resetScreen()
@@ -222,14 +223,10 @@ void RunScreen::resetScreen()
 
 void RunScreen::interpreterAskForValidation()
 {
-
-  TextLine textLine;
-  textLine << LCDChar_Substract << LCDChar_Space << LCDChar_D << LCDChar_i
-           << LCDChar_s << LCDChar_p << LCDChar_Space << LCDChar_Substract;
+  TextLine textLine("- Disp -");
   textLine.setRightJustified(true);
   _lines << textLine;
   feedScreen();
   emit screenChanged();
-  _replaceLastLine = true;
   moveCursor(_lines.count() - 1, 0); // To scroll
 }

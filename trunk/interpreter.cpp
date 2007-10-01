@@ -10,9 +10,9 @@ Interpreter::Interpreter(const QList<TextLine> &program) :
   _error(false),
   _errorStep(0),
   _lastResult(0.0),
-  _lastResultExists(true),
   _waitForInput(false),
-  _waitForValidation(false)
+  _waitForValidation(false),
+  _displayDefm(false)
 {
   setProgram(program);
 }
@@ -34,10 +34,13 @@ void Interpreter::run()
 void Interpreter::execute() throw (InterpreterException)
 {
   int entity;
+  _displayDefm = false;
+  bool displayLastNumber = true;
   while ((entity = currentEntity()) != -1)
   {
     msleep(10);
-    _lastResultExists = true;
+    displayLastNumber = true;
+    _displayDefm = false;
     switch (entity)
     {
     case LCDChar_DoubleQuote: // A string instruction?
@@ -49,7 +52,7 @@ void Interpreter::execute() throw (InterpreterException)
         {
           storeDisplayLine(textLine);
           emit displayLine();
-          _lastResultExists = false;
+          displayLastNumber = false;
         }
       }
       break;
@@ -60,7 +63,7 @@ void Interpreter::execute() throw (InterpreterException)
     case LCDOp_Goto: parseGoto(); break;
     case LCDOp_Deg: case LCDOp_Rad: case LCDOp_Gra: changeAngleMode(entity); break;
     case LCDOp_Prog: if (parseProg()) continue; else break;
-    case LCDOp_Defm: parseDefm(); break;
+    case LCDOp_Defm: parseDefm(); _displayDefm = true; displayLastNumber = false; break;
     default:
       if (ExpressionSolver::isExpressionStartEntity(entity))
       {
@@ -96,7 +99,7 @@ void Interpreter::execute() throw (InterpreterException)
 
       if (sep == LCDChar_RBTriangle)
       {
-        if (_lastResultExists)
+        if (displayLastNumber)
         {
           TextLine textLine = formatDouble(_lastResult);
           textLine.setRightJustified(true);
@@ -124,7 +127,7 @@ void Interpreter::execute() throw (InterpreterException)
   }
 
   // Display the stack value?
-  if (_lastResultExists)
+  if (displayLastNumber)
   {
     TextLine textLine = formatDouble(_lastResult);
     textLine.setRightJustified(true);

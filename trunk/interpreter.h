@@ -32,6 +32,8 @@ public:
 
   double lastResult() const { return _lastResult; }
 
+  bool displayDefm() const { return _displayDefm; }
+
 signals:
   void displayLine();
   void askForValidation();
@@ -56,10 +58,10 @@ private:
   bool _error; // If true then the last execution failed
   int _errorStep; // The last error step
   double _lastResult;
-  bool _lastResultExists;
   TextLine _input;
   bool _waitForInput;
   bool _waitForValidation;
+  bool _displayDefm;
   QMutex _inputMutex;
   QWaitCondition _inputWaitCondition;
   QStack<ProgramIndex> _callStack;

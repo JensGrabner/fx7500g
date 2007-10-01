@@ -12,6 +12,9 @@ public:
 
   void buttonClicked(int button);
 
+signals:
+  void displayDefm();
+
 private:
   QList<TextLine> _lastProgram;
   bool _waitingMode;
@@ -21,7 +24,6 @@ private:
   QTimer _timerDisplay;
   Interpreter _interpreter;
   double _lastResult;
-  bool _replaceLastLine;
 
   void validate();
   void displayLastProgram(bool cursorOnTop = false); // Empty <_lines> and paste <_lastProgram> inside

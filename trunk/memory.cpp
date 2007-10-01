@@ -109,6 +109,16 @@ Program *Memory::programAt(int index)
   return &_programs[index];
 }
 
+int Memory::programsSize() const
+{
+  int steps = 0;
+
+  for (int i = 0; i < programsCount; ++i)
+    steps += _programs[i].size();
+
+  return steps;
+}
+
 int Memory::freeSteps() const
 {
   int steps = _freeStepsMax;

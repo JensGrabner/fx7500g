@@ -35,6 +35,7 @@ private:
   LCDDisplay *_lcdDisplay;
 
   QList<LCDString> getResumeScreen() const;
+  QList<LCDString> getDefmScreen() const;
 
 private slots:
   void screenModeChanged(ScreenMode oldMode);
@@ -42,6 +43,7 @@ private slots:
 
   void runChangeChar(int col, int line, LCDChar c);
   void runScreenChanged();
+  void runScreenDisplayDefm();
 
   void progChangeChar(int col, int line, LCDChar c);
   void progEditProgram(int programIndex);
