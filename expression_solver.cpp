@@ -229,27 +229,35 @@ Token ExpressionSolver::readToken() throw (InterpreterException)
     } else if (isCipher(entity) || entity == LCDChar_Dot)
     {
       int firstOffset = _currentOffset;
-      QString numberStr;
-      numberStr.append(toNumChar(entity));
-      _currentOffset++;
-      while (_currentOffset < _expression.count() && (isCipher(_expression[_currentOffset]) ||
-             _expression[_currentOffset] == LCDChar_Dot))
-      {
-        // Continue the number
-        if (isCipher(_expression[_currentOffset]))
-          numberStr.append(toNumChar(_expression[_currentOffset]));
-        else if (numberStr.indexOf('.') < 0)
-          numberStr.append('.');
-        else
-          throw InterpreterException(Error_Syntax);
-        _currentOffset++;
-      }
+      double d = parseNumber(_expression, _currentOffset);
       _currentToken = Token(Token::Type_Number, firstOffset);
-      _currentToken.setValue(numberStr.toDouble());
+      _currentToken.setValue(d);
     } else
       _currentToken = Token();
   }
   return _currentToken;
+}
+
+double ExpressionSolver::parseNumber(const TextLine &expression, int &offset) throw (InterpreterException)
+{
+  if (expression[offset] != LCDChar_Dot && !isCipher(expression[offset]))
+    return 0.0;
+
+  QString numberStr;
+  numberStr.append(toNumChar(expression[offset++]));
+  while (offset < expression.count() && (isCipher(expression[offset]) ||
+         expression[offset] == LCDChar_Dot))
+  {
+    // Continue the number
+    if (isCipher(expression[offset]))
+      numberStr.append(toNumChar(expression[offset]));
+    else if (numberStr.indexOf('.') < 0)
+      numberStr.append('.');
+    else
+      throw InterpreterException(Error_Syntax, offset);
+    offset++;
+  }
+  return numberStr.toDouble();
 }
 
 void ExpressionSolver::pushToken(const Token &token) throw (InterpreterException)
