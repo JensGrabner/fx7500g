@@ -60,6 +60,7 @@ void Interpreter::execute() throw (InterpreterException)
     case LCDOp_Goto: parseGoto(); break;
     case LCDOp_Deg: case LCDOp_Rad: case LCDOp_Gra: changeAngleMode(entity); break;
     case LCDOp_Prog: if (parseProg()) continue; else break;
+    case LCDOp_Defm: parseDefm(); break;
     default:
       if (ExpressionSolver::isExpressionStartEntity(entity))
       {
@@ -451,4 +452,19 @@ bool Interpreter::parseProg()
     return true;
   }
   return false;
+}
+
+void Interpreter::parseDefm()
+{
+  readEntity(); // Pass the "defm"
+
+  if (isCipher(currentEntity()) || currentEntity() == LCDChar_Dot)
+  {
+    int mem = (int) roundf(ExpressionSolver::parseNumber(program(), _currentOffset));
+
+    // Try to set the memory
+    if (!Memory::instance().setExtraVarCount(mem))
+      throw InterpreterException(Error_Argument, _currentOffset);
+  } else if (!isSeparator(currentEntity()) && currentEntity() != -1)
+    throw InterpreterException(Error_Argument, _currentOffset);
 }

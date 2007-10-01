@@ -14,6 +14,9 @@ public:
   // <offset> is the start offset in <expression> and will be written with the next offset to be read after the expression
   double solve(const TextLine &expression, int &offset) throw (InterpreterException);
 
+  // Returns 0.0 if expression is not a number
+  static double parseNumber(const TextLine &expression, int &offset) throw (InterpreterException);
+
   // Static methods
   static bool isExpressionStartEntity(int entity);
 

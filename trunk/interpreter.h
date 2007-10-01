@@ -88,6 +88,7 @@ private:
   bool parseProg();
   void parseVariableAndStore(double d);
   void parseInput(const TextLine &prefix = TextLine());
+  void parseDefm();
 
   void display(const QList<TextLine> &lines);
 

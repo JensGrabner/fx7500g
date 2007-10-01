@@ -56,7 +56,6 @@ private:
 
   static Memory *_instance;
   Program _programs[10];
-//  QMap<int,Program> _programs;
   int _extraVarCount;
   double _variables[526]; // Memory
   int _freeSteps;
