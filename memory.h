@@ -37,6 +37,7 @@ public:
   static Memory &instance();
 
   Program *programAt(int index);
+  int programsSize() const;
 
   void clearVariables();
   void clearProgram(int programIndex = -1);

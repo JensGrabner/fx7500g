@@ -1,3 +1,5 @@
+#include "memory.h"
+
 #include "calculator.h"
 
 Calculator::Calculator() :
@@ -8,6 +10,8 @@ Calculator::Calculator() :
           this, SLOT(runChangeChar(int, int, LCDChar)));
   connect(&_runScreen, SIGNAL(screenChanged()),
           this, SLOT(runScreenChanged()));
+  connect(&_runScreen, SIGNAL(displayDefm()),
+          this, SLOT(runScreenDisplayDefm()));
 
   // Init prog screen
   connect(&_progScreen, SIGNAL(changeChar(int, int, LCDChar)),
@@ -50,6 +54,11 @@ void Calculator::runScreenChanged()
     _lcdDisplay->drawScreen(_runScreen.currentScreen());
 }
 
+void Calculator::runScreenDisplayDefm()
+{
+  _lcdDisplay->drawScreen(getDefmScreen());
+}
+
 QList<LCDString> Calculator::getResumeScreen() const
 {
   QList<LCDString> screen;
@@ -72,6 +81,25 @@ QList<LCDString> Calculator::getResumeScreen() const
   }
   screen << LCDString("");
   screen << LCDString("   Step    0");
+
+  return screen;
+}
+
+QList<LCDString> Calculator::getDefmScreen() const
+{
+  QList<LCDString> screen;
+
+  screen << LCDString("**Defm**");
+  screen << LCDString("");
+  screen << LCDString(QString(" Program : %1").arg(Memory::instance().programsSize()));
+  screen << LCDString("");
+  screen << LCDString(QString("  Memory : %1").arg(Memory::instance().extraVarCount() + 26));
+  screen << LCDString("");
+
+  LCDString str(QString("%1 Bytes Free").arg(Memory::instance().freeSteps() - Memory::instance().extraVarCount() * 8));
+  while (str.count() < 16)
+    str.insert(0, LCDChar_Space);
+  screen << str;
 
   return screen;
 }
